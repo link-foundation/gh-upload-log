@@ -1,0 +1,39 @@
+{
+  "name": "@link-foundation/gh-upload-log",
+  "version": "0.1.0",
+  "description": "A tool to upload log files to GitHub as Gists or repositories",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "gh-upload-log": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "test:bun": "bun test",
+    "test:deno": "deno test --allow-all"
+  },
+  "keywords": [
+    "github",
+    "gist",
+    "log",
+    "upload",
+    "cli"
+  ],
+  "author": "Link Foundation",
+  "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/link-foundation/gh-upload-log.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "use-m": "^8.13.7",
+    "command-stream": "^0.7.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "test-anywhere": "^0.2.6"
+  }
+}
