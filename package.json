@@ -8,9 +8,13 @@
     "gh-upload-log": "src/cli.js"
   },
   "scripts": {
-    "test": "node --test test/*.test.js",
+    "test": "node --test test/index.test.js",
     "test:bun": "bun test",
-    "test:deno": "deno test --allow-all"
+    "test:deno": "deno test --allow-all",
+    "lint": "node --check src/index.js && node --check src/cli.js",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish"
   },
   "keywords": [
     "github",
@@ -29,11 +33,13 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "use-m": "^8.13.7",
     "command-stream": "^0.7.1",
+    "use-m": "^8.13.7",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.7",
     "test-anywhere": "^0.2.6"
   }
 }
