@@ -8,7 +8,7 @@
     "gh-upload-log": "src/cli.js"
   },
   "scripts": {
-    "test": "node --test test/**/*.test.js",
+    "test": "node --test test/",
     "test:bun": "bun test",
     "test:deno": "deno test --allow-all"
   },
