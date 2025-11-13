@@ -5,6 +5,7 @@
 import { test, assert } from 'test-anywhere';
 import fs from 'node:fs';
 import path from 'node:path';
+import { cwd } from 'node:process';
 import {
   normalizeFileName,
   generateRepoName,
@@ -17,7 +18,7 @@ import {
 } from '../src/index.js';
 
 // Create test directory
-const testDir = path.join(process.cwd(), 'test', 'fixtures');
+const testDir = path.join(cwd(), 'test', 'fixtures');
 if (!fs.existsSync(testDir)) {
   fs.mkdirSync(testDir, { recursive: true });
 }
