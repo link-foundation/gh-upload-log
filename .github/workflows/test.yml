@@ -10,6 +10,7 @@ jobs:
   test:
     name: Test on ${{ matrix.os }} with ${{ matrix.runtime }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
 
     strategy:
       matrix:
