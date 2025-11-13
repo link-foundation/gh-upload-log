@@ -22,22 +22,29 @@ const argv = yargs(hideBin(process.argv))
   .option('public', {
     alias: 'p',
     type: 'boolean',
-    description: 'Make the upload public (default: private)',
-    default: false
+    description: 'Make the upload public (default: private)'
   })
   .option('private', {
     type: 'boolean',
-    description: 'Make the upload private (default)',
+    description: 'Make the upload private (default)'
+  })
+  .option('auto', {
+    type: 'boolean',
+    description: 'Automatically choose upload strategy based on file size (default)',
     default: true
   })
-  .option('force-gist', {
+  .option('only-gist', {
     type: 'boolean',
-    description: 'Force upload as GitHub Gist',
-    default: false
+    description: 'Upload only as GitHub Gist (disables auto mode)'
   })
-  .option('force-repo', {
+  .option('only-repository', {
     type: 'boolean',
-    description: 'Force upload as GitHub Repository',
+    description: 'Upload only as GitHub Repository (disables auto mode)'
+  })
+  .option('dry-mode', {
+    alias: 'dry',
+    type: 'boolean',
+    description: 'Dry run mode - show what would be done without uploading',
     default: false
   })
   .option('description', {
@@ -52,11 +59,23 @@ const argv = yargs(hideBin(process.argv))
     default: false
   })
   .conflicts('public', 'private')
-  .conflicts('force-gist', 'force-repo')
-  .example('$0 /var/log/app.log', 'Upload log file as private gist/repo')
-  .example('$0 /var/log/app.log --public', 'Upload log file as public gist/repo')
-  .example('$0 ./error.log --force-gist', 'Force upload as gist')
-  .example('$0 ./large.log --force-repo --public', 'Force upload as public repository')
+  .conflicts('only-gist', 'only-repository')
+  .check((argv) => {
+    // If --no-auto is used, require either --only-gist or --only-repository
+    if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
+      throw new Error('When using --no-auto, you must specify either --only-gist or --only-repository');
+    }
+    // If --only-gist or --only-repository is used, auto mode is disabled
+    if (argv.onlyGist || argv.onlyRepository) {
+      argv.auto = false;
+    }
+    return true;
+  })
+  .example('$0 /var/log/app.log', 'Upload log file (auto mode, private)')
+  .example('$0 /var/log/app.log --public', 'Upload log file (auto mode, public)')
+  .example('$0 ./error.log --only-gist', 'Upload only as gist')
+  .example('$0 ./large.log --only-repository --public', 'Upload only as public repository')
+  .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
   .help('h')
   .alias('h', 'help')
   .version('0.1.0')
@@ -79,10 +98,15 @@ async function main() {
     }
 
     // Prepare options
+    // If neither public nor private is specified, default to private
+    const isPublic = argv.public === true ? true : (argv.private === false ? true : false);
+
     const options = {
-      isPublic: argv.public,
-      forceGist: argv.forceGist,
-      forceRepo: argv.forceRepo,
+      isPublic,
+      auto: argv.auto,
+      onlyGist: argv.onlyGist,
+      onlyRepository: argv.onlyRepository,
+      dryMode: argv.dryMode,
       description: argv.description,
       verbose: argv.verbose
     };
@@ -93,8 +117,13 @@ async function main() {
       console.log('');
     }
 
+    if (options.dryMode) {
+      console.log('🔍 DRY MODE - No actual upload will be performed');
+      console.log('');
+    }
+
     // Upload the log file
-    console.log(`Uploading log file: ${logFile}`);
+    console.log(`${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'} log file: ${logFile}`);
     console.log('');
 
     const result = await uploadLog(logFile, options);

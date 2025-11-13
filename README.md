@@ -67,33 +67,41 @@ gh-upload-log /path/to/logfile.log --description "My application logs"
 Usage: gh-upload-log <log-file> [options]
 
 Options:
-  --public, -p       Make the upload public (default: private)
-  --private          Make the upload private (default)
-  --force-gist       Force upload as GitHub Gist
-  --force-repo       Force upload as GitHub Repository
-  --description, -d  Description for the upload
-  --verbose, -v      Enable verbose output
-  --help, -h         Show help
-  --version          Show version number
+  --public, -p         Make the upload public (default: private)
+  --private            Make the upload private (default)
+  --auto               Automatically choose upload strategy (default: true)
+  --only-gist          Upload only as GitHub Gist (disables auto mode)
+  --only-repository    Upload only as GitHub Repository (disables auto mode)
+  --dry-mode, --dry    Dry run - show what would be done without uploading
+  --description, -d    Description for the upload
+  --verbose, -v        Enable verbose output
+  --help, -h           Show help
+  --version            Show version number
 ```
 
 ### CLI Examples
 
 ```bash
-# Upload private log file
+# Upload private log file (auto mode)
 gh-upload-log /var/log/app.log
 
-# Upload public log file
+# Upload public log file (auto mode)
 gh-upload-log /var/log/app.log --public
 
-# Force upload as gist
-gh-upload-log ./error.log --force-gist
+# Upload only as gist
+gh-upload-log ./error.log --only-gist
 
-# Force upload as repository
-gh-upload-log ./large.log --force-repo --public
+# Upload only as repository
+gh-upload-log ./large.log --only-repository --public
+
+# Dry run mode - see what would happen
+gh-upload-log ./app.log --dry-mode
 
 # Upload with custom description
 gh-upload-log ./debug.log -d "Debug logs from production" --public
+
+# Disable auto mode and force repository
+gh-upload-log ./file.log --no-auto --only-repository
 ```
 
 ## Library Usage
@@ -125,8 +133,10 @@ Main function to upload a log file. Automatically determines the best strategy.
 - `filePath` (string): Path to the log file
 - `options` (object, optional):
   - `isPublic` (boolean): Make upload public (default: false)
-  - `forceGist` (boolean): Force upload as gist (default: false)
-  - `forceRepo` (boolean): Force upload as repository (default: false)
+  - `auto` (boolean): Automatically choose strategy (default: true)
+  - `onlyGist` (boolean): Upload only as gist (disables auto mode)
+  - `onlyRepository` (boolean): Upload only as repository (disables auto mode)
+  - `dryMode` (boolean): Dry run mode - don't actually upload
   - `description` (string): Description for the upload
 
 **Returns:** Promise<Object>
@@ -136,7 +146,8 @@ Main function to upload a log file. Automatically determines the best strategy.
   url: string,
   isPublic: boolean,
   fileName?: string,      // For gists
-  repoName?: string       // For repos
+  repoName?: string,      // For repos
+  dryMode?: boolean       // Set to true in dry mode
 }
 ```
 

@@ -263,8 +263,10 @@ export async function uploadAsRepo(filePath, options = {}) {
  * @param {string} filePath - Path to the log file
  * @param {Object} options - Upload options
  * @param {boolean} options.isPublic - Whether to make it public (default: false/private)
- * @param {boolean} options.forceGist - Force upload as gist even if it might not fit
- * @param {boolean} options.forceRepo - Force upload as repository
+ * @param {boolean} options.auto - Automatically choose strategy (default: true)
+ * @param {boolean} options.onlyGist - Upload only as gist (disables auto mode)
+ * @param {boolean} options.onlyRepository - Upload only as repository (disables auto mode)
+ * @param {boolean} options.dryMode - Dry run mode - don't actually upload
  * @param {string} options.description - Description for the upload
  * @returns {Promise<Object>} Upload result with URL and metadata
  */
@@ -279,12 +281,37 @@ export async function uploadLog(filePath, options = {}) {
   console.log(`File size: ${(strategy.fileSize / (1024 * 1024)).toFixed(2)} MB`);
   console.log(`Strategy: ${strategy.reason}`);
 
-  // Allow forcing a specific strategy
+  // Determine upload type based on options
   let uploadType = strategy.type;
-  if (options.forceGist) {
+
+  // If onlyGist or onlyRepository is specified, use that
+  if (options.onlyGist) {
     uploadType = 'gist';
-  } else if (options.forceRepo) {
+    console.log('Mode: Only Gist (forced)');
+  } else if (options.onlyRepository) {
     uploadType = 'repo';
+    console.log('Mode: Only Repository (forced)');
+  } else if (options.auto !== false) {
+    // Auto mode is default
+    console.log('Mode: Auto (automatic strategy selection)');
+  }
+
+  // In dry mode, return mock result without uploading
+  if (options.dryMode) {
+    console.log('');
+    console.log('🔍 DRY MODE: Would perform the following action:');
+    console.log(`   Upload Type: ${uploadType}`);
+    console.log(`   Visibility: ${options.isPublic ? 'public' : 'private'}`);
+    console.log(`   Description: ${options.description || 'N/A'}`);
+
+    return {
+      type: uploadType,
+      url: `[DRY MODE] Would create ${uploadType === 'gist' ? 'gist' : 'repository'}`,
+      fileName: uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
+      repoName: uploadType === 'repo' ? generateRepoName(filePath) : undefined,
+      isPublic: options.isPublic || false,
+      dryMode: true
+    };
   }
 
   if (uploadType === 'gist') {
