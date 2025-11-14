@@ -21,19 +21,19 @@ const __dirname = path.dirname(__filename);
  * This can be customized by users when using the library
  */
 function createDefaultLogger(options = {}) {
-  const { verbose = false, logTarget = console } = options;
+  const { verbose = false, logger = console } = options;
 
   const log = makeLog({
     level: verbose ? 'development' : 'info',
     log: {
-      fatal: logTarget.error || logTarget.log,
-      error: logTarget.error || logTarget.log,
-      warn: logTarget.warn || logTarget.log,
-      info: logTarget.log,
-      debug: logTarget.debug || logTarget.log,
-      verbose: logTarget.log,
-      trace: logTarget.log,
-      silly: logTarget.log
+      fatal: logger.error || logger.log,
+      error: logger.error || logger.log,
+      warn: logger.warn || logger.log,
+      info: logger.log,
+      debug: logger.debug || logger.log,
+      verbose: logger.log,
+      trace: logger.log,
+      silly: logger.log
     }
   });
 
@@ -180,7 +180,7 @@ export async function splitFileIntoChunks(inputPath, outputDir, chunkSize = GITH
  * @param {boolean} options.isPublic - Whether the gist should be public (default: false)
  * @param {string} options.description - Description for the gist
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
- * @param {Object} options.logTarget - Logging target (default: console)
+ * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Gist information including URL
  */
 export async function uploadAsGist(options = {}) {
@@ -191,14 +191,14 @@ export async function uploadAsGist(options = {}) {
     isPublic = false,
     description,
     verbose = false,
-    logTarget = console
+    logger = console
   } = options;
 
   if (!filePath) {
     throw new Error('filePath is required in options');
   }
 
-  const log = createDefaultLogger({ verbose, logTarget });
+  const log = createDefaultLogger({ verbose, logger });
   const gistFileName = generateGistFileName(filePath);
   const desc = description || `Log file: ${path.basename(filePath)}`;
 
@@ -231,7 +231,7 @@ export async function uploadAsGist(options = {}) {
  * @param {boolean} options.isPublic - Whether the repo should be public (default: false)
  * @param {string} options.description - Description for the repo
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
- * @param {Object} options.logTarget - Logging target (default: console)
+ * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Repository information including URL
  */
 export async function uploadAsRepo(options = {}) {
@@ -242,17 +242,17 @@ export async function uploadAsRepo(options = {}) {
     isPublic = false,
     description,
     verbose = false,
-    logTarget = console
+    logger = console
   } = options;
 
   if (!filePath) {
     throw new Error('filePath is required in options');
   }
 
-  const log = createDefaultLogger({ verbose, logTarget });
-  const repoName = generateRepoName(filePath);
+  const log = createDefaultLogger({ verbose, logger });
+  const repositoryName = generateRepoName(filePath);
   const normalized = normalizeFileName(filePath);
-  const workDir = `/tmp/${repoName}-${Date.now()}`;
+  const workDir = `/tmp/${repositoryName}-${Date.now()}`;
 
   try {
     // Create work directory
@@ -297,18 +297,18 @@ export async function uploadAsRepo(options = {}) {
     log.debug(() => `GitHub user: ${githubUser}`);
 
     // Create GitHub repo and push
-    log(() => `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repoName}`);
+    log(() => `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`);
     const visibility = isPublic ? '--public' : '--private';
-    await $`cd ${workDir} && gh repo create ${repoName} ${visibility} --source=. --push`;
+    await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
 
-    const repoUrl = `https://github.com/${githubUser}/${repoName}`;
+    const repoUrl = `https://github.com/${githubUser}/${repositoryName}`;
 
     log(() => `Repository created successfully: ${repoUrl}`);
 
     return {
       type: 'repo',
       url: repoUrl,
-      repoName,
+      repositoryName,
       isPublic,
       workDir // Keep for debugging; caller can clean up
     };
@@ -335,7 +335,7 @@ export async function uploadAsRepo(options = {}) {
  * @param {boolean} options.dryMode - Dry run mode - don't actually upload
  * @param {string} options.description - Description for the upload
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
- * @param {Object} options.logTarget - Logging target (default: console)
+ * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
  */
 export async function uploadLog(options = {}) {
@@ -348,7 +348,7 @@ export async function uploadLog(options = {}) {
     dryMode = false,
     description,
     verbose = false,
-    logTarget = console
+    logger = console
   } = options;
 
   if (!filePath) {
@@ -360,7 +360,7 @@ export async function uploadLog(options = {}) {
     throw new Error(`File does not exist: ${filePath}`);
   }
 
-  const log = createDefaultLogger({ verbose, logTarget });
+  const log = createDefaultLogger({ verbose, logger });
   const strategy = determineUploadStrategy(filePath);
 
   log(() => `File size: ${(strategy.fileSize / (1024 * 1024)).toFixed(2)} MB`);
@@ -393,7 +393,7 @@ export async function uploadLog(options = {}) {
       type: uploadType,
       url: `[DRY MODE] Would create ${uploadType === 'gist' ? 'gist' : 'repository'}`,
       fileName: uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
-      repoName: uploadType === 'repo' ? generateRepoName(filePath) : undefined,
+      repositoryName: uploadType === 'repo' ? generateRepoName(filePath) : undefined,
       isPublic: isPublic || false,
       dryMode: true
     };

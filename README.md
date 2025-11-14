@@ -128,7 +128,7 @@ const publicResult = await uploadLog({
 });
 console.log('Public URL:', publicResult.url);
 
-// Upload with custom log target (silent mode)
+// Upload with custom logger (silent mode)
 const customLogger = {
   log: () => {},  // Silent logging
   error: (msg) => console.error('ERROR:', msg)
@@ -136,7 +136,7 @@ const customLogger = {
 
 const result = await uploadLog({
   filePath: '/path/to/logfile.log',
-  logTarget: customLogger
+  logger: customLogger
 });
 ```
 
@@ -156,7 +156,7 @@ Main function to upload a log file. Automatically determines the best strategy.
   - `dryMode` (boolean): Dry run mode - don't actually upload
   - `description` (string): Description for the upload
   - `verbose` (boolean): Enable verbose logging (default: false)
-  - `logTarget` (object): Custom logging target (default: console)
+  - `logger` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 ```javascript
@@ -164,9 +164,9 @@ Main function to upload a log file. Automatically determines the best strategy.
   type: 'gist' | 'repo',
   url: string,
   isPublic: boolean,
-  fileName?: string,      // For gists
-  repoName?: string,      // For repos
-  dryMode?: boolean       // Set to true in dry mode
+  fileName?: string,           // For gists
+  repositoryName?: string,     // For repos
+  dryMode?: boolean            // Set to true in dry mode
 }
 ```
 
@@ -180,7 +180,7 @@ Upload a file as a GitHub Gist.
   - `isPublic` (boolean): Make gist public (default: false)
   - `description` (string): Gist description
   - `verbose` (boolean): Enable verbose logging (default: false)
-  - `logTarget` (object): Custom logging target (default: console)
+  - `logger` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 
@@ -194,7 +194,7 @@ Upload a file as a GitHub Repository (with splitting if needed).
   - `isPublic` (boolean): Make repo public (default: false)
   - `description` (string): Repository description
   - `verbose` (boolean): Enable verbose logging (default: false)
-  - `logTarget` (object): Custom logging target (default: console)
+  - `logger` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 

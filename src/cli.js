@@ -139,7 +139,7 @@ async function main() {
     if (result.type === 'gist') {
       console.log(`File name: ${result.fileName}`);
     } else if (result.type === 'repo') {
-      console.log(`Repository: ${result.repoName}`);
+      console.log(`Repository: ${result.repositoryName}`);
     }
 
     console.log('');

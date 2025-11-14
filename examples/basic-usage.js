@@ -45,8 +45,8 @@ async function main() {
     console.log('Result:', result2);
     console.log('');
 
-    // Example 3: Custom log target (silent mode)
-    console.log('Example 3: Uploading with custom log target (silent)...');
+    // Example 3: Custom logger (silent mode)
+    console.log('Example 3: Uploading with custom logger (silent)...');
     const customLogger = {
       log: () => {}, // Silent
       error: (msg) => console.error('ERROR:', msg)
@@ -54,7 +54,7 @@ async function main() {
     const result3 = await uploadLog({
       filePath: logFile,
       isPublic: false,
-      logTarget: customLogger
+      logger: customLogger
     });
     console.log('Result:', result3);
     console.log('');

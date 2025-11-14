@@ -7,13 +7,15 @@
 **New features:**
 - Integrated `log-lazy` library for efficient lazy evaluation logging
 - Added `verbose` option to enable detailed logging output
-- Added `logTarget` option to configure custom logging targets (enables silent mode, custom loggers, etc.)
+- Added `logger` option to configure custom logging targets (enables silent mode, custom loggers, etc.)
 - Improved logging throughout upload process with debug-level messages
 
 **API Changes:**
 - `uploadLog(filePath, options)` → `uploadLog(options)` where options includes `filePath`
 - `uploadAsGist(filePath, options)` → `uploadAsGist(options)` where options includes `filePath`
 - `uploadAsRepo(filePath, options)` → `uploadAsRepo(options)` where options includes `filePath`
+- Parameter renamed: `logTarget` → `logger` for better clarity
+- Return value property renamed: `repoName` → `repositoryName` for consistency
 
 **CI/CD improvements:**
 - Upgrade CI/CD pipeline with changesets and NPM deployment support
