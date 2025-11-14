@@ -20,6 +20,8 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 - **Cross-platform**: Works on macOS, Linux, and Windows
 - **Dual interface**: Use as CLI tool or JavaScript library
 - **Path normalization**: Converts file paths into valid GitHub names
+- **Verbose logging**: Built-in verbose mode using [log-lazy](https://github.com/link-foundation/log-lazy) for efficient lazy evaluation
+- **Configurable logging**: Customize logging behavior with custom log targets (silent mode, custom loggers, etc.)
 
 ## Prerequisites
 
@@ -112,32 +114,49 @@ gh-upload-log ./file.log --no-auto --only-repository
 import { uploadLog } from '@link-foundation/gh-upload-log';
 
 // Upload a log file (private by default)
-const result = await uploadLog('/path/to/logfile.log');
+const result = await uploadLog({
+  filePath: '/path/to/logfile.log'
+});
 console.log('Uploaded to:', result.url);
 
-// Upload as public
-const publicResult = await uploadLog('/path/to/logfile.log', {
+// Upload as public with verbose logging
+const publicResult = await uploadLog({
+  filePath: '/path/to/logfile.log',
   isPublic: true,
-  description: 'My application logs'
+  description: 'My application logs',
+  verbose: true
 });
 console.log('Public URL:', publicResult.url);
+
+// Upload with custom log target (silent mode)
+const customLogger = {
+  log: () => {},  // Silent logging
+  error: (msg) => console.error('ERROR:', msg)
+};
+
+const result = await uploadLog({
+  filePath: '/path/to/logfile.log',
+  logTarget: customLogger
+});
 ```
 
 ### API Reference
 
-#### `uploadLog(filePath, options)`
+#### `uploadLog(options)`
 
 Main function to upload a log file. Automatically determines the best strategy.
 
 **Parameters:**
-- `filePath` (string): Path to the log file
-- `options` (object, optional):
+- `options` (object):
+  - `filePath` (string, **required**): Path to the log file
   - `isPublic` (boolean): Make upload public (default: false)
   - `auto` (boolean): Automatically choose strategy (default: true)
   - `onlyGist` (boolean): Upload only as gist (disables auto mode)
   - `onlyRepository` (boolean): Upload only as repository (disables auto mode)
   - `dryMode` (boolean): Dry run mode - don't actually upload
   - `description` (string): Description for the upload
+  - `verbose` (boolean): Enable verbose logging (default: false)
+  - `logTarget` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 ```javascript
@@ -151,27 +170,31 @@ Main function to upload a log file. Automatically determines the best strategy.
 }
 ```
 
-#### `uploadAsGist(filePath, options)`
+#### `uploadAsGist(options)`
 
 Upload a file as a GitHub Gist.
 
 **Parameters:**
-- `filePath` (string): Path to the file
-- `options` (object, optional):
+- `options` (object):
+  - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make gist public (default: false)
   - `description` (string): Gist description
+  - `verbose` (boolean): Enable verbose logging (default: false)
+  - `logTarget` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 
-#### `uploadAsRepo(filePath, options)`
+#### `uploadAsRepo(options)`
 
 Upload a file as a GitHub Repository (with splitting if needed).
 
 **Parameters:**
-- `filePath` (string): Path to the file
-- `options` (object, optional):
+- `options` (object):
+  - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make repo public (default: false)
   - `description` (string): Repository description
+  - `verbose` (boolean): Enable verbose logging (default: false)
+  - `logTarget` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
 

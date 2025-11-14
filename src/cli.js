@@ -102,6 +102,7 @@ async function main() {
     const isPublic = argv.public === true ? true : (argv.private === false ? true : false);
 
     const options = {
+      filePath: logFile,
       isPublic,
       auto: argv.auto,
       onlyGist: argv.onlyGist,
@@ -113,7 +114,6 @@ async function main() {
 
     if (options.verbose) {
       console.log('Options:', options);
-      console.log('Log file:', logFile);
       console.log('');
     }
 
@@ -126,7 +126,7 @@ async function main() {
     console.log(`${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'} log file: ${logFile}`);
     console.log('');
 
-    const result = await uploadLog(logFile, options);
+    const result = await uploadLog(options);
 
     // Display results
     console.log('');

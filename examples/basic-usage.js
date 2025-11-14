@@ -26,20 +26,37 @@ async function main() {
   try {
     // Example 1: Upload as private (default)
     console.log('Example 1: Uploading as private gist/repo...');
-    const result1 = await uploadLog(logFile, {
+    const result1 = await uploadLog({
+      filePath: logFile,
       isPublic: false,
       description: 'Sample log file from gh-upload-log example'
     });
     console.log('Result:', result1);
     console.log('');
 
-    // Example 2: Upload as public
-    console.log('Example 2: Uploading as public gist/repo...');
-    const result2 = await uploadLog(logFile, {
+    // Example 2: Upload as public with verbose mode
+    console.log('Example 2: Uploading as public gist/repo with verbose logging...');
+    const result2 = await uploadLog({
+      filePath: logFile,
       isPublic: true,
-      description: 'Public sample log file'
+      description: 'Public sample log file',
+      verbose: true
     });
     console.log('Result:', result2);
+    console.log('');
+
+    // Example 3: Custom log target (silent mode)
+    console.log('Example 3: Uploading with custom log target (silent)...');
+    const customLogger = {
+      log: () => {}, // Silent
+      error: (msg) => console.error('ERROR:', msg)
+    };
+    const result3 = await uploadLog({
+      filePath: logFile,
+      isPublic: false,
+      logTarget: customLogger
+    });
+    console.log('Result:', result3);
     console.log('');
 
     // Clean up

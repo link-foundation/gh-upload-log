@@ -11,9 +11,34 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import makeLog from 'log-lazy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * Create a logger instance
+ * This can be customized by users when using the library
+ */
+function createDefaultLogger(options = {}) {
+  const { verbose = false, logTarget = console } = options;
+
+  const log = makeLog({
+    level: verbose ? 'development' : 'info',
+    log: {
+      fatal: logTarget.error || logTarget.log,
+      error: logTarget.error || logTarget.log,
+      warn: logTarget.warn || logTarget.log,
+      info: logTarget.log,
+      debug: logTarget.debug || logTarget.log,
+      verbose: logTarget.log,
+      trace: logTarget.log,
+      silly: logTarget.log
+    }
+  });
+
+  return log;
+}
 
 /**
  * Constants for GitHub limits
@@ -150,25 +175,45 @@ export async function splitFileIntoChunks(inputPath, outputDir, chunkSize = GITH
 /**
  * Upload a file as a GitHub Gist
  *
- * @param {string} filePath - Path to the file to upload
  * @param {Object} options - Upload options
+ * @param {string} options.filePath - Path to the file to upload
  * @param {boolean} options.isPublic - Whether the gist should be public (default: false)
  * @param {string} options.description - Description for the gist
+ * @param {boolean} options.verbose - Enable verbose logging (default: false)
+ * @param {Object} options.logTarget - Logging target (default: console)
  * @returns {Promise<Object>} Gist information including URL
  */
-export async function uploadAsGist(filePath, options = {}) {
+export async function uploadAsGist(options = {}) {
   const { $ } = await import('command-stream');
 
-  const isPublic = options.isPublic !== undefined ? options.isPublic : false;
+  const {
+    filePath,
+    isPublic = false,
+    description,
+    verbose = false,
+    logTarget = console
+  } = options;
+
+  if (!filePath) {
+    throw new Error('filePath is required in options');
+  }
+
+  const log = createDefaultLogger({ verbose, logTarget });
   const gistFileName = generateGistFileName(filePath);
-  const description = options.description || `Log file: ${path.basename(filePath)}`;
+  const desc = description || `Log file: ${path.basename(filePath)}`;
+
+  log(() => `Creating GitHub Gist for ${filePath}`);
+  log.debug(() => `Gist file name: ${gistFileName}`);
+  log.debug(() => `Description: ${desc}`);
 
   // Create gist using gh CLI
   const visibility = isPublic ? '--public' : '';
-  const result = await $`gh gist create ${filePath} ${visibility} --desc ${description}`;
+  const result = await $`gh gist create ${filePath} ${visibility} --desc ${desc}`;
 
   // Extract gist URL from output
   const gistUrl = result.stdout.trim();
+
+  log(() => `Gist created successfully: ${gistUrl}`);
 
   return {
     type: 'gist',
@@ -181,33 +226,49 @@ export async function uploadAsGist(filePath, options = {}) {
 /**
  * Upload a file as a GitHub repository (with splitting if needed)
  *
- * @param {string} filePath - Path to the file to upload
  * @param {Object} options - Upload options
+ * @param {string} options.filePath - Path to the file to upload
  * @param {boolean} options.isPublic - Whether the repo should be public (default: false)
  * @param {string} options.description - Description for the repo
+ * @param {boolean} options.verbose - Enable verbose logging (default: false)
+ * @param {Object} options.logTarget - Logging target (default: console)
  * @returns {Promise<Object>} Repository information including URL
  */
-export async function uploadAsRepo(filePath, options = {}) {
+export async function uploadAsRepo(options = {}) {
   const { $ } = await import('command-stream');
 
-  const isPublic = options.isPublic !== undefined ? options.isPublic : false;
+  const {
+    filePath,
+    isPublic = false,
+    description,
+    verbose = false,
+    logTarget = console
+  } = options;
+
+  if (!filePath) {
+    throw new Error('filePath is required in options');
+  }
+
+  const log = createDefaultLogger({ verbose, logTarget });
   const repoName = generateRepoName(filePath);
   const normalized = normalizeFileName(filePath);
   const workDir = `/tmp/${repoName}-${Date.now()}`;
 
   try {
     // Create work directory
-    console.log(`→ Creating work directory: ${workDir}`);
+    log(() => `→ Creating work directory: ${workDir}`);
     fs.mkdirSync(workDir, { recursive: true });
 
     // Copy file to work directory
-    console.log('→ Copying file...');
+    log(() => '→ Copying file...');
     fs.copyFileSync(filePath, path.join(workDir, normalized));
 
     // Split file if needed
     const fileSize = getFileSize(filePath);
     if (fileSize > GITHUB_REPO_CHUNK_SIZE) {
-      console.log('→ Splitting file into 100MB chunks...');
+      log(() => '→ Splitting file into 100MB chunks...');
+      log.debug(() => `File size: ${fileSize} bytes, chunk size: ${GITHUB_REPO_CHUNK_SIZE} bytes`);
+
       await splitFileIntoChunks(
         path.join(workDir, normalized),
         workDir,
@@ -215,30 +276,34 @@ export async function uploadAsRepo(filePath, options = {}) {
       );
 
       // Remove original large file
-      console.log('→ Removing original large file...');
+      log(() => '→ Removing original large file...');
       fs.unlinkSync(path.join(workDir, normalized));
     }
 
     // Initialize git repository
-    console.log('→ Initializing git repository...');
+    log(() => '→ Initializing git repository...');
     await $`cd ${workDir} && git init`;
     await $`cd ${workDir} && git branch -m main`;
 
     // Add and commit files
-    console.log('→ Adding and committing files...');
+    log(() => '→ Adding and committing files...');
     await $`cd ${workDir} && git add .`;
     await $`cd ${workDir} && git commit -m "Add log file"`;
 
     // Get current GitHub user
+    log.debug(() => 'Getting GitHub user information...');
     const whoamiResult = await $`gh api user --jq .login`;
     const githubUser = whoamiResult.stdout.trim();
+    log.debug(() => `GitHub user: ${githubUser}`);
 
     // Create GitHub repo and push
-    console.log(`→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repoName}`);
+    log(() => `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repoName}`);
     const visibility = isPublic ? '--public' : '--private';
     await $`cd ${workDir} && gh repo create ${repoName} ${visibility} --source=. --push`;
 
     const repoUrl = `https://github.com/${githubUser}/${repoName}`;
+
+    log(() => `Repository created successfully: ${repoUrl}`);
 
     return {
       type: 'repo',
@@ -248,6 +313,7 @@ export async function uploadAsRepo(filePath, options = {}) {
       workDir // Keep for debugging; caller can clean up
     };
   } catch (error) {
+    log.error(() => `Error uploading as repository: ${error.message}`);
     // Clean up on error
     if (fs.existsSync(workDir)) {
       fs.rmSync(workDir, { recursive: true, force: true });
@@ -260,64 +326,83 @@ export async function uploadAsRepo(filePath, options = {}) {
  * Main function to upload a log file to GitHub
  * Automatically determines the best strategy (gist vs repo)
  *
- * @param {string} filePath - Path to the log file
  * @param {Object} options - Upload options
+ * @param {string} options.filePath - Path to the log file
  * @param {boolean} options.isPublic - Whether to make it public (default: false/private)
  * @param {boolean} options.auto - Automatically choose strategy (default: true)
  * @param {boolean} options.onlyGist - Upload only as gist (disables auto mode)
  * @param {boolean} options.onlyRepository - Upload only as repository (disables auto mode)
  * @param {boolean} options.dryMode - Dry run mode - don't actually upload
  * @param {string} options.description - Description for the upload
+ * @param {boolean} options.verbose - Enable verbose logging (default: false)
+ * @param {Object} options.logTarget - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
  */
-export async function uploadLog(filePath, options = {}) {
+export async function uploadLog(options = {}) {
+  const {
+    filePath,
+    isPublic = false,
+    auto = true,
+    onlyGist = false,
+    onlyRepository = false,
+    dryMode = false,
+    description,
+    verbose = false,
+    logTarget = console
+  } = options;
+
+  if (!filePath) {
+    throw new Error('filePath is required in options');
+  }
+
   // Validate file exists
   if (!fileExists(filePath)) {
     throw new Error(`File does not exist: ${filePath}`);
   }
 
+  const log = createDefaultLogger({ verbose, logTarget });
   const strategy = determineUploadStrategy(filePath);
 
-  console.log(`File size: ${(strategy.fileSize / (1024 * 1024)).toFixed(2)} MB`);
-  console.log(`Strategy: ${strategy.reason}`);
+  log(() => `File size: ${(strategy.fileSize / (1024 * 1024)).toFixed(2)} MB`);
+  log(() => `Strategy: ${strategy.reason}`);
 
   // Determine upload type based on options
   let uploadType = strategy.type;
 
   // If onlyGist or onlyRepository is specified, use that
-  if (options.onlyGist) {
+  if (onlyGist) {
     uploadType = 'gist';
-    console.log('Mode: Only Gist (forced)');
-  } else if (options.onlyRepository) {
+    log(() => 'Mode: Only Gist (forced)');
+  } else if (onlyRepository) {
     uploadType = 'repo';
-    console.log('Mode: Only Repository (forced)');
-  } else if (options.auto !== false) {
+    log(() => 'Mode: Only Repository (forced)');
+  } else if (auto !== false) {
     // Auto mode is default
-    console.log('Mode: Auto (automatic strategy selection)');
+    log(() => 'Mode: Auto (automatic strategy selection)');
   }
 
   // In dry mode, return mock result without uploading
-  if (options.dryMode) {
-    console.log('');
-    console.log('🔍 DRY MODE: Would perform the following action:');
-    console.log(`   Upload Type: ${uploadType}`);
-    console.log(`   Visibility: ${options.isPublic ? 'public' : 'private'}`);
-    console.log(`   Description: ${options.description || 'N/A'}`);
+  if (dryMode) {
+    log(() => '');
+    log(() => '🔍 DRY MODE: Would perform the following action:');
+    log(() => `   Upload Type: ${uploadType}`);
+    log(() => `   Visibility: ${isPublic ? 'public' : 'private'}`);
+    log(() => `   Description: ${description || 'N/A'}`);
 
     return {
       type: uploadType,
       url: `[DRY MODE] Would create ${uploadType === 'gist' ? 'gist' : 'repository'}`,
       fileName: uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
       repoName: uploadType === 'repo' ? generateRepoName(filePath) : undefined,
-      isPublic: options.isPublic || false,
+      isPublic: isPublic || false,
       dryMode: true
     };
   }
 
   if (uploadType === 'gist') {
-    return await uploadAsGist(filePath, options);
+    return await uploadAsGist(options);
   } else {
-    return await uploadAsRepo(filePath, options);
+    return await uploadAsRepo(options);
   }
 }
 
