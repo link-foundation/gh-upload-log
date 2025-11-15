@@ -58,11 +58,29 @@ npm install @link-foundation/gh-upload-log
 3. **`.lenv` file** - Local configuration using Links Notation format
 4. **Defaults** - Built-in default values
 
-### Using .lenv Configuration Files (Future Support)
+### Using .lenv Configuration Files
 
-Support for `.lenv` configuration files using [Links Notation](https://github.com/link-foundation/links-notation) format is planned for a future release when [lino-arguments](https://github.com/link-foundation/lino-arguments) and [lino-env](https://github.com/link-foundation/lino-env) are published to npm.
+The tool now supports `.lenv` configuration files using [Links Notation](https://github.com/link-foundation/links-notation) format through [lino-arguments](https://github.com/link-foundation/lino-arguments).
 
-For now, use environment variables for configuration (see below).
+Create a `.lenv` file in your project directory:
+
+```
+GH_UPLOAD_LOG_PUBLIC: false
+GH_UPLOAD_LOG_VERBOSE: true
+GH_UPLOAD_LOG_DESCRIPTION: Production logs
+```
+
+The configuration priority is:
+1. CLI arguments (highest priority)
+2. Environment variables
+3. `.lenv` file
+4. Default values (lowest priority)
+
+You can also specify a custom configuration file using the `--configuration` or `-c` flag:
+
+```bash
+gh-upload-log /path/to/file.log --configuration ./custom.lenv
+```
 
 ### Using Environment Variables
 
@@ -361,16 +379,16 @@ gh-upload-log/
 ### Dependencies
 
 This project uses modern Link Foundation libraries:
+- **[lino-arguments](https://github.com/link-foundation/lino-arguments)**: CLI argument parsing with environment variable and .lenv file support
 - **[log-lazy](https://github.com/link-foundation/log-lazy)**: Efficient lazy evaluation logging
 - **[use-m](https://github.com/link-foundation/use-m)**: Dynamic module loading without package.json pollution
 - **[command-stream](https://github.com/link-foundation/command-stream)**: Streamable command execution
-- **[yargs](https://yargs.js.org/)**: Command-line argument parsing
 - **[test-anywhere](https://github.com/link-foundation/test-anywhere)**: Universal testing framework (dev dependency)
 
-**Planned for future releases:**
-- **[lino-arguments](https://github.com/link-foundation/lino-arguments)**: CLI argument parsing with environment variable and .lenv file support
+The following libraries are used internally by lino-arguments:
 - **[lino-env](https://github.com/link-foundation/lino-env)**: Configuration management using Links Notation format
 - **[links-notation](https://github.com/link-foundation/links-notation)**: Data description using references and links
+- **[yargs](https://yargs.js.org/)**: Command-line argument parsing
 
 ## Contributing
 

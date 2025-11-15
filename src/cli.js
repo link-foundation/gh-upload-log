@@ -6,125 +6,94 @@
  * Command-line interface for uploading log files to GitHub
  */
 
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
+import { makeConfig } from 'lino-arguments';
 import { uploadLog } from './index.js';
 
-/**
- * Get environment variable with fallback
- * Supports multiple naming conventions (UPPER_CASE, camelCase, kebab-case)
- */
-function getEnv(name, defaultValue) {
-  // Try different case variations
-  const variations = [
-    name,
-    name.toUpperCase(),
-    name.toLowerCase(),
-    name.replace(/-/g, '_').toUpperCase(),
-  ];
-
-  for (const variation of variations) {
-    const value = process.env[variation];
-    if (value !== undefined) {
-      // Parse boolean strings
-      if (typeof defaultValue === 'boolean') {
-        return value === 'true' || value === '1';
-      }
-      // Parse number strings
-      if (typeof defaultValue === 'number') {
-        return Number(value);
-      }
-      return value;
-    }
-  }
-
-  return defaultValue;
-}
-
-// Parse command-line arguments with environment variable support
-const argv = yargs(hideBin(process.argv))
-  .usage('Usage: $0 <log-file> [options]')
-  .command('$0 <logFile>', 'Upload a log file to GitHub', (yargs) => {
-    yargs.positional('logFile', {
-      describe: 'Path to the log file to upload',
-      type: 'string'
-    });
-  })
-  .option('public', {
-    alias: 'p',
-    type: 'boolean',
-    description: 'Make the upload public (default: private)',
-    default: getEnv('GH_UPLOAD_LOG_PUBLIC', false)
-  })
-  .option('private', {
-    type: 'boolean',
-    description: 'Make the upload private (default)',
-    default: getEnv('GH_UPLOAD_LOG_PRIVATE', true)
-  })
-  .option('auto', {
-    type: 'boolean',
-    description: 'Automatically choose upload strategy based on file size (default)',
-    default: getEnv('GH_UPLOAD_LOG_AUTO', true)
-  })
-  .option('only-gist', {
-    type: 'boolean',
-    description: 'Upload only as GitHub Gist (disables auto mode)',
-    default: getEnv('GH_UPLOAD_LOG_ONLY_GIST', false)
-  })
-  .option('only-repository', {
-    type: 'boolean',
-    description: 'Upload only as GitHub Repository (disables auto mode)',
-    default: getEnv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false)
-  })
-  .option('dry-mode', {
-    alias: 'dry',
-    type: 'boolean',
-    description: 'Dry run mode - show what would be done without uploading',
-    default: getEnv('GH_UPLOAD_LOG_DRY_MODE', false)
-  })
-  .option('description', {
-    alias: 'd',
-    type: 'string',
-    description: 'Description for the upload',
-    default: getEnv('GH_UPLOAD_LOG_DESCRIPTION', '')
-  })
-  .option('verbose', {
-    alias: 'v',
-    type: 'boolean',
-    description: 'Enable verbose output',
-    default: getEnv('GH_UPLOAD_LOG_VERBOSE', false)
-  })
-  .conflicts('public', 'private')
-  .conflicts('only-gist', 'only-repository')
-  .check((argv) => {
-    // If --no-auto is used, require either --only-gist or --only-repository
-    if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
-      throw new Error('When using --no-auto, you must specify either --only-gist or --only-repository');
-    }
-    // If --only-gist or --only-repository is used, auto mode is disabled
-    if (argv.onlyGist || argv.onlyRepository) {
-      argv.auto = false;
-    }
-    return true;
-  })
-  .example('$0 /var/log/app.log', 'Upload log file (auto mode, private)')
-  .example('$0 /var/log/app.log --public', 'Upload log file (auto mode, public)')
-  .example('$0 ./error.log --only-gist', 'Upload only as gist')
-  .example('$0 ./large.log --only-repository --public', 'Upload only as public repository')
-  .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
-  .help('h')
-  .alias('h', 'help')
-  .version('0.1.0')
-  .alias('v', 'version')
-  .strict()
-  .parse();
+// Parse command-line arguments with environment variable and .lenv support
+const config = makeConfig({
+  yargs: ({ yargs, getenv }) =>
+    yargs
+      .usage('Usage: $0 <log-file> [options]')
+      .command('$0 <logFile>', 'Upload a log file to GitHub', (yargs) => {
+        yargs.positional('logFile', {
+          describe: 'Path to the log file to upload',
+          type: 'string'
+        });
+      })
+      .option('public', {
+        alias: 'p',
+        type: 'boolean',
+        description: 'Make the upload public (default: private)',
+        default: getenv('GH_UPLOAD_LOG_PUBLIC', false)
+      })
+      .option('private', {
+        type: 'boolean',
+        description: 'Make the upload private (default)',
+        default: getenv('GH_UPLOAD_LOG_PRIVATE', true)
+      })
+      .option('auto', {
+        type: 'boolean',
+        description: 'Automatically choose upload strategy based on file size (default)',
+        default: getenv('GH_UPLOAD_LOG_AUTO', true)
+      })
+      .option('only-gist', {
+        type: 'boolean',
+        description: 'Upload only as GitHub Gist (disables auto mode)',
+        default: getenv('GH_UPLOAD_LOG_ONLY_GIST', false)
+      })
+      .option('only-repository', {
+        type: 'boolean',
+        description: 'Upload only as GitHub Repository (disables auto mode)',
+        default: getenv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false)
+      })
+      .option('dry-mode', {
+        alias: 'dry',
+        type: 'boolean',
+        description: 'Dry run mode - show what would be done without uploading',
+        default: getenv('GH_UPLOAD_LOG_DRY_MODE', false)
+      })
+      .option('description', {
+        alias: 'd',
+        type: 'string',
+        description: 'Description for the upload',
+        default: getenv('GH_UPLOAD_LOG_DESCRIPTION', '')
+      })
+      .option('verbose', {
+        alias: 'v',
+        type: 'boolean',
+        description: 'Enable verbose output',
+        default: getenv('GH_UPLOAD_LOG_VERBOSE', false)
+      })
+      .conflicts('public', 'private')
+      .conflicts('only-gist', 'only-repository')
+      .check((argv) => {
+        // If --no-auto is used, require either --only-gist or --only-repository
+        if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
+          throw new Error('When using --no-auto, you must specify either --only-gist or --only-repository');
+        }
+        // If --only-gist or --only-repository is used, auto mode is disabled
+        if (argv.onlyGist || argv.onlyRepository) {
+          argv.auto = false;
+        }
+        return true;
+      })
+      .example('$0 /var/log/app.log', 'Upload log file (auto mode, private)')
+      .example('$0 /var/log/app.log --public', 'Upload log file (auto mode, public)')
+      .example('$0 ./error.log --only-gist', 'Upload only as gist')
+      .example('$0 ./large.log --only-repository --public', 'Upload only as public repository')
+      .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
+      .help('h')
+      .alias('h', 'help')
+      .version('0.1.0')
+      .strict(),
+});
 
 /**
  * Main CLI function
  */
 async function main() {
   try {
-    const logFile = argv.logFile;
+    const logFile = config.logFile;
 
     if (!logFile) {
       console.error('Error: Log file path is required');
@@ -135,17 +104,17 @@ async function main() {
 
     // Prepare options
     // If neither public nor private is specified, default to private
-    const isPublic = argv.public === true ? true : (argv.private === false ? true : false);
+    const isPublic = config.public === true ? true : (config.private === false ? true : false);
 
     const options = {
       filePath: logFile,
       isPublic,
-      auto: argv.auto,
-      onlyGist: argv.onlyGist,
-      onlyRepository: argv.onlyRepository,
-      dryMode: argv.dryMode,
-      description: argv.description,
-      verbose: argv.verbose
+      auto: config.auto,
+      onlyGist: config.onlyGist,
+      onlyRepository: config.onlyRepository,
+      dryMode: config.dryMode,
+      description: config.description,
+      verbose: config.verbose
     };
 
     if (options.verbose) {
@@ -187,7 +156,7 @@ async function main() {
     console.error('');
     console.error('✗ Error:', error.message);
 
-    if (argv.verbose) {
+    if (config.verbose) {
       console.error('');
       console.error('Stack trace:');
       console.error(error.stack);
