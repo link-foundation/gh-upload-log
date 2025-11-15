@@ -1,0 +1,47 @@
+{
+  "name": "@link-foundation/gh-upload-log",
+  "version": "0.1.0",
+  "description": "A tool to upload log files to GitHub as Gists or repositories",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "gh-upload-log": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test test/index.test.js",
+    "test:bun": "bun test",
+    "test:deno": "deno test --allow-all",
+    "lint": "node --check src/index.js && node --check src/cli.js",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish"
+  },
+  "keywords": [
+    "github",
+    "gist",
+    "log",
+    "upload",
+    "cli"
+  ],
+  "author": "Link Foundation",
+  "license": "Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/link-foundation/gh-upload-log.git"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "command-stream": "^0.7.1",
+    "lino-arguments": "^0.2.1",
+    "log-lazy": "^1.0.4",
+    "use-m": "^8.13.7",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.7",
+    "test-anywhere": "^0.7.0"
+  }
+}

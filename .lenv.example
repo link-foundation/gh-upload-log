@@ -1,0 +1,29 @@
+# gh-upload-log Configuration File (.lenv)
+# This file uses Links Notation format (key: value)
+#
+# Copy this file to .lenv and customize the values
+# Priority: CLI arguments > Environment variables > .lenv file
+
+# Make uploads public by default (default: false)
+# GH_UPLOAD_LOG_PUBLIC: false
+
+# Make uploads private by default (default: true)
+# GH_UPLOAD_LOG_PRIVATE: true
+
+# Enable automatic strategy selection (gist vs repository) based on file size (default: true)
+# GH_UPLOAD_LOG_AUTO: true
+
+# Force upload only as GitHub Gist (default: false)
+# GH_UPLOAD_LOG_ONLY_GIST: false
+
+# Force upload only as GitHub Repository (default: false)
+# GH_UPLOAD_LOG_ONLY_REPOSITORY: false
+
+# Enable dry run mode by default (default: false)
+# GH_UPLOAD_LOG_DRY_MODE: false
+
+# Default description for uploads
+# GH_UPLOAD_LOG_DESCRIPTION: My application logs
+
+# Enable verbose output by default (default: false)
+# GH_UPLOAD_LOG_VERBOSE: false

@@ -1,0 +1,318 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  # Changeset check - only runs on PRs
+  changeset-check:
+    name: Check for Changesets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for changesets
+        run: |
+          # Skip changeset check for automated version PRs
+          if [[ "${{ github.head_ref }}" == "changeset-release/"* ]]; then
+            echo "Skipping changeset check for automated release PR"
+            exit 0
+          fi
+
+          # Count changeset files (excluding README.md and config.json)
+          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+
+          echo "Found $CHANGESET_COUNT changeset file(s)"
+
+          # Ensure exactly one changeset file exists
+          if [ "$CHANGESET_COUNT" -eq 0 ]; then
+            echo "::error::No changeset found. Please add a changeset by running 'npm run changeset' and commit the result."
+            exit 1
+          elif [ "$CHANGESET_COUNT" -gt 1 ]; then
+            echo "::error::Multiple changesets found ($CHANGESET_COUNT). Each PR should have exactly ONE changeset."
+            echo "::error::Found changeset files:"
+            find .changeset -name "*.md" ! -name "README.md" -exec basename {} \;
+            exit 1
+          fi
+
+          # Get the changeset file
+          CHANGESET_FILE=$(find .changeset -name "*.md" ! -name "README.md" | head -1)
+          echo "Validating changeset: $CHANGESET_FILE"
+
+          # Check if changeset has a valid type (major, minor, or patch)
+          if ! grep -qE "^['\"]@link-foundation/gh-upload-log['\"]:\s+(major|minor|patch)" "$CHANGESET_FILE"; then
+            echo "::error::Changeset must specify a version type: major, minor, or patch"
+            echo "::error::Expected format in $CHANGESET_FILE:"
+            echo "::error::---"
+            echo "::error::'@link-foundation/gh-upload-log': patch"
+            echo "::error::---"
+            echo "::error::"
+            echo "::error::Your description here"
+            cat "$CHANGESET_FILE"
+            exit 1
+          fi
+
+          # Extract description (everything after the closing ---) and check it's not empty
+          DESCRIPTION=$(awk '/^---$/{count++; next} count==2' "$CHANGESET_FILE" | sed '/^[[:space:]]*$/d')
+
+          if [ -z "$DESCRIPTION" ]; then
+            echo "::error::Changeset must include a description of the changes"
+            echo "::error::The description should appear after the closing '---' in the changeset file"
+            echo "::error::Current content of $CHANGESET_FILE:"
+            cat "$CHANGESET_FILE"
+            exit 1
+          fi
+
+          echo "✅ Changeset validation passed"
+          echo "   Type: $(grep -E "^['\"]@link-foundation/gh-upload-log['\"]:" "$CHANGESET_FILE" | sed "s/.*: //")"
+          echo "   Description: $DESCRIPTION"
+
+  # Linting - runs after changeset check on PRs, immediately on main
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: [changeset-check]
+    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint
+        run: npm run lint
+
+  # Test on Node.js - runs after changeset check on PRs, immediately on main
+  test-node:
+    name: Test on ${{ matrix.os }} with Node.js
+    runs-on: ${{ matrix.os }}
+    needs: [changeset-check]
+    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  # Test on Bun - runs after changeset check on PRs, immediately on main
+  test-bun:
+    name: Test on ${{ matrix.os }} with Bun
+    runs-on: ${{ matrix.os }}
+    needs: [changeset-check]
+    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun test
+
+  # Test on Deno - runs after changeset check on PRs, immediately on main
+  test-deno:
+    name: Test on ${{ matrix.os }} with Deno
+    runs-on: ${{ matrix.os }}
+    needs: [changeset-check]
+    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies
+        run: deno install
+
+      - name: Run tests
+        run: deno test --allow-all
+
+  # Release - only runs on main after tests pass
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [lint, test-node, test-bun, test-deno]
+    # Use always() to ensure this job runs even if changeset-check was skipped
+    # This is needed because lint/test jobs have a transitive dependency on changeset-check
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test-node.result == 'success' && needs.test-bun.result == 'success' && needs.test-deno.result == 'success'
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for changesets
+        id: check_changesets
+        run: |
+          # Count changeset files (excluding README.md and config.json)
+          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
+          echo "Found $CHANGESET_COUNT changeset file(s)"
+          echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+      - name: Version packages and commit to main
+        if: steps.check_changesets.outputs.has_changesets == 'true'
+        id: version
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Get current version before bump
+          OLD_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $OLD_VERSION"
+
+          # Run changeset version to bump versions and update CHANGELOG
+          npm run changeset:version
+
+          # Get new version after bump
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+          # Check if there are changes to commit
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Changes detected, committing..."
+
+            # Stage all changes (package.json, package-lock.json, CHANGELOG.md, deleted changesets)
+            git add -A
+
+            # Commit with version number as message
+            git commit -m "$NEW_VERSION" \
+                       -m "" \
+                       -m "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+
+            # Push directly to main
+            git push origin main
+
+            echo "✅ Version bump committed and pushed to main"
+            echo "version_committed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes to commit"
+            echo "version_committed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to npm
+        if: steps.version.outputs.version_committed == 'true'
+        id: publish
+        run: |
+          # Pull the latest changes we just pushed
+          git pull origin main
+
+          # Publish to npm
+          npm run changeset:publish
+
+          echo "published=true" >> $GITHUB_OUTPUT
+
+          # Get published version
+          PUBLISHED_VERSION=$(node -p "require('./package.json').version")
+          echo "published_version=$PUBLISHED_VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Published @link-foundation/gh-upload-log@$PUBLISHED_VERSION to npm"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.publish.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.publish.outputs.published_version }}"
+          TAG="v$VERSION"
+
+          echo "Creating GitHub release for $TAG..."
+
+          # Extract changelog entry for this version
+          # Read from CHANGELOG.md between this version and the next version marker
+          RELEASE_NOTES=$(awk "/## $VERSION/,/## [0-9]/" CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+
+          if [ -z "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES="Release $VERSION"
+          fi
+
+          # Create release
+          gh release create "$TAG" \
+            --title "$VERSION" \
+            --notes "$RELEASE_NOTES" \
+            --repo ${{ github.repository }}
+
+          echo "✅ Created GitHub release: $TAG"
+
+      - name: Format GitHub release notes
+        if: steps.publish.outputs.published == 'true'
+        run: |
+          VERSION="${{ steps.publish.outputs.published_version }}"
+          TAG="v$VERSION"
+
+          # Get the release ID for this version
+          RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.id' 2>/dev/null || echo "")
+
+          if [ -n "$RELEASE_ID" ]; then
+            echo "Formatting release notes for $TAG..."
+            node scripts/format-release-notes.mjs "$RELEASE_ID" "$TAG" "${{ github.repository }}"
+            echo "✅ Formatted release notes for $TAG"
+          else
+            echo "⚠️ Could not find release for $TAG"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
