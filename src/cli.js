@@ -10,7 +10,38 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { uploadLog } from './index.js';
 
-// Parse command-line arguments
+/**
+ * Get environment variable with fallback
+ * Supports multiple naming conventions (UPPER_CASE, camelCase, kebab-case)
+ */
+function getEnv(name, defaultValue) {
+  // Try different case variations
+  const variations = [
+    name,
+    name.toUpperCase(),
+    name.toLowerCase(),
+    name.replace(/-/g, '_').toUpperCase(),
+  ];
+
+  for (const variation of variations) {
+    const value = process.env[variation];
+    if (value !== undefined) {
+      // Parse boolean strings
+      if (typeof defaultValue === 'boolean') {
+        return value === 'true' || value === '1';
+      }
+      // Parse number strings
+      if (typeof defaultValue === 'number') {
+        return Number(value);
+      }
+      return value;
+    }
+  }
+
+  return defaultValue;
+}
+
+// Parse command-line arguments with environment variable support
 const argv = yargs(hideBin(process.argv))
   .usage('Usage: $0 <log-file> [options]')
   .command('$0 <logFile>', 'Upload a log file to GitHub', (yargs) => {
@@ -22,41 +53,46 @@ const argv = yargs(hideBin(process.argv))
   .option('public', {
     alias: 'p',
     type: 'boolean',
-    description: 'Make the upload public (default: private)'
+    description: 'Make the upload public (default: private)',
+    default: getEnv('GH_UPLOAD_LOG_PUBLIC', false)
   })
   .option('private', {
     type: 'boolean',
-    description: 'Make the upload private (default)'
+    description: 'Make the upload private (default)',
+    default: getEnv('GH_UPLOAD_LOG_PRIVATE', true)
   })
   .option('auto', {
     type: 'boolean',
     description: 'Automatically choose upload strategy based on file size (default)',
-    default: true
+    default: getEnv('GH_UPLOAD_LOG_AUTO', true)
   })
   .option('only-gist', {
     type: 'boolean',
-    description: 'Upload only as GitHub Gist (disables auto mode)'
+    description: 'Upload only as GitHub Gist (disables auto mode)',
+    default: getEnv('GH_UPLOAD_LOG_ONLY_GIST', false)
   })
   .option('only-repository', {
     type: 'boolean',
-    description: 'Upload only as GitHub Repository (disables auto mode)'
+    description: 'Upload only as GitHub Repository (disables auto mode)',
+    default: getEnv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false)
   })
   .option('dry-mode', {
     alias: 'dry',
     type: 'boolean',
     description: 'Dry run mode - show what would be done without uploading',
-    default: false
+    default: getEnv('GH_UPLOAD_LOG_DRY_MODE', false)
   })
   .option('description', {
     alias: 'd',
     type: 'string',
-    description: 'Description for the upload'
+    description: 'Description for the upload',
+    default: getEnv('GH_UPLOAD_LOG_DESCRIPTION', '')
   })
   .option('verbose', {
     alias: 'v',
     type: 'boolean',
     description: 'Enable verbose output',
-    default: false
+    default: getEnv('GH_UPLOAD_LOG_VERBOSE', false)
   })
   .conflicts('public', 'private')
   .conflicts('only-gist', 'only-repository')

@@ -3,7 +3,7 @@
 A smart tool to upload log files to GitHub as Gists or Repositories
 
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
 
 ## Overview
 
@@ -17,6 +17,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 - **Automatic strategy selection**: Chooses between Gist and Repository based on file size
 - **Smart file splitting**: Automatically splits large files into manageable chunks
 - **Public/Private control**: Upload as public or private (default: private)
+- **Flexible configuration**: CLI arguments, environment variables, or `.lenv` files using [Links Notation](https://github.com/link-foundation/links-notation)
 - **Cross-platform**: Works on macOS, Linux, and Windows
 - **Dual interface**: Use as CLI tool or JavaScript library
 - **Path normalization**: Converts file paths into valid GitHub names
@@ -25,7 +26,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 
 ## Prerequisites
 
-- Node.js ≥18.0.0
+- Node.js ≥20.0.0
 - Git (installed and configured)
 - GitHub CLI (`gh`) installed and authenticated
 
@@ -47,6 +48,45 @@ npm install -g @link-foundation/gh-upload-log
 ```bash
 npm install @link-foundation/gh-upload-log
 ```
+
+## Configuration
+
+`gh-upload-log` supports multiple configuration methods with the following priority (highest to lowest):
+
+1. **CLI arguments** - Directly passed command-line options
+2. **Environment variables** - System environment variables
+3. **`.lenv` file** - Local configuration using Links Notation format
+4. **Defaults** - Built-in default values
+
+### Using .lenv Configuration Files (Future Support)
+
+Support for `.lenv` configuration files using [Links Notation](https://github.com/link-foundation/links-notation) format is planned for a future release when [lino-arguments](https://github.com/link-foundation/lino-arguments) and [lino-env](https://github.com/link-foundation/lino-env) are published to npm.
+
+For now, use environment variables for configuration (see below).
+
+### Using Environment Variables
+
+Set environment variables for persistent configuration:
+
+```bash
+export GH_UPLOAD_LOG_PUBLIC=true
+export GH_UPLOAD_LOG_VERBOSE=true
+export GH_UPLOAD_LOG_DESCRIPTION="Production logs"
+gh-upload-log /var/log/app.log
+```
+
+### Available Configuration Options
+
+- `GH_UPLOAD_LOG_PUBLIC` - Make uploads public (default: false)
+- `GH_UPLOAD_LOG_PRIVATE` - Make uploads private (default: true)
+- `GH_UPLOAD_LOG_AUTO` - Enable automatic strategy selection (default: true)
+- `GH_UPLOAD_LOG_ONLY_GIST` - Force gist uploads only (default: false)
+- `GH_UPLOAD_LOG_ONLY_REPOSITORY` - Force repository uploads only (default: false)
+- `GH_UPLOAD_LOG_DRY_MODE` - Enable dry run mode (default: false)
+- `GH_UPLOAD_LOG_DESCRIPTION` - Default description for uploads
+- `GH_UPLOAD_LOG_VERBOSE` - Enable verbose output (default: false)
+
+See [.lenv.example](./.lenv.example) for a complete configuration template.
 
 ## CLI Usage
 
@@ -321,10 +361,16 @@ gh-upload-log/
 ### Dependencies
 
 This project uses modern Link Foundation libraries:
-- **use-m**: Dynamic module loading without package.json pollution
-- **command-stream**: Streamable command execution
-- **yargs**: Command-line argument parsing
-- **test-anywhere**: Universal testing framework
+- **[log-lazy](https://github.com/link-foundation/log-lazy)**: Efficient lazy evaluation logging
+- **[use-m](https://github.com/link-foundation/use-m)**: Dynamic module loading without package.json pollution
+- **[command-stream](https://github.com/link-foundation/command-stream)**: Streamable command execution
+- **[yargs](https://yargs.js.org/)**: Command-line argument parsing
+- **[test-anywhere](https://github.com/link-foundation/test-anywhere)**: Universal testing framework (dev dependency)
+
+**Planned for future releases:**
+- **[lino-arguments](https://github.com/link-foundation/lino-arguments)**: CLI argument parsing with environment variable and .lenv file support
+- **[lino-env](https://github.com/link-foundation/lino-env)**: Configuration management using Links Notation format
+- **[links-notation](https://github.com/link-foundation/links-notation)**: Data description using references and links
 
 ## Contributing
 
@@ -342,6 +388,10 @@ This is free and unencumbered software released into the public domain. See [LIC
 
 ## Related Projects
 
+- [lino-arguments](https://github.com/link-foundation/lino-arguments) - CLI argument parsing with environment variables and .lenv support
+- [lino-env](https://github.com/link-foundation/lino-env) - Configuration management using Links Notation
+- [links-notation](https://github.com/link-foundation/links-notation) - Data description using references and links
+- [log-lazy](https://github.com/link-foundation/log-lazy) - Efficient lazy evaluation logging
 - [use-m](https://github.com/link-foundation/use-m) - Dynamic module loading
 - [command-stream](https://github.com/link-foundation/command-stream) - Streamable commands
 - [test-anywhere](https://github.com/link-foundation/test-anywhere) - Universal testing

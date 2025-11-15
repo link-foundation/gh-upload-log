@@ -30,7 +30,7 @@
     "url": "https://github.com/link-foundation/gh-upload-log.git"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "command-stream": "^0.7.1",
@@ -41,6 +41,6 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
-    "test-anywhere": "^0.2.6"
+    "test-anywhere": "^0.7.0"
   }
 }

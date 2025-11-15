@@ -8,7 +8,9 @@
 - Integrated `log-lazy` library for efficient lazy evaluation logging
 - Added `verbose` option to enable detailed logging output
 - Added `logger` option to configure custom logging targets (enables silent mode, custom loggers, etc.)
+- Added environment variable support for all CLI options (e.g., `GH_UPLOAD_LOG_PUBLIC`, `GH_UPLOAD_LOG_VERBOSE`)
 - Improved logging throughout upload process with debug-level messages
+- Prepared infrastructure for future `.lenv` file support using Links Notation
 
 **API Changes:**
 - `uploadLog(filePath, options)` → `uploadLog(options)` where options includes `filePath`
@@ -18,8 +20,17 @@
 - Return value property renamed: `repoName` → `repositoryName` for consistency
 
 **CI/CD improvements:**
-- Upgrade CI/CD pipeline with changesets and NPM deployment support
-- Latest runtime versions (Node.js 22.x, Bun latest, Deno v2.x)
-- Windows test fixes
-- Bun Windows support
-- Automated release workflow
+- Upgraded to Node.js 20.x minimum requirement (matching Link Foundation standards)
+- Updated to test-anywhere 0.7.0 for testing
+- Latest runtime versions (Node.js 20.x, Bun latest, Deno v2.x) in CI matrix
+- Windows test fixes for all runtimes
+- Bun Windows support added to CI
+- Complete CI/CD pipeline with changesets and NPM deployment
+- Automated release workflow with formatted release notes
+
+**Documentation improvements:**
+- Added comprehensive configuration section
+- Documented environment variable support
+- Updated dependencies list with Link Foundation libraries
+- Added .lenv.example template for future configuration support
+- Updated Node.js version requirements throughout docs
