@@ -1,5 +1,5 @@
 ---
-'@link-foundation/gh-upload-log': minor
+'gh-upload-log': minor
 ---
 
 **BREAKING CHANGE**: Refactored API to use options-only pattern for all functions. All functions now accept a single options object with `filePath` as a required property instead of separate parameters.

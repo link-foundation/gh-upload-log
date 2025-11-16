@@ -19,7 +19,7 @@ if (!releaseId || !version || !repository) {
   process.exit(1);
 }
 
-const packageName = '@link-foundation/gh-upload-log';
+const packageName = 'gh-upload-log';
 
 try {
   // Get current release body

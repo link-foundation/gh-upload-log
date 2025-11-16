@@ -40,13 +40,13 @@ gh auth login
 ### Global Installation (CLI)
 
 ```bash
-npm install -g @link-foundation/gh-upload-log
+npm install -g gh-upload-log
 ```
 
 ### Local Installation (Library)
 
 ```bash
-npm install @link-foundation/gh-upload-log
+npm install gh-upload-log
 ```
 
 ## Configuration
@@ -169,7 +169,7 @@ gh-upload-log ./file.log --no-auto --only-repository
 ### Basic Example
 
 ```javascript
-import { uploadLog } from '@link-foundation/gh-upload-log';
+import { uploadLog } from 'gh-upload-log';
 
 // Upload a log file (private by default)
 const result = await uploadLog({
@@ -289,7 +289,7 @@ import {
   GITHUB_GIST_FILE_LIMIT,     // 100 MB
   GITHUB_GIST_WEB_LIMIT,      // 25 MB
   GITHUB_REPO_CHUNK_SIZE      // 100 MB
-} from '@link-foundation/gh-upload-log';
+} from 'gh-upload-log';
 ```
 
 ## How It Works

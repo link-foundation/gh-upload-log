@@ -1,5 +1,5 @@
 {
-  "name": "@link-foundation/gh-upload-log",
+  "name": "gh-upload-log",
   "version": "0.1.0",
   "description": "A tool to upload log files to GitHub as Gists or repositories",
   "type": "module",

@@ -57,11 +57,11 @@ jobs:
           echo "Validating changeset: $CHANGESET_FILE"
 
           # Check if changeset has a valid type (major, minor, or patch)
-          if ! grep -qE "^['\"]@link-foundation/gh-upload-log['\"]:\s+(major|minor|patch)" "$CHANGESET_FILE"; then
+          if ! grep -qE "^['\"]gh-upload-log['\"]:\s+(major|minor|patch)" "$CHANGESET_FILE"; then
             echo "::error::Changeset must specify a version type: major, minor, or patch"
             echo "::error::Expected format in $CHANGESET_FILE:"
             echo "::error::---"
-            echo "::error::'@link-foundation/gh-upload-log': patch"
+            echo "::error::'gh-upload-log': patch"
             echo "::error::---"
             echo "::error::"
             echo "::error::Your description here"
@@ -81,7 +81,7 @@ jobs:
           fi
 
           echo "✅ Changeset validation passed"
-          echo "   Type: $(grep -E "^['\"]@link-foundation/gh-upload-log['\"]:" "$CHANGESET_FILE" | sed "s/.*: //")"
+          echo "   Type: $(grep -E "^['\"]gh-upload-log['\"]:" "$CHANGESET_FILE" | sed "s/.*: //")"
           echo "   Description: $DESCRIPTION"
 
   # Linting - runs after changeset check on PRs, immediately on main
@@ -267,7 +267,7 @@ jobs:
           # Get published version
           PUBLISHED_VERSION=$(node -p "require('./package.json').version")
           echo "published_version=$PUBLISHED_VERSION" >> $GITHUB_OUTPUT
-          echo "✅ Published @link-foundation/gh-upload-log@$PUBLISHED_VERSION to npm"
+          echo "✅ Published gh-upload-log@$PUBLISHED_VERSION to npm"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
