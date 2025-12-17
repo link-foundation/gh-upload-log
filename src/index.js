@@ -33,8 +33,8 @@ function createDefaultLogger(options = {}) {
       debug: logger.debug || logger.log,
       verbose: logger.log,
       trace: logger.log,
-      silly: logger.log
-    }
+      silly: logger.log,
+    },
   });
 
   return log;
@@ -91,7 +91,7 @@ export function generateGistFileName(filePath) {
 export function fileExists(filePath) {
   try {
     return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -124,7 +124,7 @@ export function determineUploadStrategy(filePath) {
       type: 'gist',
       fileSize,
       needsSplit: false,
-      reason: 'File fits within GitHub Gist limit (100MB)'
+      reason: 'File fits within GitHub Gist limit (100MB)',
     };
   } else {
     const numChunks = Math.ceil(fileSize / GITHUB_REPO_CHUNK_SIZE);
@@ -134,7 +134,7 @@ export function determineUploadStrategy(filePath) {
       needsSplit: true,
       numChunks,
       chunkSize: GITHUB_REPO_CHUNK_SIZE,
-      reason: `File exceeds Gist limit, will be split into ${numChunks} chunks`
+      reason: `File exceeds Gist limit, will be split into ${numChunks} chunks`,
     };
   }
 }
@@ -147,7 +147,11 @@ export function determineUploadStrategy(filePath) {
  * @param {number} chunkSize - Size of each chunk in bytes
  * @returns {Promise<string[]>} Array of chunk file paths
  */
-export async function splitFileIntoChunks(inputPath, outputDir, chunkSize = GITHUB_REPO_CHUNK_SIZE) {
+export async function splitFileIntoChunks(
+  inputPath,
+  outputDir,
+  chunkSize = GITHUB_REPO_CHUNK_SIZE
+) {
   const { $ } = await import('command-stream');
 
   const baseName = path.basename(normalizeFileName(inputPath), '.log');
@@ -164,10 +168,11 @@ export async function splitFileIntoChunks(inputPath, outputDir, chunkSize = GITH
   await $`split -b ${chunkSizeMB}m -d -a 2 ${inputPath} ${path.join(outputDir, chunkPrefix)}`;
 
   // Get list of created chunks
-  const chunks = fs.readdirSync(outputDir)
-    .filter(file => file.startsWith(chunkPrefix))
+  const chunks = fs
+    .readdirSync(outputDir)
+    .filter((file) => file.startsWith(chunkPrefix))
     .sort()
-    .map(file => path.join(outputDir, file));
+    .map((file) => path.join(outputDir, file));
 
   return chunks;
 }
@@ -191,7 +196,7 @@ export async function uploadAsGist(options = {}) {
     isPublic = false,
     description,
     verbose = false,
-    logger = console
+    logger = console,
   } = options;
 
   if (!filePath) {
@@ -208,7 +213,8 @@ export async function uploadAsGist(options = {}) {
 
   // Create gist using gh CLI
   const visibility = isPublic ? '--public' : '';
-  const result = await $`gh gist create ${filePath} ${visibility} --desc ${desc}`;
+  const result =
+    await $`gh gist create ${filePath} ${visibility} --desc ${desc}`;
 
   // Extract gist URL from output
   const gistUrl = result.stdout.trim();
@@ -219,7 +225,7 @@ export async function uploadAsGist(options = {}) {
     type: 'gist',
     url: gistUrl,
     fileName: gistFileName,
-    isPublic
+    isPublic,
   };
 }
 
@@ -240,9 +246,9 @@ export async function uploadAsRepo(options = {}) {
   const {
     filePath,
     isPublic = false,
-    description,
+    description: _description,
     verbose = false,
-    logger = console
+    logger = console,
   } = options;
 
   if (!filePath) {
@@ -267,7 +273,10 @@ export async function uploadAsRepo(options = {}) {
     const fileSize = getFileSize(filePath);
     if (fileSize > GITHUB_REPO_CHUNK_SIZE) {
       log(() => '→ Splitting file into 100MB chunks...');
-      log.debug(() => `File size: ${fileSize} bytes, chunk size: ${GITHUB_REPO_CHUNK_SIZE} bytes`);
+      log.debug(
+        () =>
+          `File size: ${fileSize} bytes, chunk size: ${GITHUB_REPO_CHUNK_SIZE} bytes`
+      );
 
       await splitFileIntoChunks(
         path.join(workDir, normalized),
@@ -297,7 +306,10 @@ export async function uploadAsRepo(options = {}) {
     log.debug(() => `GitHub user: ${githubUser}`);
 
     // Create GitHub repo and push
-    log(() => `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`);
+    log(
+      () =>
+        `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`
+    );
     const visibility = isPublic ? '--public' : '--private';
     await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
 
@@ -310,7 +322,7 @@ export async function uploadAsRepo(options = {}) {
       url: repoUrl,
       repositoryName,
       isPublic,
-      workDir // Keep for debugging; caller can clean up
+      workDir, // Keep for debugging; caller can clean up
     };
   } catch (error) {
     log.error(() => `Error uploading as repository: ${error.message}`);
@@ -348,7 +360,7 @@ export async function uploadLog(options = {}) {
     dryMode = false,
     description,
     verbose = false,
-    logger = console
+    logger = console,
   } = options;
 
   if (!filePath) {
@@ -392,10 +404,12 @@ export async function uploadLog(options = {}) {
     return {
       type: uploadType,
       url: `[DRY MODE] Would create ${uploadType === 'gist' ? 'gist' : 'repository'}`,
-      fileName: uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
-      repositoryName: uploadType === 'repo' ? generateRepoName(filePath) : undefined,
+      fileName:
+        uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
+      repositoryName:
+        uploadType === 'repo' ? generateRepoName(filePath) : undefined,
       isPublic: isPublic || false,
-      dryMode: true
+      dryMode: true,
     };
   }
 
@@ -419,5 +433,5 @@ export default {
   splitFileIntoChunks,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
-  GITHUB_REPO_CHUNK_SIZE
+  GITHUB_REPO_CHUNK_SIZE,
 };

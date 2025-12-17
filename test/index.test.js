@@ -14,7 +14,7 @@ import {
   getFileSize,
   determineUploadStrategy,
   GITHUB_GIST_FILE_LIMIT,
-  GITHUB_REPO_CHUNK_SIZE
+  GITHUB_REPO_CHUNK_SIZE,
 } from '../src/index.js';
 
 // Create test directory
@@ -137,7 +137,7 @@ test('GITHUB_REPO_CHUNK_SIZE - is 100MB', () => {
 });
 
 // Clean up function (optional, can be called after tests)
-function cleanupTestFiles() {
+export function cleanupTestFiles() {
   if (fs.existsSync(testDir)) {
     fs.rmSync(testDir, { recursive: true, force: true });
   }

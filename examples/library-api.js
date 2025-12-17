@@ -8,9 +8,8 @@ import {
   normalizeFileName,
   generateRepoName,
   generateGistFileName,
-  determineUploadStrategy,
   GITHUB_GIST_FILE_LIMIT,
-  GITHUB_REPO_CHUNK_SIZE
+  GITHUB_REPO_CHUNK_SIZE,
 } from '../src/index.js';
 
 console.log('=== gh-upload-log Library API Examples ===\n');
@@ -49,7 +48,7 @@ console.log('');
 
 // Simulate a large file
 console.log('  Large file (500 MB):');
-const numChunks = Math.ceil(500 * 1024 * 1024 / GITHUB_REPO_CHUNK_SIZE);
+const numChunks = Math.ceil((500 * 1024 * 1024) / GITHUB_REPO_CHUNK_SIZE);
 console.log(`    -> Would use: repo (split into ${numChunks} chunks)`);
 console.log('');
 

@@ -1,5 +1,5 @@
 ---
-"test-anywhere": patch
+'test-anywhere': patch
 ---
 
 Test patch release
