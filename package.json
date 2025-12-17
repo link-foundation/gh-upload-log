@@ -10,7 +10,7 @@
   "scripts": {
     "test": "node --test test/",
     "test:bun": "bun test",
-    "test:deno": "deno test --allow-read",
+    "test:deno": "deno test --allow-read --allow-write",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
