@@ -15,7 +15,10 @@ async function main() {
   console.log('Creating sample log file...');
   const logContent = Array(100)
     .fill(0)
-    .map((_, i) => `[${new Date().toISOString()}] Log entry ${i + 1}: Sample log message`)
+    .map(
+      (_, i) =>
+        `[${new Date().toISOString()}] Log entry ${i + 1}: Sample log message`
+    )
     .join('\n');
 
   fs.writeFileSync(logFile, logContent);
@@ -29,18 +32,20 @@ async function main() {
     const result1 = await uploadLog({
       filePath: logFile,
       isPublic: false,
-      description: 'Sample log file from gh-upload-log example'
+      description: 'Sample log file from gh-upload-log example',
     });
     console.log('Result:', result1);
     console.log('');
 
     // Example 2: Upload as public with verbose mode
-    console.log('Example 2: Uploading as public gist/repo with verbose logging...');
+    console.log(
+      'Example 2: Uploading as public gist/repo with verbose logging...'
+    );
     const result2 = await uploadLog({
       filePath: logFile,
       isPublic: true,
       description: 'Public sample log file',
-      verbose: true
+      verbose: true,
     });
     console.log('Result:', result2);
     console.log('');
@@ -49,12 +54,12 @@ async function main() {
     console.log('Example 3: Uploading with custom logger (silent)...');
     const customLogger = {
       log: () => {}, // Silent
-      error: (msg) => console.error('ERROR:', msg)
+      error: (msg) => console.error('ERROR:', msg),
     };
     const result3 = await uploadLog({
       filePath: logFile,
       isPublic: false,
-      logger: customLogger
+      logger: customLogger,
     });
     console.log('Result:', result3);
     console.log('');

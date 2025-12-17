@@ -31,6 +31,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 - GitHub CLI (`gh`) installed and authenticated
 
 To authenticate with GitHub CLI:
+
 ```bash
 gh auth login
 ```
@@ -71,6 +72,7 @@ GH_UPLOAD_LOG_DESCRIPTION: Production logs
 ```
 
 The configuration priority is:
+
 1. CLI arguments (highest priority)
 2. Environment variables
 3. `.lenv` file
@@ -173,7 +175,7 @@ import { uploadLog } from 'gh-upload-log';
 
 // Upload a log file (private by default)
 const result = await uploadLog({
-  filePath: '/path/to/logfile.log'
+  filePath: '/path/to/logfile.log',
 });
 console.log('Uploaded to:', result.url);
 
@@ -182,19 +184,19 @@ const publicResult = await uploadLog({
   filePath: '/path/to/logfile.log',
   isPublic: true,
   description: 'My application logs',
-  verbose: true
+  verbose: true,
 });
 console.log('Public URL:', publicResult.url);
 
 // Upload with custom logger (silent mode)
 const customLogger = {
-  log: () => {},  // Silent logging
-  error: (msg) => console.error('ERROR:', msg)
+  log: () => {}, // Silent logging
+  error: (msg) => console.error('ERROR:', msg),
 };
 
 const result = await uploadLog({
   filePath: '/path/to/logfile.log',
-  logger: customLogger
+  logger: customLogger,
 });
 ```
 
@@ -205,6 +207,7 @@ const result = await uploadLog({
 Main function to upload a log file. Automatically determines the best strategy.
 
 **Parameters:**
+
 - `options` (object):
   - `filePath` (string, **required**): Path to the log file
   - `isPublic` (boolean): Make upload public (default: false)
@@ -217,6 +220,7 @@ Main function to upload a log file. Automatically determines the best strategy.
   - `logger` (object): Custom logging target (default: console)
 
 **Returns:** Promise<Object>
+
 ```javascript
 {
   type: 'gist' | 'repo',
@@ -233,6 +237,7 @@ Main function to upload a log file. Automatically determines the best strategy.
 Upload a file as a GitHub Gist.
 
 **Parameters:**
+
 - `options` (object):
   - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make gist public (default: false)
@@ -247,6 +252,7 @@ Upload a file as a GitHub Gist.
 Upload a file as a GitHub Repository (with splitting if needed).
 
 **Parameters:**
+
 - `options` (object):
   - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make repo public (default: false)
@@ -261,9 +267,11 @@ Upload a file as a GitHub Repository (with splitting if needed).
 Determine the best upload strategy for a file.
 
 **Parameters:**
+
 - `filePath` (string): Path to the file
 
 **Returns:** Object
+
 ```javascript
 {
   type: 'gist' | 'repo',
@@ -286,9 +294,9 @@ Determine the best upload strategy for a file.
 
 ```javascript
 import {
-  GITHUB_GIST_FILE_LIMIT,     // 100 MB
-  GITHUB_GIST_WEB_LIMIT,      // 25 MB
-  GITHUB_REPO_CHUNK_SIZE      // 100 MB
+  GITHUB_GIST_FILE_LIMIT, // 100 MB
+  GITHUB_GIST_WEB_LIMIT, // 25 MB
+  GITHUB_REPO_CHUNK_SIZE, // 100 MB
 } from 'gh-upload-log';
 ```
 
@@ -297,11 +305,13 @@ import {
 ### File Naming
 
 File paths are normalized for GitHub compatibility:
+
 - Leading slashes are removed
 - All `/` characters are replaced with `-`
 - Repository names are prefixed with `log-`
 
 Examples:
+
 - `/home/user/app.log` → Gist: `home-user-app.log`, Repo: `log-home-user-app`
 - `./logs/error.log` → Gist: `.-logs-error.log`, Repo: `log-.-logs-error`
 
@@ -320,6 +330,7 @@ Examples:
 ### Privacy
 
 By default, all uploads are **private**:
+
 - **Private Gists**: Only accessible by you
 - **Private Repositories**: Only accessible by you
 
@@ -354,6 +365,7 @@ See the `examples/` directory for more usage examples:
 - `examples/library-api.js`: API function examples
 
 Run examples:
+
 ```bash
 node examples/library-api.js
 ```
@@ -379,6 +391,7 @@ gh-upload-log/
 ### Dependencies
 
 This project uses modern Link Foundation libraries:
+
 - **[lino-arguments](https://github.com/link-foundation/lino-arguments)**: CLI argument parsing with environment variable and .lenv file support
 - **[log-lazy](https://github.com/link-foundation/log-lazy)**: Efficient lazy evaluation logging
 - **[use-m](https://github.com/link-foundation/use-m)**: Dynamic module loading without package.json pollution
@@ -386,6 +399,7 @@ This project uses modern Link Foundation libraries:
 - **[test-anywhere](https://github.com/link-foundation/test-anywhere)**: Universal testing framework (dev dependency)
 
 The following libraries are used internally by lino-arguments:
+
 - **[lino-env](https://github.com/link-foundation/lino-env)**: Configuration management using Links Notation format
 - **[links-notation](https://github.com/link-foundation/links-notation)**: Data description using references and links
 - **[yargs](https://yargs.js.org/)**: Command-line argument parsing

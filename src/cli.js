@@ -17,59 +17,62 @@ const config = makeConfig({
       .command('$0 <logFile>', 'Upload a log file to GitHub', (yargs) => {
         yargs.positional('logFile', {
           describe: 'Path to the log file to upload',
-          type: 'string'
+          type: 'string',
         });
       })
       .option('public', {
         alias: 'p',
         type: 'boolean',
         description: 'Make the upload public (default: private)',
-        default: getenv('GH_UPLOAD_LOG_PUBLIC', false)
+        default: getenv('GH_UPLOAD_LOG_PUBLIC', false),
       })
       .option('private', {
         type: 'boolean',
         description: 'Make the upload private (default)',
-        default: getenv('GH_UPLOAD_LOG_PRIVATE', true)
+        default: getenv('GH_UPLOAD_LOG_PRIVATE', true),
       })
       .option('auto', {
         type: 'boolean',
-        description: 'Automatically choose upload strategy based on file size (default)',
-        default: getenv('GH_UPLOAD_LOG_AUTO', true)
+        description:
+          'Automatically choose upload strategy based on file size (default)',
+        default: getenv('GH_UPLOAD_LOG_AUTO', true),
       })
       .option('only-gist', {
         type: 'boolean',
         description: 'Upload only as GitHub Gist (disables auto mode)',
-        default: getenv('GH_UPLOAD_LOG_ONLY_GIST', false)
+        default: getenv('GH_UPLOAD_LOG_ONLY_GIST', false),
       })
       .option('only-repository', {
         type: 'boolean',
         description: 'Upload only as GitHub Repository (disables auto mode)',
-        default: getenv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false)
+        default: getenv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false),
       })
       .option('dry-mode', {
         alias: 'dry',
         type: 'boolean',
         description: 'Dry run mode - show what would be done without uploading',
-        default: getenv('GH_UPLOAD_LOG_DRY_MODE', false)
+        default: getenv('GH_UPLOAD_LOG_DRY_MODE', false),
       })
       .option('description', {
         alias: 'd',
         type: 'string',
         description: 'Description for the upload',
-        default: getenv('GH_UPLOAD_LOG_DESCRIPTION', '')
+        default: getenv('GH_UPLOAD_LOG_DESCRIPTION', ''),
       })
       .option('verbose', {
         alias: 'v',
         type: 'boolean',
         description: 'Enable verbose output',
-        default: getenv('GH_UPLOAD_LOG_VERBOSE', false)
+        default: getenv('GH_UPLOAD_LOG_VERBOSE', false),
       })
       .conflicts('public', 'private')
       .conflicts('only-gist', 'only-repository')
       .check((argv) => {
         // If --no-auto is used, require either --only-gist or --only-repository
         if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
-          throw new Error('When using --no-auto, you must specify either --only-gist or --only-repository');
+          throw new Error(
+            'When using --no-auto, you must specify either --only-gist or --only-repository'
+          );
         }
         // If --only-gist or --only-repository is used, auto mode is disabled
         if (argv.onlyGist || argv.onlyRepository) {
@@ -78,9 +81,15 @@ const config = makeConfig({
         return true;
       })
       .example('$0 /var/log/app.log', 'Upload log file (auto mode, private)')
-      .example('$0 /var/log/app.log --public', 'Upload log file (auto mode, public)')
+      .example(
+        '$0 /var/log/app.log --public',
+        'Upload log file (auto mode, public)'
+      )
       .example('$0 ./error.log --only-gist', 'Upload only as gist')
-      .example('$0 ./large.log --only-repository --public', 'Upload only as public repository')
+      .example(
+        '$0 ./large.log --only-repository --public',
+        'Upload only as public repository'
+      )
       .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
       .help('h')
       .alias('h', 'help')
@@ -104,7 +113,8 @@ async function main() {
 
     // Prepare options
     // If neither public nor private is specified, default to private
-    const isPublic = config.public === true ? true : (config.private === false ? true : false);
+    const isPublic =
+      config.public === true ? true : config.private === false ? true : false;
 
     const options = {
       filePath: logFile,
@@ -114,7 +124,7 @@ async function main() {
       onlyRepository: config.onlyRepository,
       dryMode: config.dryMode,
       description: config.description,
-      verbose: config.verbose
+      verbose: config.verbose,
     };
 
     if (options.verbose) {
@@ -128,7 +138,9 @@ async function main() {
     }
 
     // Upload the log file
-    console.log(`${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'} log file: ${logFile}`);
+    console.log(
+      `${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'} log file: ${logFile}`
+    );
     console.log('');
 
     const result = await uploadLog(options);
