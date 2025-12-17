@@ -79,7 +79,7 @@ try {
     if (relevantPr) {
       prNumber = relevantPr.number;
     }
-  } catch (_error) {
+  } catch {
     console.log('⚠️ Could not find PR for commit', commitHash);
   }
 

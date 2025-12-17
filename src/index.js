@@ -10,11 +10,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import makeLog from 'log-lazy';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /**
  * Create a logger instance
@@ -91,7 +87,7 @@ export function generateGistFileName(filePath) {
 export function fileExists(filePath) {
   try {
     return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
-  } catch (_error) {
+  } catch {
     return false;
   }
 }
@@ -246,7 +242,6 @@ export async function uploadAsRepo(options = {}) {
   const {
     filePath,
     isPublic = false,
-    description: _description,
     verbose = false,
     logger = console,
   } = options;

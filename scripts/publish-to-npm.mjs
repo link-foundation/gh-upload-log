@@ -108,7 +108,7 @@ async function main() {
           `\u2705 Published ${PACKAGE_NAME}@${currentVersion} to npm`
         );
         return;
-      } catch (_error) {
+      } catch {
         if (i < MAX_RETRIES) {
           console.log(
             `Publish failed, waiting ${RETRY_DELAY / 1000}s before retry...`
