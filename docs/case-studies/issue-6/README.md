@@ -220,22 +220,93 @@ Replace `.conflicts()` with a custom `.check()` function that only validates whe
 - [Yargs Wiki](https://github.com/yargs/yargs/wiki)
 - [Pull Request #741](https://github.com/yargs/yargs/pull/741): Implementation of conflicts()
 
+## UPDATE: Second Report (2025-12-24)
+
+### New User Report
+
+After PR #7 was merged with the fix, the user reported the issue **still persists** when installing via package managers:
+
+```bash
+bun install -g gh-upload-log
+gh-upload-log /path/to/file.log
+# Still shows: "Arguments public and private are mutually exclusive"
+```
+
+### Investigation of Published Package
+
+**Key Discovery**: The npm package version 0.1.0 was published on **November 16, 2025**, but PR #7 (containing the fix) was merged on **December 24, 2025**.
+
+**Evidence**:
+
+1. Published package inspection shows old buggy code still present:
+
+   ```javascript
+   // From published npm package (0.1.0)
+   .option('public', {
+     alias: 'p',
+     type: 'boolean',
+     description: 'Make the upload public (default: private)',
+     default: getenv('GH_UPLOAD_LOG_PUBLIC', false)  // ← Still has default!
+   })
+   .option('private', {
+     type: 'boolean',
+     description: 'Make the upload private (default)',
+     default: getenv('GH_UPLOAD_LOG_PRIVATE', true)  // ← Still has default!
+   })
+   ```
+
+2. Main branch has the correct fixed code (no defaults on conflicting options)
+
+### Actual Root Cause
+
+**The fix was implemented correctly in PR #7 but was NEVER published to npm/bun registries.**
+
+Users installing the package globally via:
+
+- `npm install -g gh-upload-log`
+- `bun install -g gh-upload-log`
+
+Are still receiving version 0.1.0 which contains the bug.
+
+### Timeline of Events (Complete)
+
+1. **Nov 16, 2025**: Version 0.1.0 published to npm (with bug)
+2. **Dec 24, 2025 (morning)**: User reported issue #6
+3. **Dec 24, 2025**: PR #7 created and merged with fix to main branch
+4. **Dec 24, 2025**: User marked issue as "solved" prematurely
+5. **Dec 24, 2025 (evening)**: User reported issue still exists when installing via bun
+6. **Dec 24, 2025**: Investigation revealed the fix was never published
+
+### Solution
+
+1. **Immediate**: Create changeset and publish new version (0.1.1 or 0.2.0) with the fix
+2. **Long-term**: Add integration tests that run with installed package simulation
+3. **Process**: Implement automated release process to ensure fixes reach users
+
 ## Lessons Learned
 
 1. **Yargs .conflicts() limitation**: When using `.conflicts()`, avoid setting default values on mutually exclusive options
 2. **Testing is essential**: The issue wasn't caught because there were no integration tests for the CLI
 3. **Environment variables**: The `getenv()` function can still be used; the issue is specifically with yargs `default` values
 4. **Documentation**: Better documentation about this limitation would prevent similar issues
+5. **Publishing workflow**: Code fixes must be published to reach end users - CI/CD automation is critical
+6. **Testing published packages**: Integration tests should verify behavior of installed packages, not just local source code
+7. **Version management**: Use changesets or similar tools to ensure fixes trigger new releases
 
 ## Recommendations
 
 1. **Add integration tests** for CLI argument parsing
 2. **Add test for mutually exclusive options** to prevent regression
-3. **Update documentation** to clarify the default behavior when neither flag is specified
-4. **Consider CI/CD improvements** to catch these issues before release
+3. **Add tests that simulate package installation** (e.g., `npm pack` + install + test)
+4. **Update documentation** to clarify the default behavior when neither flag is specified
+5. **Implement automated release process** using GitHub Actions + changesets
+6. **Add --dry-mode tests** to CI to prevent such errors from reaching production
+7. **Version bump protocol**: Ensure every fix includes appropriate version bump
 
 ## References
 
 - Issue: https://github.com/link-foundation/gh-upload-log/issues/6
-- Pull Request: https://github.com/link-foundation/gh-upload-log/pull/7
+- Pull Request #7: https://github.com/link-foundation/gh-upload-log/pull/7 (merged but not published)
+- Pull Request #8: https://github.com/link-foundation/gh-upload-log/pull/8 (this PR - includes publication)
 - Yargs Conflicts Issues: [#929](https://github.com/yargs/yargs/issues/929), [#957](https://github.com/yargs/yargs/issues/957), [#899](https://github.com/yargs/yargs/issues/899), [#1910](https://github.com/yargs/yargs/issues/1910)
+- Published package: https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.1.0.tgz (contains bug)
