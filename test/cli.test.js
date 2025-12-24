@@ -7,12 +7,13 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
+import os from 'node:os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
-const testLogFile = '/tmp/test-cli-log-file.log';
+const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 
 // Helper function to run CLI command
 function runCLI(args) {
