@@ -24,12 +24,10 @@ const config = makeConfig({
         alias: 'p',
         type: 'boolean',
         description: 'Make the upload public (default: private)',
-        default: getenv('GH_UPLOAD_LOG_PUBLIC', false),
       })
       .option('private', {
         type: 'boolean',
         description: 'Make the upload private (default)',
-        default: getenv('GH_UPLOAD_LOG_PRIVATE', true),
       })
       .option('auto', {
         type: 'boolean',
@@ -40,12 +38,10 @@ const config = makeConfig({
       .option('only-gist', {
         type: 'boolean',
         description: 'Upload only as GitHub Gist (disables auto mode)',
-        default: getenv('GH_UPLOAD_LOG_ONLY_GIST', false),
       })
       .option('only-repository', {
         type: 'boolean',
         description: 'Upload only as GitHub Repository (disables auto mode)',
-        default: getenv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false),
       })
       .option('dry-mode', {
         alias: 'dry',
