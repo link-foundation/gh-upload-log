@@ -1,0 +1,202 @@
+[
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-24T23:05:56Z",
+    "databaseId": 20495256711,
+    "event": "pull_request",
+    "headBranch": "issue-6-c93f7b8bb8e7",
+    "headSha": "00393d7548328748ff7f75d7ad09dec19b978d71",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-24T23:03:37Z",
+    "databaseId": 20495228248,
+    "event": "pull_request",
+    "headBranch": "issue-6-c93f7b8bb8e7",
+    "headSha": "f98a57af3c3fd0e5f8601ad8c8116b88691e6842",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T23:02:38Z",
+    "databaseId": 20495215770,
+    "event": "pull_request",
+    "headBranch": "issue-6-c93f7b8bb8e7",
+    "headSha": "ffde303b59b43715fd83e99362548fb1f5ffd8ca",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T22:58:13Z",
+    "databaseId": 20495168508,
+    "event": "pull_request",
+    "headBranch": "issue-6-c93f7b8bb8e7",
+    "headSha": "edfdb858e7f16857d4408d42e381de88f71845df",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-24T17:14:56Z",
+    "databaseId": 20490806736,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "7b490e8223636ab03c552c95f81704b9cda1c40a",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-24T15:31:28Z",
+    "databaseId": 20489245418,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "327d225269ce9e0accab5193f61a8dd096a18352",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-24T15:28:37Z",
+    "databaseId": 20489200201,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "335ea207564e5b3d27b10198e4c3105b8e50462a",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T15:25:40Z",
+    "databaseId": 20489152139,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "cf96541ed5a26426f9bfdfb0aa1c3c9bfd58ac92",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T15:23:27Z",
+    "databaseId": 20489115580,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "6f0e05a44a7c92f2ba87b52699846abf04902d11",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T15:20:32Z",
+    "databaseId": 20489065563,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "6daae85e28c687c7235e762e5ade34b9879987d7",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-24T15:13:42Z",
+    "databaseId": 20488948354,
+    "event": "pull_request",
+    "headBranch": "issue-6-5911db19a01b",
+    "headSha": "cdf5845f88b3198010ba779d6e3e27b6f07f4d66",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-17T13:01:35Z",
+    "databaseId": 20303688859,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "96cf4df4940b807fa77a76012dc9c7c55425563e",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-17T12:47:31Z",
+    "databaseId": 20303314542,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "d0240d316068be6e2be3038185872448557ea5e2",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "success",
+    "createdAt": "2025-12-17T05:02:47Z",
+    "databaseId": 20292220683,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "dd3b131f656963d03712792db7df6eab7877a524",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-17T04:58:17Z",
+    "databaseId": 20292139442,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "0fdc9229934bf98d23b64c859f8822a676b4ab46",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-17T04:56:14Z",
+    "databaseId": 20292102013,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "d3579de75c47210853148457c8493e30e11358ac",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-17T04:45:59Z",
+    "databaseId": 20291928288,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "4c5bfb556c69c191c08852652b3f367f58c957b3",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-17T04:45:05Z",
+    "databaseId": 20291913908,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "d0b6f7861d3e5efc62ad97080082ede1c670260a",
+    "name": "Checks and release",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-17T04:36:12Z",
+    "databaseId": 20291761463,
+    "event": "pull_request",
+    "headBranch": "issue-4-7c098376a819",
+    "headSha": "77fd0f0bce184ab4b7c6f64493dde224556ad562",
+    "name": "CI/CD",
+    "status": "completed"
+  },
+  {
+    "conclusion": "failure",
+    "createdAt": "2025-12-01T20:29:07Z",
+    "databaseId": 19836510972,
+    "event": "push",
+    "headBranch": "main",
+    "headSha": "22d75bb1f2c2e6adc030960f0c25ba29800fb8b7",
+    "name": "CI/CD",
+    "status": "completed"
+  }
+]
