@@ -232,7 +232,7 @@ export async function uploadAsGist(options = {}) {
   const gistFileName = generateGistFileName(filePath);
   const desc = description || `Log file: ${path.basename(filePath)}`;
 
-  log(() => `Creating GitHub Gist for ${filePath}`);
+  log.debug(() => `Creating GitHub Gist for ${filePath}`);
   log.debug(() => `Gist file name: ${gistFileName}`);
   log.debug(() => `Description: ${desc}`);
 
@@ -248,7 +248,7 @@ export async function uploadAsGist(options = {}) {
   // Extract gist URL from output
   const gistUrl = result.stdout.trim();
 
-  log(() => `Gist created successfully: ${gistUrl}`);
+  log.debug(() => `Gist created successfully: ${gistUrl}`);
 
   return {
     type: 'gist',
@@ -290,17 +290,17 @@ export async function uploadAsRepo(options = {}) {
 
   try {
     // Create work directory
-    log(() => `→ Creating work directory: ${workDir}`);
+    log.debug(() => `→ Creating work directory: ${workDir}`);
     fs.mkdirSync(workDir, { recursive: true });
 
     // Copy file to work directory
-    log(() => '→ Copying file...');
+    log.debug(() => '→ Copying file...');
     fs.copyFileSync(filePath, path.join(workDir, normalized));
 
     // Split file if needed
     const fileSize = getFileSize(filePath);
     if (fileSize > GITHUB_REPO_CHUNK_SIZE) {
-      log(() => '→ Splitting file into 100MB chunks...');
+      log.debug(() => '→ Splitting file into 100MB chunks...');
       log.debug(
         () =>
           `File size: ${fileSize} bytes, chunk size: ${GITHUB_REPO_CHUNK_SIZE} bytes`
@@ -313,17 +313,17 @@ export async function uploadAsRepo(options = {}) {
       );
 
       // Remove original large file
-      log(() => '→ Removing original large file...');
+      log.debug(() => '→ Removing original large file...');
       fs.unlinkSync(path.join(workDir, normalized));
     }
 
     // Initialize git repository
-    log(() => '→ Initializing git repository...');
+    log.debug(() => '→ Initializing git repository...');
     await $`cd ${workDir} && git init`;
     await $`cd ${workDir} && git branch -m main`;
 
     // Add and commit files
-    log(() => '→ Adding and committing files...');
+    log.debug(() => '→ Adding and committing files...');
     await $`cd ${workDir} && git add .`;
     await $`cd ${workDir} && git commit -m "Add log file"`;
 
@@ -334,7 +334,7 @@ export async function uploadAsRepo(options = {}) {
     log.debug(() => `GitHub user: ${githubUser}`);
 
     // Create GitHub repo and push
-    log(
+    log.debug(
       () =>
         `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`
     );
@@ -343,7 +343,7 @@ export async function uploadAsRepo(options = {}) {
 
     const repoUrl = `https://github.com/${githubUser}/${repositoryName}`;
 
-    log(() => `Repository created successfully: ${repoUrl}`);
+    log.debug(() => `Repository created successfully: ${repoUrl}`);
 
     return {
       type: 'repo',
@@ -403,8 +403,9 @@ export async function uploadLog(options = {}) {
   const log = createDefaultLogger({ verbose, logger });
   const strategy = determineUploadStrategy(filePath);
 
-  log(() => `File size: ${formatFileSize(strategy.fileSize)}`);
-  log(() => `Strategy: ${strategy.reason}`);
+  // Only show strategy details in verbose mode
+  log.debug(() => `File size: ${formatFileSize(strategy.fileSize)}`);
+  log.debug(() => `Strategy: ${strategy.reason}`);
 
   // Determine upload type based on options
   let uploadType = strategy.type;
@@ -412,22 +413,20 @@ export async function uploadLog(options = {}) {
   // If onlyGist or onlyRepository is specified, use that
   if (onlyGist) {
     uploadType = 'gist';
-    log(() => 'Mode: Only Gist (forced)');
+    log.debug(() => 'Mode: Only Gist (forced)');
   } else if (onlyRepository) {
     uploadType = 'repo';
-    log(() => 'Mode: Only Repository (forced)');
+    log.debug(() => 'Mode: Only Repository (forced)');
   } else if (auto !== false) {
     // Auto mode is default
-    log(() => 'Mode: Auto (automatic strategy selection)');
+    log.debug(() => 'Mode: Auto (automatic strategy selection)');
   }
 
   // In dry mode, return mock result without uploading
   if (dryMode) {
-    log(() => '');
-    log(() => '🔍 DRY MODE: Would perform the following action:');
-    log(() => `   Upload Type: ${uploadType}`);
-    log(() => `   Visibility: ${isPublic ? 'public' : 'private'}`);
-    log(() => `   Description: ${description || 'N/A'}`);
+    log.debug(() => `DRY MODE: Upload Type: ${uploadType}`);
+    log.debug(() => `DRY MODE: Visibility: ${isPublic ? 'public' : 'private'}`);
+    log.debug(() => `DRY MODE: Description: ${description || 'N/A'}`);
 
     return {
       type: uploadType,

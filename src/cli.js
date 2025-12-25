@@ -101,7 +101,7 @@ async function main() {
     const logFile = config.logFile;
 
     if (!logFile) {
-      console.error('Error: Log file path is required');
+      console.error('❌ Error: Log file path is required');
       console.error('Usage: gh-upload-log <log-file> [options]');
       console.error('Run "gh-upload-log --help" for more information');
       process.exit(1);
@@ -128,59 +128,58 @@ async function main() {
       console.log('');
     }
 
-    if (options.dryMode) {
-      console.log('🔍 DRY MODE - No actual upload will be performed');
-      console.log('');
-    }
-
-    // Show file info before uploading
+    // Get file size for display
+    let fileSize = 0;
     if (fileExists(logFile)) {
-      const fileSize = getFileSize(logFile);
-      console.log(`File: ${logFile}`);
-      console.log(`Size: ${formatFileSize(fileSize)}`);
+      fileSize = getFileSize(logFile);
+    }
+
+    // Show concise upload status
+    const visibility = isPublic ? '🌐 public' : '🔒 private';
+    const dryModePrefix = options.dryMode ? '[DRY] ' : '';
+
+    if (options.verbose) {
+      console.log(`📁 ${logFile}`);
+      console.log(`📊 ${formatFileSize(fileSize)}`);
       console.log('');
     }
 
-    // Upload the log file
     console.log(
-      `${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'}...`
+      `${dryModePrefix}⏳ Uploading ${formatFileSize(fileSize)} (${visibility})...`
     );
-    console.log('');
 
     const result = await uploadLog(options);
 
-    // Display results
-    console.log('');
-    if (result.dryMode) {
-      console.log('✓ Dry run complete!');
-    } else {
-      console.log('✓ Upload complete!');
-    }
-    console.log('');
-    const typeLabel =
-      result.type === 'gist' ? 'GitHub Gist' : 'GitHub Repository';
-    console.log(`Type: ${typeLabel}`);
-    console.log(`Visibility: ${result.isPublic ? 'public' : 'private'}`);
+    // Display concise results
+    const typeEmoji = result.type === 'gist' ? '📝' : '📦';
+    const typeLabel = result.type === 'gist' ? 'Gist' : 'Repository';
+    const successEmoji = result.dryMode ? '🔍' : '✅';
 
-    if (result.type === 'gist') {
-      console.log(`File name: ${result.fileName}`);
-    } else if (result.type === 'repo') {
-      console.log(`Repository: ${result.repositoryName}`);
-    }
+    console.log(
+      `${successEmoji} ${typeLabel} ${result.dryMode ? 'would be created' : 'created'} (${visibility})`
+    );
 
-    // Show URL prominently at the end
-    console.log('');
     if (result.url && !result.dryMode) {
-      console.log(`URL: ${result.url}`);
-    } else if (result.dryMode) {
-      const dryModeType = result.type === 'gist' ? 'gist' : 'repository';
-      console.log(`[DRY MODE] Would create ${dryModeType}`);
+      console.log(`🔗 ${result.url}`);
+    }
+
+    // Show additional details only in verbose mode
+    if (options.verbose) {
+      console.log('');
+      console.log('Details:');
+      console.log(`  Type: ${typeEmoji} ${typeLabel}`);
+      console.log(`  Visibility: ${result.isPublic ? 'public' : 'private'}`);
+      if (result.type === 'gist') {
+        console.log(`  File name: ${result.fileName}`);
+      } else if (result.type === 'repo') {
+        console.log(`  Repository: ${result.repositoryName}`);
+      }
     }
 
     process.exit(0);
   } catch (error) {
     console.error('');
-    console.error('✗ Error:', error.message);
+    console.error('❌ Error:', error.message);
 
     if (config.verbose) {
       console.error('');
