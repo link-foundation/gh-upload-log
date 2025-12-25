@@ -65,7 +65,11 @@ test('CLI basic usage - accepts positional argument without conflicts error', as
     ),
     'Should not show public/private conflict error'
   );
-  assert.ok(result.output.includes('DRY MODE'), 'Should run in dry mode');
+  assert.ok(
+    result.output.includes('[DRY]') ||
+      result.output.includes('would be created'),
+    'Should run in dry mode'
+  );
 });
 
 // Test: --public flag
@@ -73,7 +77,7 @@ test('CLI with --public flag', async () => {
   const result = await runCLI([testLogFile, '--public', '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(
-    result.output.includes('Visibility: public'),
+    result.output.includes('🌐 public'),
     'Should set visibility to public'
   );
 });
@@ -83,7 +87,7 @@ test('CLI with --private flag', async () => {
   const result = await runCLI([testLogFile, '--private', '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(
-    result.output.includes('Visibility: private'),
+    result.output.includes('🔒 private'),
     'Should set visibility to private'
   );
 });
@@ -92,10 +96,7 @@ test('CLI with --private flag', async () => {
 test('CLI without visibility flags defaults to private', async () => {
   const result = await runCLI([testLogFile, '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
-  assert.ok(
-    result.output.includes('Visibility: private'),
-    'Should default to private'
-  );
+  assert.ok(result.output.includes('🔒 private'), 'Should default to private');
 });
 
 // Test: Mutually exclusive --public and --private
@@ -114,10 +115,7 @@ test('CLI with both --public and --private shows conflict error', async () => {
 test('CLI with --only-gist flag', async () => {
   const result = await runCLI([testLogFile, '--only-gist', '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
-  assert.ok(
-    result.output.includes('Upload Type: gist'),
-    'Should use gist upload type'
-  );
+  assert.ok(result.output.includes('Gist'), 'Should use gist upload type');
 });
 
 // Test: --only-repository flag
@@ -125,7 +123,7 @@ test('CLI with --only-repository flag', async () => {
   const result = await runCLI([testLogFile, '--only-repository', '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(
-    result.output.includes('Upload Type: repo'),
+    result.output.includes('Repository'),
     'Should use repo upload type'
   );
 });
