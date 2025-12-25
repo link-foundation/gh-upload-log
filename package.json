@@ -1,6 +1,6 @@
 {
   "name": "gh-upload-log",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A tool to upload log files to GitHub as Gists or repositories",
   "type": "module",
   "main": "src/index.js",
