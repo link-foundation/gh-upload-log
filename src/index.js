@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * gh-upload-log - Core library for uploading log files to GitHub

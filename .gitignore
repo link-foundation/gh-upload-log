@@ -147,3 +147,6 @@ experiments/output/
 examples/output/
 *.test.log
 test-*.log
+
+# npm lockfile (we use bun.lock)
+package-lock.json

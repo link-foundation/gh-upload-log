@@ -3,7 +3,7 @@
 A smart tool to upload log files to GitHub as Gists or Repositories
 
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
+[![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)
 
 ## Overview
 
@@ -26,7 +26,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 
 ## Prerequisites
 
-- Node.js ≥20.0.0
+- [Bun](https://bun.sh/) ≥1.0.0
 - Git (installed and configured)
 - GitHub CLI (`gh`) installed and authenticated
 
@@ -41,13 +41,13 @@ gh auth login
 ### Global Installation (CLI)
 
 ```bash
-npm install -g gh-upload-log
+bun install -g gh-upload-log
 ```
 
 ### Local Installation (Library)
 
 ```bash
-npm install gh-upload-log
+bun add gh-upload-log
 ```
 
 ## Configuration
@@ -344,17 +344,10 @@ Use `--public` flag or `isPublic: true` option for public uploads.
 
 ## Testing
 
-Run tests using your preferred runtime:
+Run tests using Bun:
 
 ```bash
-# Node.js
-npm test
-
-# Bun
 bun test
-
-# Deno
-deno test --allow-all
 ```
 
 ## Examples
@@ -367,7 +360,7 @@ See the `examples/` directory for more usage examples:
 Run examples:
 
 ```bash
-node examples/library-api.js
+bun examples/library-api.js
 ```
 
 ## Development
