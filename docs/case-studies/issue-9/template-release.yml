@@ -94,8 +94,8 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
-      - name: Check file size limit
-        run: npm run check:file-size
+      - name: Check code duplication
+        run: npm run check:duplication
 
   # Test matrix: 3 runtimes (Node.js, Bun, Deno) x 3 OS (Ubuntu, macOS, Windows)
   test:
@@ -147,7 +147,7 @@ jobs:
 
       - name: Run tests (Deno)
         if: matrix.runtime == 'deno'
-        run: deno test --allow-read --allow-write --allow-env --allow-run
+        run: deno test --allow-read
 
   # Release - only runs on main after tests pass (for push events)
   release:

@@ -1,0 +1,58 @@
+{
+  "body": "## Summary\n\nThis PR improves the changeset CI/CD robustness by implementing solutions from hive-mind PR #961. The key improvements:\n\n- **PR Validation**: Only validates changesets **added by the current PR**, not pre-existing ones from other merged PRs\n- **Release-time Merging**: Automatically merges multiple pending changesets with highest version bump type\n- **Documentation**: Comprehensive case study and README updates\n\n### Changes Made\n\n1. **Update `validate-changeset.mjs`**\n   - Uses git diff to compare PR head vs base SHA\n   - Only validates changesets ADDED by the current PR (not pre-existing ones)\n   - Falls back to checking all changesets for local development\n   - Refactored to reduce complexity by extracting helper functions\n\n2. **Add `merge-changesets.mjs`**\n   - Combines multiple pending changesets into a single merged changeset during release\n   - Uses the highest version bump type (major > minor > patch)\n   - Preserves all descriptions in chronological order (by file modification time)\n   - Cleans up individual changeset files after merging\n\n3. **Update `release.yml` workflow**\n   - Pass `GITHUB_BASE_SHA` and `GITHUB_HEAD_SHA` environment variables to validation script\n   - Add step to merge multiple changesets before running `changeset version`\n\n4. **Add comprehensive tests**\n   - Tests for both `validate-changeset.mjs` and `merge-changesets.mjs`\n   - Tests for bump type priority, chronological ordering, edge cases\n\n5. **Add case study documentation**\n   - Timeline of events leading to the issue\n   - Root cause analysis\n   - Solutions and industry best practices\n   - Reference data from hive-mind PR #961\n\n### How It Works\n\n**During PR validation:**\n```\nBefore: Check all .changeset/*.md files → Fail if >1 exists\nAfter:  Check only files ADDED in this PR → Fail if >1 was added\n```\n\n**During release:**\n```\nBefore: changeset version → (fail if multiple changesets)\nAfter:  merge-changesets.mjs → changeset version → (always single changeset)\n```\n\n### Benefits\n\n1. **No more false failures** - PRs won't fail just because other PRs merged first\n2. **Preserved sequence** - Changesets are merged chronologically\n3. **Correct version bumps** - Major changes won't be downgraded to patch\n4. **Backward compatible** - Local development still works without git context\n5. **Decoupled from git merge** - No need to pull changes from default branch\n\n### Testing\n\nAll tests pass locally:\n- `node experiments/test-changeset-scripts.mjs` - 10/10 tests pass\n- `npm run lint` - passes\n- `npm run format:check` - passes\n- `npm run check:duplication` - passes\n- `npm test` - passes\n\n## Fixes\n\nFixes #13\n\n## References\n\n- [hive-mind PR #961](https://github.com/link-assistant/hive-mind/pull/961) - Original implementation\n- [hive-mind Issue #960](https://github.com/link-assistant/hive-mind/issues/960) - Problem description\n- [Case Study Documentation](docs/case-studies/issue-13/README.md) - Full analysis\n\n---\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+  "commits": [
+    {
+      "authoredDate": "2025-12-23T18:09:36Z",
+      "authors": [
+        {
+          "email": "drakonard@gmail.com",
+          "id": "MDQ6VXNlcjE0MzE5MDQ=",
+          "login": "konard",
+          "name": "konard"
+        }
+      ],
+      "committedDate": "2025-12-23T18:09:36Z",
+      "messageBody": "Adding CLAUDE.md with task information for AI processing.\nThis file will be removed when the task is complete.\n\nIssue: https://github.com/link-foundation/js-ai-driven-development-pipeline-template/issues/13",
+      "messageHeadline": "Initial commit with task details",
+      "oid": "193bed411bb6b93c742e990b9924f998a82b68f6"
+    },
+    {
+      "authoredDate": "2025-12-23T18:16:47Z",
+      "authors": [
+        {
+          "email": "drakonard@gmail.com",
+          "id": "MDQ6VXNlcjE0MzE5MDQ=",
+          "login": "konard",
+          "name": "konard"
+        },
+        {
+          "email": "noreply@anthropic.com",
+          "id": "MDQ6VXNlcjgxODQ3",
+          "login": "claude",
+          "name": "Claude"
+        }
+      ],
+      "committedDate": "2025-12-23T18:16:47Z",
+      "messageBody": "- Update validate-changeset.mjs to only check changesets ADDED by the\n  current PR (not pre-existing ones from merged PRs)\n- Add merge-changesets.mjs script to combine multiple pending changesets\n  during release with highest version bump type\n- Update release.yml workflow to pass SHA env vars and add merge step\n- Add comprehensive tests for changeset scripts\n- Add case study documentation analyzing the root cause and solutions\n- Update README.md with robust changeset handling documentation\n\nThis prevents PR failures when multiple PRs merge before a release cycle\ncompletes, decoupling PR validation from the need to pull changes from\nthe default branch.\n\nFixes #13\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+      "messageHeadline": "feat: improve changeset CI/CD robustness for concurrent PRs",
+      "oid": "d3f7fcd6790fa8bb6a525d0db12d001826ea8ffd"
+    },
+    {
+      "authoredDate": "2025-12-23T18:19:12Z",
+      "authors": [
+        {
+          "email": "drakonard@gmail.com",
+          "id": "MDQ6VXNlcjE0MzE5MDQ=",
+          "login": "konard",
+          "name": "konard"
+        }
+      ],
+      "committedDate": "2025-12-23T18:19:12Z",
+      "messageBody": "This reverts commit 193bed411bb6b93c742e990b9924f998a82b68f6.",
+      "messageHeadline": "Revert \"Initial commit with task details\"",
+      "oid": "c271bb2b9ea0935f653b8568f14aa8aa775e2f2b"
+    }
+  ],
+  "number": 14,
+  "title": "feat: improve changeset CI/CD robustness for concurrent PRs"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "mergedAt": "2025-12-23T23:00:26Z",
+    "number": 14,
+    "title": "feat: improve changeset CI/CD robustness for concurrent PRs"
+  },
+  {
+    "mergedAt": "2025-12-18T23:57:55Z",
+    "number": 10,
+    "title": "feat: add reasonable complexity checks to ESLint configuration"
+  },
+  {
+    "mergedAt": "2025-12-18T22:09:45Z",
+    "number": 8,
+    "title": "docs: analyze best practices from effect-template"
+  },
+  {
+    "mergedAt": "2025-12-17T15:43:14Z",
+    "number": 6,
+    "title": "chore: enforce strict no-unused-vars ESLint rule"
+  },
+  {
+    "mergedAt": "2025-12-17T04:11:19Z",
+    "number": 4,
+    "title": "Fix: Support Major/Minor/Patch changes in release formatting script"
+  },
+  {
+    "mergedAt": "2025-12-13T12:38:56Z",
+    "number": 2,
+    "title": "feat: add complete AI-driven development pipeline template"
+  }
+]
