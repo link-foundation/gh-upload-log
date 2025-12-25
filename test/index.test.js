@@ -12,6 +12,7 @@ import {
   generateGistFileName,
   fileExists,
   getFileSize,
+  formatFileSize,
   determineUploadStrategy,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
@@ -105,6 +106,43 @@ test('getFileSize - returns correct size for small file', () => {
 test('getFileSize - returns correct size for medium file', () => {
   const result = getFileSize(mediumTestFile);
   assert.equal(result, 1024 * 1024);
+});
+
+// Test: formatFileSize
+test('formatFileSize - formats 0 bytes', () => {
+  const result = formatFileSize(0);
+  assert.equal(result, '0 B');
+});
+
+test('formatFileSize - formats bytes', () => {
+  const result = formatFileSize(500);
+  assert.equal(result, '500 B');
+});
+
+test('formatFileSize - formats kilobytes', () => {
+  const result = formatFileSize(1024);
+  assert.equal(result, '1.00 KB');
+});
+
+test('formatFileSize - formats kilobytes with decimals', () => {
+  const result = formatFileSize(1536);
+  assert.equal(result, '1.50 KB');
+});
+
+test('formatFileSize - formats megabytes', () => {
+  const result = formatFileSize(1024 * 1024);
+  assert.equal(result, '1.00 MB');
+});
+
+test('formatFileSize - formats 1.9 KB file correctly', () => {
+  // This is the actual use case from the issue (1.9K file)
+  const result = formatFileSize(1945);
+  assert.equal(result, '1.90 KB');
+});
+
+test('formatFileSize - formats gigabytes', () => {
+  const result = formatFileSize(1024 * 1024 * 1024);
+  assert.equal(result, '1.00 GB');
 });
 
 // Test: determineUploadStrategy
