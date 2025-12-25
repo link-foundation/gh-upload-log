@@ -7,7 +7,7 @@
  */
 
 import { makeConfig } from 'lino-arguments';
-import { uploadLog } from './index.js';
+import { uploadLog, getFileSize, formatFileSize, fileExists } from './index.js';
 
 // Parse command-line arguments with environment variable and .lenv support
 const config = makeConfig({
@@ -133,9 +133,17 @@ async function main() {
       console.log('');
     }
 
+    // Show file info before uploading
+    if (fileExists(logFile)) {
+      const fileSize = getFileSize(logFile);
+      console.log(`File: ${logFile}`);
+      console.log(`Size: ${formatFileSize(fileSize)}`);
+      console.log('');
+    }
+
     // Upload the log file
     console.log(
-      `${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'} log file: ${logFile}`
+      `${options.dryMode ? '[DRY MODE] Would upload' : 'Uploading'}...`
     );
     console.log('');
 
@@ -143,10 +151,15 @@ async function main() {
 
     // Display results
     console.log('');
-    console.log('✓ Upload complete!');
+    if (result.dryMode) {
+      console.log('✓ Dry run complete!');
+    } else {
+      console.log('✓ Upload complete!');
+    }
     console.log('');
-    console.log(`Type: ${result.type}`);
-    console.log(`URL: ${result.url}`);
+    const typeLabel =
+      result.type === 'gist' ? 'GitHub Gist' : 'GitHub Repository';
+    console.log(`Type: ${typeLabel}`);
     console.log(`Visibility: ${result.isPublic ? 'public' : 'private'}`);
 
     if (result.type === 'gist') {
@@ -155,9 +168,14 @@ async function main() {
       console.log(`Repository: ${result.repositoryName}`);
     }
 
+    // Show URL prominently at the end
     console.log('');
-    console.log('You can access your uploaded log at:');
-    console.log(result.url);
+    if (result.url && !result.dryMode) {
+      console.log(`URL: ${result.url}`);
+    } else if (result.dryMode) {
+      const dryModeType = result.type === 'gist' ? 'gist' : 'repository';
+      console.log(`[DRY MODE] Would create ${dryModeType}`);
+    }
 
     process.exit(0);
   } catch (error) {

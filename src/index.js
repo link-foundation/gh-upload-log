@@ -103,6 +103,35 @@ export function getFileSize(filePath) {
 }
 
 /**
+ * Format file size in human-readable format
+ *
+ * @param {number} bytes - File size in bytes
+ * @returns {string} Human-readable file size (e.g., "1.5 KB", "2.3 MB")
+ */
+export function formatFileSize(bytes) {
+  if (bytes === 0) {
+    return '0 B';
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const base = 1024;
+
+  // Find the appropriate unit
+  const unitIndex = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(base)),
+    units.length - 1
+  );
+  const size = bytes / Math.pow(base, unitIndex);
+
+  // Format with appropriate decimal places
+  // Use 0 decimals for bytes, 2 for larger units
+  if (unitIndex === 0) {
+    return `${size} ${units[unitIndex]}`;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
+/**
  * Determine the best upload strategy for a log file
  *
  * @param {string} filePath - Path to the log file
@@ -208,9 +237,13 @@ export async function uploadAsGist(options = {}) {
   log.debug(() => `Description: ${desc}`);
 
   // Create gist using gh CLI
-  const visibility = isPublic ? '--public' : '';
-  const result =
-    await $`gh gist create ${filePath} ${visibility} --desc ${desc}`;
+  // Note: We use separate commands for public/private to avoid empty string interpolation issues
+  let result;
+  if (isPublic) {
+    result = await $`gh gist create ${filePath} --public --desc ${desc}`;
+  } else {
+    result = await $`gh gist create ${filePath} --desc ${desc}`;
+  }
 
   // Extract gist URL from output
   const gistUrl = result.stdout.trim();
@@ -370,7 +403,7 @@ export async function uploadLog(options = {}) {
   const log = createDefaultLogger({ verbose, logger });
   const strategy = determineUploadStrategy(filePath);
 
-  log(() => `File size: ${(strategy.fileSize / (1024 * 1024)).toFixed(2)} MB`);
+  log(() => `File size: ${formatFileSize(strategy.fileSize)}`);
   log(() => `Strategy: ${strategy.reason}`);
 
   // Determine upload type based on options
@@ -425,6 +458,7 @@ export default {
   generateGistFileName,
   fileExists,
   getFileSize,
+  formatFileSize,
   splitFileIntoChunks,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
