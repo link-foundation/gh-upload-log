@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 /**
  * Experiment to understand lino-arguments behavior with conflicting boolean options
