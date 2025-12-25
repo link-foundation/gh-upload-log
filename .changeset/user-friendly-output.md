@@ -1,5 +1,5 @@
 ---
-"gh-upload-log": minor
+'gh-upload-log': minor
 ---
 
 Make output more user friendly with cleaner, shorter format and emojis
