@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.4.1
+
+### Patch Changes
+
+- 456226d: Add npm version badge to README.md for better package visibility
+
 ## 0.4.0
 
 ### Minor Changes
