@@ -2,6 +2,7 @@
 
 A smart tool to upload log files to GitHub as Gists or Repositories
 
+[![npm version](https://img.shields.io/npm/v/gh-upload-log.svg)](https://www.npmjs.com/package/gh-upload-log)
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
 [![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)
 
