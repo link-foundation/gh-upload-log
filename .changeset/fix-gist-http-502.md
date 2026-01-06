@@ -1,5 +1,5 @@
 ---
-"gh-upload-log": minor
+'gh-upload-log': minor
 ---
 
 Fix gist upload failing with HTTP 502 for large files
