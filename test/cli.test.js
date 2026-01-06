@@ -172,8 +172,9 @@ test('CLI without file path shows error', async () => {
   const result = await runCLI([]);
   assert.equal(result.code, 1, 'Should exit with code 1');
   assert.ok(
-    result.output.includes('Not enough non-option arguments'),
-    'Should show error message about missing arguments'
+    result.output.includes('Log file path is required') ||
+      result.output.includes('Not enough non-option arguments'),
+    'Should show error message about missing file path'
   );
 });
 
