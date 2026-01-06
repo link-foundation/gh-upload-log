@@ -27,6 +27,7 @@ if (!fs.existsSync(testDir)) {
 // Test file paths
 const smallTestFile = path.join(testDir, 'small.log');
 const mediumTestFile = path.join(testDir, 'medium.log');
+const largeTestFile = path.join(testDir, 'large.log'); // 26MB - exceeds 25MB gist limit
 
 // Create test files if they don't exist
 function setupTestFiles() {
@@ -38,6 +39,19 @@ function setupTestFiles() {
   // Medium file (1 MB)
   if (!fs.existsSync(mediumTestFile)) {
     fs.writeFileSync(mediumTestFile, 'x'.repeat(1024 * 1024));
+  }
+
+  // Large file (26 MB - exceeds 25MB gist limit, triggers repository mode)
+  // Note: This file is created dynamically for testing and is larger than usual
+  // We create a sparse/efficient representation to avoid slow tests
+  if (!fs.existsSync(largeTestFile)) {
+    // Create 26MB file using streaming to avoid memory issues
+    const fd = fs.openSync(largeTestFile, 'w');
+    const chunk = 'x'.repeat(1024 * 1024); // 1MB chunk
+    for (let i = 0; i < 26; i++) {
+      fs.writeSync(fd, chunk);
+    }
+    fs.closeSync(fd);
   }
 }
 
@@ -159,6 +173,13 @@ test('determineUploadStrategy - chooses gist for medium files under limit', () =
   assert.equal(result.needsSplit, false);
 });
 
+test('determineUploadStrategy - chooses repo for files exceeding gist limit', () => {
+  const result = determineUploadStrategy(largeTestFile);
+  assert.equal(result.type, 'repo');
+  assert.equal(result.needsSplit, false); // 26MB doesn't need split (under 100MB)
+  assert.ok(result.reason.includes('Gist limit'));
+});
+
 test('determineUploadStrategy - throws error for non-existent file', () => {
   assert.throws(() => {
     determineUploadStrategy('/nonexistent/file.log');
@@ -166,8 +187,11 @@ test('determineUploadStrategy - throws error for non-existent file', () => {
 });
 
 // Test: Constants
-test('GITHUB_GIST_FILE_LIMIT - is 100MB', () => {
-  assert.equal(GITHUB_GIST_FILE_LIMIT, 100 * 1024 * 1024);
+// Note: GITHUB_GIST_FILE_LIMIT was lowered from 100MB to 25MB
+// to match the web interface limit and avoid HTTP 502 errors
+// See: https://github.com/link-foundation/gh-upload-log/issues/19
+test('GITHUB_GIST_FILE_LIMIT - is 25MB (safe API limit)', () => {
+  assert.equal(GITHUB_GIST_FILE_LIMIT, 25 * 1024 * 1024);
 });
 
 test('GITHUB_REPO_CHUNK_SIZE - is 100MB', () => {

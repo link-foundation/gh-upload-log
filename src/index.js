@@ -38,8 +38,15 @@ function createDefaultLogger(options = {}) {
 
 /**
  * Constants for GitHub limits
+ *
+ * Note: While GitHub documents a 100MB limit for gist files, the API has
+ * practical limitations. Large files (>25MB) can cause HTTP 502 errors
+ * due to request payload size limits. The safe threshold for gists via
+ * the API matches the web interface limit of 25MB.
+ *
+ * See: https://github.com/orgs/community/discussions/147837
  */
-export const GITHUB_GIST_FILE_LIMIT = 100 * 1024 * 1024; // 100 MB via git
+export const GITHUB_GIST_FILE_LIMIT = 25 * 1024 * 1024; // 25 MB - safe API limit (matches web interface)
 export const GITHUB_GIST_WEB_LIMIT = 25 * 1024 * 1024; // 25 MB via web
 export const GITHUB_REPO_CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB chunks for repo
 
@@ -149,17 +156,20 @@ export function determineUploadStrategy(filePath) {
       type: 'gist',
       fileSize,
       needsSplit: false,
-      reason: 'File fits within GitHub Gist limit (100MB)',
+      reason: 'File fits within GitHub Gist API limit (25MB)',
     };
   } else {
     const numChunks = Math.ceil(fileSize / GITHUB_REPO_CHUNK_SIZE);
+    const needsSplit = fileSize > GITHUB_REPO_CHUNK_SIZE;
     return {
       type: 'repo',
       fileSize,
-      needsSplit: true,
+      needsSplit,
       numChunks,
       chunkSize: GITHUB_REPO_CHUNK_SIZE,
-      reason: `File exceeds Gist limit, will be split into ${numChunks} chunks`,
+      reason: needsSplit
+        ? `File exceeds Gist limit, will be split into ${numChunks} chunks`
+        : 'File exceeds Gist limit, will upload as repository',
     };
   }
 }
@@ -247,6 +257,18 @@ export async function uploadAsGist(options = {}) {
 
   // Extract gist URL from output
   const gistUrl = result.stdout.trim();
+
+  // Validate that gist was created successfully
+  // The gh CLI returns the gist URL to stdout on success
+  // On failure (e.g., HTTP 502), stdout is empty and error is in stderr
+  if (
+    !gistUrl ||
+    !gistUrl.startsWith('https://gist.github.com/') ||
+    gistUrl === 'https://gist.github.com/'
+  ) {
+    const errorMessage = result.stderr ? result.stderr.trim() : 'Unknown error';
+    throw new Error(`Failed to create gist: ${errorMessage}`);
+  }
 
   log.debug(() => `Gist created successfully: ${gistUrl}`);
 
@@ -441,7 +463,23 @@ export async function uploadLog(options = {}) {
   }
 
   if (uploadType === 'gist') {
-    return await uploadAsGist(options);
+    // Try gist upload first, fallback to repository on failure (unless onlyGist is set)
+    try {
+      return await uploadAsGist(options);
+    } catch (gistError) {
+      // If user explicitly requested only gist, don't fallback
+      if (onlyGist) {
+        throw gistError;
+      }
+
+      // Log the fallback and try repository mode
+      log.warn(
+        () =>
+          `Gist upload failed: ${gistError.message}. Falling back to repository mode...`
+      );
+
+      return await uploadAsRepo(options);
+    }
   } else {
     return await uploadAsRepo(options);
   }

@@ -14,7 +14,7 @@ const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
     yargs
       .usage('Usage: $0 <log-file> [options]')
-      .command('$0 <logFile>', 'Upload a log file to GitHub', (yargs) => {
+      .command('$0 [logFile]', 'Upload a log file to GitHub', (yargs) => {
         yargs.positional('logFile', {
           describe: 'Path to the log file to upload',
           type: 'string',
@@ -61,9 +61,25 @@ const config = makeConfig({
         description: 'Enable verbose output',
         default: getenv('GH_UPLOAD_LOG_VERBOSE', false),
       })
+      .option('test', {
+        alias: 't',
+        type: 'boolean',
+        description: 'Run self-test to verify upload functionality',
+        default: false,
+      })
+      .option('quick', {
+        alias: 'q',
+        type: 'boolean',
+        description: 'Run quick self-test (only 1MB file)',
+        default: false,
+      })
       .conflicts('public', 'private')
       .conflicts('only-gist', 'only-repository')
       .check((argv) => {
+        // Skip validation if running self-test
+        if (argv.test || argv.quick) {
+          return true;
+        }
         // If --no-auto is used, require either --only-gist or --only-repository
         if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
           throw new Error(
@@ -87,6 +103,8 @@ const config = makeConfig({
         'Upload only as public repository'
       )
       .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
+      .example('$0 --test', 'Run self-test to verify functionality')
+      .example('$0 --quick', 'Run quick self-test (1MB file only)')
       .help('h')
       .alias('h', 'help')
       .version('0.1.0')
@@ -98,6 +116,16 @@ const config = makeConfig({
  */
 async function main() {
   try {
+    // Handle self-test mode
+    if (config.test || config.quick) {
+      const { runSelfTest } = await import('./self-test.js');
+      const result = await runSelfTest({
+        verbose: config.verbose,
+        quick: config.quick,
+      });
+      process.exit(result.passed ? 0 : 1);
+    }
+
     const logFile = config.logFile;
 
     if (!logFile) {
