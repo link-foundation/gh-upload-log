@@ -1,1 +1,33 @@
-{"author":{"id":"MDQ6VXNlcjE0MzE5MDQ=","is_bot":false,"login":"konard","name":"Konstantin Diachenko"},"body":"```\nhive@vmi2955137:~$ gh-upload-log /home/hive/b97bb9ff-68e7-441e-8441-832bab47c634.log\n⏳ Uploading 28.89 MB (🔒 private)...\nhint: Using 'master' as the name for the initial branch. This default branch name\nhint: is subject to change. To configure the initial branch name to use in all\nhint: of your new repositories, which will suppress this warning, call:\nhint: \nhint:   git config --global init.defaultBranch <name>\nhint: \nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint: \nhint:   git branch -m <name>\nInitialized empty Git repository in /tmp/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634-1769277482193/.git/\n[main (root-commit) 7a37239] Add log file\n 1 file changed, 12627 insertions(+)\n create mode 100644 home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.log\nkonard\nhttps://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634\nTo https://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.git\n * [new branch]      HEAD -> main\nbranch 'main' set up to track 'origin/main'.\n✅ Repository created (🔒 private)\n🔗 https://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634\n```\n\nFor example if I do press `raw` button on GitHub, I get link like this:\n\n```\nhttps://raw.githubusercontent.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634/refs/heads/main/home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.log?token=GHSAT0AAAAAACVDCR4EC5CCMJV6LDQK7NCU2LVBB5Q\n```\n\nThat link should be sharable (with token, even if it is private).\n\nAlso double check that we can fallback to public repository/gist in case, we don't have technical ability to get similar link.\n\nPlease download all logs and data related about the issue to this repository, make sure we compile that data to `./docs/case-studies/issue-{id}` folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), in which we will reconstruct timeline/sequence of events, find root causes of the problem, and propose possible solutions.\n","comments":[],"createdAt":"2026-01-24T18:10:38Z","labels":[{"id":"LA_kwDOQU1fXM8AAAACPnyG3Q","name":"bug","description":"Something isn't working","color":"d73a4a"},{"id":"LA_kwDOQU1fXM8AAAACPnyG5Q","name":"documentation","description":"Improvements or additions to documentation","color":"0075ca"},{"id":"LA_kwDOQU1fXM8AAAACPnyG8Q","name":"enhancement","description":"New feature or request","color":"a2eeef"}],"number":21,"title":"If we have only one log part in repository or gist we should give direct link to it (in addition to gist/repository link)"}
+{
+  "author": {
+    "id": "MDQ6VXNlcjE0MzE5MDQ=",
+    "is_bot": false,
+    "login": "konard",
+    "name": "Konstantin Diachenko"
+  },
+  "body": "```\nhive@vmi2955137:~$ gh-upload-log /home/hive/b97bb9ff-68e7-441e-8441-832bab47c634.log\n⏳ Uploading 28.89 MB (🔒 private)...\nhint: Using 'master' as the name for the initial branch. This default branch name\nhint: is subject to change. To configure the initial branch name to use in all\nhint: of your new repositories, which will suppress this warning, call:\nhint: \nhint:   git config --global init.defaultBranch <name>\nhint: \nhint: Names commonly chosen instead of 'master' are 'main', 'trunk' and\nhint: 'development'. The just-created branch can be renamed via this command:\nhint: \nhint:   git branch -m <name>\nInitialized empty Git repository in /tmp/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634-1769277482193/.git/\n[main (root-commit) 7a37239] Add log file\n 1 file changed, 12627 insertions(+)\n create mode 100644 home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.log\nkonard\nhttps://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634\nTo https://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.git\n * [new branch]      HEAD -> main\nbranch 'main' set up to track 'origin/main'.\n✅ Repository created (🔒 private)\n🔗 https://github.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634\n```\n\nFor example if I do press `raw` button on GitHub, I get link like this:\n\n```\nhttps://raw.githubusercontent.com/konard/log-home-hive-b97bb9ff-68e7-441e-8441-832bab47c634/refs/heads/main/home-hive-b97bb9ff-68e7-441e-8441-832bab47c634.log?token=GHSAT0AAAAAACVDCR4EC5CCMJV6LDQK7NCU2LVBB5Q\n```\n\nThat link should be sharable (with token, even if it is private).\n\nAlso double check that we can fallback to public repository/gist in case, we don't have technical ability to get similar link.\n\nPlease download all logs and data related about the issue to this repository, make sure we compile that data to `./docs/case-studies/issue-{id}` folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), in which we will reconstruct timeline/sequence of events, find root causes of the problem, and propose possible solutions.\n",
+  "comments": [],
+  "createdAt": "2026-01-24T18:10:38Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG3Q",
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG5Q",
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG8Q",
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    }
+  ],
+  "number": 21,
+  "title": "If we have only one log part in repository or gist we should give direct link to it (in addition to gist/repository link)"
+}

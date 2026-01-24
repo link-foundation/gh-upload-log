@@ -65,6 +65,7 @@ For repositories (public or private), the GitHub API provides a `download_url` f
 ```
 
 **Key Findings**:
+
 1. **Private repos**: The `download_url` includes a token that enables unauthenticated access
 2. **Token expiration**: These tokens expire after approximately 10 minutes (per GitHub documentation)
 3. **Token regeneration**: Each API call to get the file content generates a fresh token
@@ -80,6 +81,7 @@ This means private repository raw URLs with tokens are **not suitable for long-t
 ### Alternative Access Methods
 
 For permanent access to private repository files, users need:
+
 1. A Personal Access Token (PAT) with `repo` scope
 2. Use the token in an Authorization header when making requests
 
@@ -95,23 +97,25 @@ The current `uploadAsGist()` and `uploadAsRepo()` functions in `src/index.js`:
 ### Technical Analysis
 
 **For Gists** (`uploadAsGist`, lines 226-281):
+
 ```javascript
 // Current: Returns gist URL from gh CLI output
 const gistUrl = result.stdout.trim();
 return {
   type: 'gist',
-  url: gistUrl,  // Only the main gist URL
+  url: gistUrl, // Only the main gist URL
   // Missing: rawUrl for the file
 };
 ```
 
 **For Repositories** (`uploadAsRepo`, lines 294-385):
+
 ```javascript
 // Current: Constructs repo URL from user and repo name
 const repoUrl = `https://github.com/${githubUser}/${repositoryName}`;
 return {
   type: 'repo',
-  url: repoUrl,  // Only the main repo URL
+  url: repoUrl, // Only the main repo URL
   // Missing: rawUrl/download_url for the file
 };
 ```
@@ -127,11 +131,13 @@ After creating the gist, make an API call to get the raw URL:
 const gistId = gistUrl.split('/').pop();
 
 // Get gist details to find raw_url
-const gistDetails = await $`gh api gists/${gistId} --jq '.files | to_entries | .[0].value.raw_url'`;
+const gistDetails =
+  await $`gh api gists/${gistId} --jq '.files | to_entries | .[0].value.raw_url'`;
 const rawUrl = gistDetails.stdout.trim();
 ```
 
 **Benefits**:
+
 - Raw URL is stable (doesn't expire for secret gists)
 - Anyone with the URL can access the content
 - No additional authentication required
@@ -142,11 +148,13 @@ After creating the repository, make an API call to get the download URL:
 
 ```javascript
 // Get file download URL with token
-const contentResult = await $`gh api repos/${githubUser}/${repositoryName}/contents/${filename} --jq '.download_url'`;
+const contentResult =
+  await $`gh api repos/${githubUser}/${repositoryName}/contents/${filename} --jq '.download_url'`;
 const rawUrl = contentResult.stdout.trim();
 ```
 
 **Important considerations**:
+
 - Token expires in ~10 minutes
 - For long-term sharing, consider:
   - Making the repository public (fallback option)
@@ -156,6 +164,7 @@ const rawUrl = contentResult.stdout.trim();
 ### 3. Fallback Strategy
 
 If private raw URLs aren't practical for sharing (due to token expiration), offer:
+
 - Option to create public repository/gist instead
 - Clear warning about token expiration
 - Documentation about alternative access methods
