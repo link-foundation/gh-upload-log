@@ -191,16 +191,35 @@ async function main() {
       console.log(`🔗 ${result.url}`);
     }
 
+    // Display raw file URL if available (single file only)
+    if (result.rawUrl && !result.dryMode) {
+      console.log(`📄 ${result.rawUrl}`);
+      // Add expiration warning for private repository raw URLs
+      if (
+        result.type === 'repo' &&
+        !result.isPublic &&
+        result.rawUrl.includes('?token=')
+      ) {
+        console.log(
+          `⚠️  Note: Raw URL token expires in ~10 minutes for private repositories`
+        );
+      }
+    }
+
     // Show additional details only in verbose mode
     if (options.verbose) {
       console.log('');
       console.log('Details:');
       console.log(`  Type: ${typeEmoji} ${typeLabel}`);
       console.log(`  Visibility: ${result.isPublic ? 'public' : 'private'}`);
+      console.log(`  File count: ${result.fileCount || 1}`);
       if (result.type === 'gist') {
         console.log(`  File name: ${result.fileName}`);
       } else if (result.type === 'repo') {
         console.log(`  Repository: ${result.repositoryName}`);
+      }
+      if (result.rawUrl) {
+        console.log(`  Raw URL: ${result.rawUrl}`);
       }
     }
 
