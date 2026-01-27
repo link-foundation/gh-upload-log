@@ -272,10 +272,39 @@ export async function uploadAsGist(options = {}) {
 
   log.debug(() => `Gist created successfully: ${gistUrl}`);
 
+  // Extract gist ID from URL and fetch raw URL for the file
+  const gistId = gistUrl.split('/').pop();
+  let rawUrl = null;
+  let fileCount = 1;
+
+  try {
+    log.debug(() => `Fetching gist details for raw URL...`);
+    // Use silent mode to avoid echoing JSON output to console
+    const $silent = $({ mirror: false, capture: true });
+    const gistDetails =
+      await $silent`gh api gists/${gistId} --jq '.files | to_entries | map({filename: .key, raw_url: .value.raw_url})'`;
+    const files = JSON.parse(gistDetails.stdout.trim());
+    fileCount = files.length;
+
+    if (fileCount === 1) {
+      rawUrl = files[0].raw_url;
+      log.debug(() => `Raw URL: ${rawUrl}`);
+    } else {
+      log.debug(
+        () => `Gist has ${fileCount} files, skipping single-file raw URL`
+      );
+    }
+  } catch (apiError) {
+    log.debug(() => `Could not fetch gist details: ${apiError.message}`);
+    // Continue without raw URL - the gist was still created successfully
+  }
+
   return {
     type: 'gist',
     url: gistUrl,
+    rawUrl,
     fileName: gistFileName,
+    fileCount,
     isPublic,
   };
 }
@@ -367,10 +396,49 @@ export async function uploadAsRepo(options = {}) {
 
     log.debug(() => `Repository created successfully: ${repoUrl}`);
 
+    // Determine how many files were uploaded and get raw URL if only one file
+    const uploadedFiles = fs
+      .readdirSync(workDir)
+      .filter((f) => !f.startsWith('.'));
+    const fileCount = uploadedFiles.length;
+    let rawUrl = null;
+
+    if (fileCount === 1) {
+      const singleFileName = uploadedFiles[0];
+      try {
+        log.debug(() => `Fetching raw URL for single file: ${singleFileName}`);
+        // Use silent mode to avoid echoing output to console
+        const $silent = $({ mirror: false, capture: true });
+        const contentResult =
+          await $silent`gh api repos/${githubUser}/${repositoryName}/contents/${singleFileName} --jq '.download_url'`;
+        rawUrl = contentResult.stdout.trim();
+
+        if (rawUrl) {
+          log.debug(() => `Raw URL: ${rawUrl}`);
+          // Note: For private repos, this URL includes a token that expires in ~10 minutes
+          if (!isPublic && rawUrl.includes('?token=')) {
+            log.debug(
+              () =>
+                `Note: Raw URL token expires in ~10 minutes for private repositories`
+            );
+          }
+        }
+      } catch (apiError) {
+        log.debug(() => `Could not fetch raw URL: ${apiError.message}`);
+        // Continue without raw URL - the repo was still created successfully
+      }
+    } else {
+      log.debug(
+        () => `Repository has ${fileCount} files, skipping single-file raw URL`
+      );
+    }
+
     return {
       type: 'repo',
       url: repoUrl,
+      rawUrl,
       repositoryName,
+      fileCount,
       isPublic,
       workDir, // Keep for debugging; caller can clean up
     };
@@ -453,10 +521,12 @@ export async function uploadLog(options = {}) {
     return {
       type: uploadType,
       url: `[DRY MODE] Would create ${uploadType === 'gist' ? 'gist' : 'repository'}`,
+      rawUrl: null, // Not available in dry mode
       fileName:
         uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
       repositoryName:
         uploadType === 'repo' ? generateRepoName(filePath) : undefined,
+      fileCount: 1, // Assume single file in dry mode
       isPublic: isPublic || false,
       dryMode: true,
     };
