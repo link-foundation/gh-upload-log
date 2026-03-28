@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.6.1
+
+### Patch Changes
+
+- 524dc7e: Fail early with a clean error message when the specified file does not exist, avoiding unnecessary output like the upload status line before the error.
+
 ## 0.6.0
 
 ### Minor Changes
