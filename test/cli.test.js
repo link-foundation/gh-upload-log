@@ -224,6 +224,27 @@ test('CLI with --description flag', async () => {
   );
 });
 
+// Test: ENOSPC error handling in CLI
+// We test the error detection logic by importing isENOSPC directly
+test('CLI ENOSPC - isENOSPC detects disk space errors correctly', async () => {
+  // This tests that the detection function works for CLI error handling
+  const { isENOSPC } = await import('../src/index.js');
+
+  // Test ENOSPC code
+  const enospcError = new Error('write');
+  enospcError.code = 'ENOSPC';
+  assert.ok(isENOSPC(enospcError), 'Should detect ENOSPC error code');
+
+  // Test message-based detection
+  const msgError = new Error('ENOSPC: no space left on device, write');
+  assert.ok(isENOSPC(msgError), 'Should detect ENOSPC in message');
+
+  // Test non-ENOSPC error
+  const otherError = new Error('EACCES: permission denied');
+  otherError.code = 'EACCES';
+  assert.ok(!isENOSPC(otherError), 'Should not detect non-ENOSPC errors');
+});
+
 // Clean up function (optional)
 export function cleanupTestFile() {
   if (fs.existsSync(testLogFile)) {

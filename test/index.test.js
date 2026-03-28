@@ -14,6 +14,8 @@ import {
   getFileSize,
   formatFileSize,
   determineUploadStrategy,
+  isENOSPC,
+  createENOSPCError,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
 } from '../src/index.js';
@@ -196,6 +198,69 @@ test('GITHUB_GIST_FILE_LIMIT - is 25MB (safe API limit)', () => {
 
 test('GITHUB_REPO_CHUNK_SIZE - is 100MB', () => {
   assert.equal(GITHUB_REPO_CHUNK_SIZE, 100 * 1024 * 1024);
+});
+
+// Test: isENOSPC
+test('isENOSPC - detects error with code ENOSPC', () => {
+  const error = new Error('write failed');
+  error.code = 'ENOSPC';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects ENOSPC in error message', () => {
+  const error = new Error('ENOSPC: no space left on device, write');
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects "no space left on device" in error message', () => {
+  const error = new Error('Error: no space left on device');
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects ENOSPC in stderr', () => {
+  const error = new Error('Command failed');
+  error.stderr = 'ENOSPC: no space left on device';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects "no space left on device" in stderr', () => {
+  const error = new Error('Command failed');
+  error.stderr = 'fatal: no space left on device';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - returns false for null/undefined', () => {
+  assert.equal(isENOSPC(null), false);
+  assert.equal(isENOSPC(undefined), false);
+});
+
+test('isENOSPC - returns false for non-ENOSPC errors', () => {
+  const error = new Error('Permission denied');
+  error.code = 'EACCES';
+  assert.equal(isENOSPC(error), false);
+});
+
+test('isENOSPC - returns false for generic errors', () => {
+  const error = new Error('Something went wrong');
+  assert.equal(isENOSPC(error), false);
+});
+
+// Test: createENOSPCError
+test('createENOSPCError - creates error with ENOSPC code', () => {
+  const original = new Error('write failed');
+  const error = createENOSPCError('gist upload', original);
+  assert.equal(error.code, 'ENOSPC');
+  assert.equal(error.operation, 'gist upload');
+  assert.equal(error.originalError, original);
+  assert.ok(error.message.includes('No space left on device'));
+  assert.ok(error.message.includes('gist upload'));
+  assert.ok(error.message.includes('Free disk space'));
+});
+
+test('createENOSPCError - includes actionable suggestions', () => {
+  const error = createENOSPCError('test', new Error('test'));
+  assert.ok(error.message.includes('Suggestion'));
+  assert.ok(error.message.includes('~/.claude/debug'));
 });
 
 // Clean up function (optional, can be called after tests)

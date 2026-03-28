@@ -7,7 +7,13 @@
  */
 
 import { makeConfig } from 'lino-arguments';
-import { uploadLog, getFileSize, formatFileSize, fileExists } from './index.js';
+import {
+  uploadLog,
+  getFileSize,
+  formatFileSize,
+  fileExists,
+  isENOSPC,
+} from './index.js';
 
 // Parse command-line arguments with environment variable and .lenv support
 const config = makeConfig({
@@ -227,12 +233,33 @@ async function main() {
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    if (isENOSPC(error)) {
+      console.error('❌ Error: No space left on device');
+      console.error('');
+      console.error('Suggestions to free disk space:');
+      console.error('  • Check ~/.claude/debug for large debug files');
+      console.error('  • Clean /tmp directory: rm -rf /tmp/log-*');
+      console.error('  • Check disk usage: df -h && du -sh /tmp ~/.claude');
+      if (error.message && error.message.includes('--only-gist')) {
+        console.error('');
+        console.error(
+          '💡 Hint: This file fits in a gist. Try --only-gist to upload'
+        );
+        console.error('   without requiring temporary disk space.');
+      }
+    } else {
+      console.error('❌ Error:', error.message);
+    }
 
     if (config.verbose) {
       console.error('');
       console.error('Stack trace:');
       console.error(error.stack);
+      if (error.originalError) {
+        console.error('');
+        console.error('Original error:');
+        console.error(error.originalError.stack || error.originalError.message);
+      }
     }
 
     process.exit(1);

@@ -13,6 +13,59 @@ import path from 'node:path';
 import makeLog from 'log-lazy';
 
 /**
+ * Check if an error is an ENOSPC (no space left on device) error
+ *
+ * @param {Error} error - The error to check
+ * @returns {boolean} True if the error is ENOSPC
+ */
+export function isENOSPC(error) {
+  if (!error) {
+    return false;
+  }
+  if (error.code === 'ENOSPC') {
+    return true;
+  }
+  if (error.message && error.message.includes('ENOSPC')) {
+    return true;
+  }
+  if (
+    error.message &&
+    error.message.toLowerCase().includes('no space left on device')
+  ) {
+    return true;
+  }
+  if (error.stderr && error.stderr.includes('ENOSPC')) {
+    return true;
+  }
+  if (
+    error.stderr &&
+    error.stderr.toLowerCase().includes('no space left on device')
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Create a structured ENOSPC error with actionable information
+ *
+ * @param {string} operation - Description of the operation that failed
+ * @param {Error} originalError - The original error
+ * @returns {Error} Enhanced error with ENOSPC metadata
+ */
+export function createENOSPCError(operation, originalError) {
+  const error = new Error(
+    `No space left on device during ${operation}. ` +
+      `Suggestion: Free disk space and retry. ` +
+      `Check large files in ~/.claude/debug, /tmp, or system logs.`
+  );
+  error.code = 'ENOSPC';
+  error.operation = operation;
+  error.originalError = originalError;
+  return error;
+}
+
+/**
  * Create a logger instance
  * This can be customized by users when using the library
  */
@@ -448,6 +501,12 @@ export async function uploadAsRepo(options = {}) {
     if (fs.existsSync(workDir)) {
       fs.rmSync(workDir, { recursive: true, force: true });
     }
+    if (isENOSPC(error)) {
+      throw createENOSPCError(
+        'repository upload (requires temp disk space)',
+        error
+      );
+    }
     throw error;
   }
 }
@@ -537,6 +596,11 @@ export async function uploadLog(options = {}) {
     try {
       return await uploadAsGist(options);
     } catch (gistError) {
+      // ENOSPC on gist upload: don't fallback to repo (needs even more disk space)
+      if (isENOSPC(gistError)) {
+        throw createENOSPCError('gist upload', gistError);
+      }
+
       // If user explicitly requested only gist, don't fallback
       if (onlyGist) {
         throw gistError;
@@ -551,7 +615,23 @@ export async function uploadLog(options = {}) {
       return await uploadAsRepo(options);
     }
   } else {
-    return await uploadAsRepo(options);
+    try {
+      return await uploadAsRepo(options);
+    } catch (repoError) {
+      // ENOSPC on repo upload: suggest gist mode if file fits
+      if (isENOSPC(repoError)) {
+        const fileSize = getFileSize(filePath);
+        if (fileSize <= GITHUB_GIST_FILE_LIMIT) {
+          const enhanced = createENOSPCError('repository upload', repoError);
+          enhanced.message +=
+            ` Hint: This file (${formatFileSize(fileSize)}) fits in a gist. ` +
+            `Try --only-gist to upload without requiring temp disk space.`;
+          throw enhanced;
+        }
+        throw createENOSPCError('repository upload', repoError);
+      }
+      throw repoError;
+    }
   }
 }
 
@@ -567,6 +647,8 @@ export default {
   getFileSize,
   formatFileSize,
   splitFileIntoChunks,
+  isENOSPC,
+  createENOSPCError,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
