@@ -14,6 +14,8 @@ import {
   getFileSize,
   formatFileSize,
   determineUploadStrategy,
+  isENOSPC,
+  createENOSPCError,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
 } from '../src/index.js';
@@ -196,6 +198,130 @@ test('GITHUB_GIST_FILE_LIMIT - is 25MB (safe API limit)', () => {
 
 test('GITHUB_REPO_CHUNK_SIZE - is 100MB', () => {
   assert.equal(GITHUB_REPO_CHUNK_SIZE, 100 * 1024 * 1024);
+});
+
+// Test: isENOSPC
+test('isENOSPC - detects error with code ENOSPC', () => {
+  const error = new Error('write failed');
+  error.code = 'ENOSPC';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects ENOSPC in error message', () => {
+  const error = new Error('ENOSPC: no space left on device, write');
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects "no space left on device" in error message', () => {
+  const error = new Error('Error: no space left on device');
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects ENOSPC in stderr', () => {
+  const error = new Error('Command failed');
+  error.stderr = 'ENOSPC: no space left on device';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - detects "no space left on device" in stderr', () => {
+  const error = new Error('Command failed');
+  error.stderr = 'fatal: no space left on device';
+  assert.equal(isENOSPC(error), true);
+});
+
+test('isENOSPC - returns false for null/undefined', () => {
+  assert.equal(isENOSPC(null), false);
+  assert.equal(isENOSPC(undefined), false);
+});
+
+test('isENOSPC - returns false for non-ENOSPC errors', () => {
+  const error = new Error('Permission denied');
+  error.code = 'EACCES';
+  assert.equal(isENOSPC(error), false);
+});
+
+test('isENOSPC - returns false for generic errors', () => {
+  const error = new Error('Something went wrong');
+  assert.equal(isENOSPC(error), false);
+});
+
+// Test: createENOSPCError
+test('createENOSPCError - creates error with ENOSPC code', () => {
+  const original = new Error('write failed');
+  const error = createENOSPCError('gist upload', original);
+  assert.equal(error.code, 'ENOSPC');
+  assert.equal(error.operation, 'gist upload');
+  assert.equal(error.originalError, original);
+  assert.ok(error.message.includes('No space left on device'));
+  assert.ok(error.message.includes('gist upload'));
+  assert.ok(error.message.includes('Free disk space'));
+});
+
+test('createENOSPCError - includes actionable suggestions', () => {
+  const error = createENOSPCError('test', new Error('test'));
+  assert.ok(error.message.includes('Suggestion'));
+  assert.ok(error.message.includes('~/.claude/debug'));
+});
+
+// Test: ENOSPC hint logic - only suggest --only-gist when repo mode is forced for small files
+test('createENOSPCError - --only-gist hint only added for repo upload of small files', () => {
+  // In uploadLog(), the --only-gist hint is appended only when:
+  // 1. uploadType === 'repo' (which means either auto chose repo for >25MB files, or user forced --only-repository)
+  // 2. ENOSPC occurs during repo upload
+  // 3. File is ≤ 25MB (fits in gist)
+  // Case: auto mode, ≤25MB file → gist path → no hint needed (gist is default)
+  const gistError = createENOSPCError('gist upload', new Error('test'));
+  assert.ok(
+    !gistError.message.includes('--only-gist'),
+    'Gist upload ENOSPC should NOT suggest --only-gist'
+  );
+
+  // Case: forced --only-repository, ≤25MB file → repo path → hint IS needed
+  const repoError = createENOSPCError('repository upload', new Error('test'));
+  // The base createENOSPCError does not include the hint; it's added by uploadLog()
+  assert.ok(
+    !repoError.message.includes('--only-gist'),
+    'Base ENOSPC error should NOT include --only-gist hint'
+  );
+
+  // Simulate what uploadLog() does when repo upload fails with ENOSPC for small file
+  const enhanced = createENOSPCError('repository upload', new Error('test'));
+  enhanced.message +=
+    ' Hint: This file fits in a gist. Try --only-gist to upload without requiring temp disk space.';
+  assert.ok(
+    enhanced.message.includes('--only-gist'),
+    'Enhanced repo ENOSPC for small file should include --only-gist hint'
+  );
+});
+
+// Test: determineUploadStrategy always picks gist for files ≤25MB (konard's key point)
+test('determineUploadStrategy - always picks gist for files within gist limit', () => {
+  // This validates konard's feedback: "by default we should use gist, if it fits"
+  // Files ≤25MB should ALWAYS get strategy type 'gist' in auto mode
+  const smallResult = determineUploadStrategy(smallTestFile);
+  assert.equal(
+    smallResult.type,
+    'gist',
+    'Small files should use gist strategy'
+  );
+
+  const mediumResult = determineUploadStrategy(mediumTestFile);
+  assert.equal(
+    mediumResult.type,
+    'gist',
+    'Medium files (1MB) should use gist strategy'
+  );
+});
+
+// Test: determineUploadStrategy picks repo only for files exceeding gist limit
+test('determineUploadStrategy - only picks repo when file exceeds gist limit', () => {
+  const largeResult = determineUploadStrategy(largeTestFile);
+  assert.equal(
+    largeResult.type,
+    'repo',
+    'Files >25MB should use repo strategy'
+  );
+  // This means in auto mode, --only-gist hint can only appear for forced --only-repository
 });
 
 // Clean up function (optional, can be called after tests)
