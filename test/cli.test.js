@@ -189,6 +189,25 @@ test('CLI with non-existent file shows error', async () => {
   );
 });
 
+// Test: Non-existent file does not print upload status before error (issue #24)
+test('CLI with non-existent file does not print upload status before error', async () => {
+  const result = await runCLI(['/nonexistent/file.log']);
+  assert.equal(result.code, 1, 'Should exit with code 1');
+  assert.ok(
+    !result.output.includes('Uploading'),
+    'Should not print uploading status for non-existent file'
+  );
+  assert.ok(
+    !result.output.startsWith('\n'),
+    'Should not start output with blank line'
+  );
+  assert.ok(
+    result.output.includes('Error:') &&
+      result.output.includes('does not exist'),
+    'Should show file not found error'
+  );
+});
+
 // Test: --description flag
 test('CLI with --description flag', async () => {
   const result = await runCLI([

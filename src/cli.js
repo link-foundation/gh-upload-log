@@ -135,6 +135,11 @@ async function main() {
       process.exit(1);
     }
 
+    if (!fileExists(logFile)) {
+      console.error(`❌ Error: File does not exist: ${logFile}`);
+      process.exit(1);
+    }
+
     // Prepare options
     // If neither public nor private is specified, default to private
     const isPublic =
@@ -156,11 +161,8 @@ async function main() {
       console.log('');
     }
 
-    // Get file size for display
-    let fileSize = 0;
-    if (fileExists(logFile)) {
-      fileSize = getFileSize(logFile);
-    }
+    // Get file size for display (file existence already verified above)
+    const fileSize = getFileSize(logFile);
 
     // Show concise upload status
     const visibility = isPublic ? '🌐 public' : '🔒 private';
@@ -225,7 +227,6 @@ async function main() {
 
     process.exit(0);
   } catch (error) {
-    console.error('');
     console.error('❌ Error:', error.message);
 
     if (config.verbose) {
