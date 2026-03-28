@@ -1,0 +1,20 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE0MzE5MDQ=",
+    "is_bot": false,
+    "login": "konard",
+    "name": "Konstantin Diachenko"
+  },
+  "body": "## Problem\n\nWhen `gh-upload-log` is invoked on a system with no remaining disk space, it fails with a generic ENOSPC error without providing actionable guidance to the user.\n\n**Error observed:**\n```\n❌ Error uploading log: ENOSPC: no space left on device, write\n❌ Error uploading log file: ENOSPC: no space left on device, write\n```\n\nThis occurred during a hive-mind solve session where the disk filled up during Claude Code execution (potentially related to claude-code#16093).\n\n## Expected Behavior\n\nWhen ENOSPC is detected, `gh-upload-log` should:\n1. Detect the ENOSPC error specifically (check `error.code === 'ENOSPC'`)\n2. Provide an actionable error message suggesting disk cleanup\n3. Optionally skip operations that require temp file creation\n4. Return a structured error result that callers can handle programmatically",
+  "comments": [
+    {
+      "author": "konard",
+      "body": "We need to double check if we really cannot upload log. Because as I understand if file already exists we can upload it, even if we don't have free space on disk, so may be we can write logic in such a way, that we don't require additional disk space to upload log.\n\nWe need to download all logs and data related about the issue to this repository, make sure we compile that data to `./docs/case-studies/issue-{id}` folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), in which we will reconstruct timeline/sequence of events, find root causes of the problem, and propose possible solutions (including known existing components/libraries, that solve similar problem or can help in solutions).\n\nIf there is not enough data to find actual root cause, add debug output and verbose mode if not present, that will allow us to find root cause on next iteration.\n\nIf issue related to any other repository/project, where we can report issues on GitHub, please do so. Each issue must contain reproducible examples, workarounds and suggestions for fix the issue in code.",
+      "createdAt": "2026-03-28T21:56:03Z"
+    }
+  ],
+  "createdAt": "2026-03-28T00:00:00Z",
+  "labels": [],
+  "number": 23,
+  "title": "Handle ENOSPC errors gracefully with actionable error messages"
+}
