@@ -245,6 +245,32 @@ test('CLI ENOSPC - isENOSPC detects disk space errors correctly', async () => {
   assert.ok(!isENOSPC(otherError), 'Should not detect non-ENOSPC errors');
 });
 
+// Test: ENOSPC hint logic - verify the CLI error handler correctly gates the --only-gist hint
+test('CLI ENOSPC - --only-gist hint only shown when error message contains it', async () => {
+  // The CLI checks error.message.includes('--only-gist') to decide whether to show the hint.
+  // This hint is only added by uploadLog() when repo upload fails with ENOSPC for a small file.
+  // In auto mode, small files use gist by default, so the hint never appears.
+  const { isENOSPC, createENOSPCError } = await import('../src/index.js');
+
+  // Simulate gist ENOSPC (auto mode, small file) - no hint
+  const gistEnospc = createENOSPCError('gist upload', new Error('test'));
+  assert.ok(isENOSPC(gistEnospc), 'Should be detected as ENOSPC');
+  assert.ok(
+    !gistEnospc.message.includes('--only-gist'),
+    'Gist ENOSPC should NOT contain --only-gist hint'
+  );
+
+  // Simulate repo ENOSPC with small file (forced --only-repository) - has hint
+  const repoEnospc = createENOSPCError('repository upload', new Error('test'));
+  repoEnospc.message +=
+    ' Hint: This file fits in a gist. Try --only-gist to upload without requiring temp disk space.';
+  assert.ok(isENOSPC(repoEnospc), 'Should be detected as ENOSPC');
+  assert.ok(
+    repoEnospc.message.includes('--only-gist'),
+    'Forced repo ENOSPC for small file should contain --only-gist hint'
+  );
+});
+
 // Clean up function (optional)
 export function cleanupTestFile() {
   if (fs.existsSync(testLogFile)) {

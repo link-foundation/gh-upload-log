@@ -74,9 +74,10 @@ a generic `❌ Error:` message. Additionally:
    disk space). This wastes time and produces confusing double errors.
 2. **No disk space guidance**: The error message doesn't suggest checking `~/.claude/debug`
    or `/tmp` for large files, even though these are the most common causes.
-3. **No gist hint**: When repository mode fails with ENOSPC but the file is small enough
-   for a gist (<= 25MB), the user isn't told that `--only-gist` could work without needing
-   temp disk space.
+3. **No gist hint**: When the user forces `--only-repository` for a file small enough
+   for a gist (<= 25MB) and ENOSPC occurs, the user isn't told that `--only-gist` could
+   work without needing temp disk space. (Note: in auto mode, files ≤25MB already use
+   gist by default, so this hint only applies to the forced `--only-repository` case.)
 
 ### Key Insight: Gist Uploads Don't Need Extra Disk Space
 
@@ -129,22 +130,40 @@ Creates errors with:
 
 - When gist upload fails with ENOSPC, the code no longer falls back to repository mode
   (which would also fail and needs more space)
-- When repository mode fails with ENOSPC and the file fits in a gist (<=25MB), the error
-  message suggests using `--only-gist` to upload without temp disk space
+- When the user forces `--only-repository` for a file that fits in a gist (<=25MB) and
+  ENOSPC occurs, the error message suggests using `--only-gist` instead. (In auto mode,
+  files ≤25MB already default to gist, so the hint only applies to forced repo mode.)
 
 ### 4. Actionable CLI Output
+
+**Default ENOSPC output** (auto mode or `--only-gist`):
 
 ```
 ❌ Error: No space left on device
 
 Suggestions to free disk space:
-  - Check ~/.claude/debug for large debug files
-  - Clean /tmp directory: rm -rf /tmp/log-*
-  - Check disk usage: df -h && du -sh /tmp ~/.claude
+  • Check ~/.claude/debug for large debug files
+  • Clean /tmp directory: rm -rf /tmp/log-*
+  • Check disk usage: df -h && du -sh /tmp ~/.claude
+```
+
+**When `--only-repository` is forced** for a file that fits in a gist (≤25MB):
+
+```
+❌ Error: No space left on device
+
+Suggestions to free disk space:
+  • Check ~/.claude/debug for large debug files
+  • Clean /tmp directory: rm -rf /tmp/log-*
+  • Check disk usage: df -h && du -sh /tmp ~/.claude
 
 💡 Hint: This file fits in a gist. Try --only-gist to upload
    without requiring temporary disk space.
 ```
+
+Note: In auto mode, files ≤25MB are uploaded as gists by default (which does not
+require extra disk space), so the `--only-gist` hint only appears when the user has
+explicitly forced repository mode via `--only-repository`.
 
 ---
 
