@@ -60,85 +60,60 @@ function createFakeRepoUploadEnv(mode) {
 
   writeExecutable(
     path.join(fakeBinDir, 'git'),
-    `#!/usr/bin/env node
-process.exit(0);
+    `#!/bin/sh
+exit 0
 `
   );
 
   writeExecutable(
     path.join(fakeBinDir, 'gh'),
-    `#!/usr/bin/env node
-const fs = require('node:fs');
+    `#!/bin/sh
+set -eu
 
-const args = process.argv.slice(2);
-const mode = process.env.FAKE_GH_MODE;
-const logPath = process.env.FAKE_GH_LOG;
-const statePath = process.env.FAKE_GH_STATE;
+printf '%s\\n' "$*" >> "$FAKE_GH_LOG"
 
-function appendLog(entry) {
-  fs.appendFileSync(logPath, JSON.stringify(entry) + '\\n');
-}
+if [ "$#" -ge 2 ] && [ "$1" = "api" ] && [ "$2" = "user" ]; then
+  printf 'test-user\\n'
+  exit 0
+fi
 
-function readState() {
-  try {
-    return JSON.parse(fs.readFileSync(statePath, 'utf8'));
-  } catch {
-    return { repoCreateCalls: 0 };
-  }
-}
+if [ "$#" -ge 2 ] && [ "$1" = "api" ]; then
+  case "$2" in
+    repos/test-user/*)
+      repo_name=$(printf '%s' "$2" | cut -d/ -f3)
+      printf 'https://raw.githubusercontent.com/test-user/%s/main/tmp-test-cli-log-file.log\\n' "$repo_name"
+      exit 0
+      ;;
+  esac
+fi
 
-function writeState(state) {
-  fs.writeFileSync(statePath, JSON.stringify(state));
-}
+if [ "$#" -ge 3 ] && [ "$1" = "repo" ] && [ "$2" = "create" ]; then
+  repo_name="$3"
+  repo_create_calls=0
 
-appendLog({ args });
+  if [ -f "$FAKE_GH_STATE" ]; then
+    repo_create_calls=$(cat "$FAKE_GH_STATE")
+  fi
 
-if (args[0] === 'api' && args[1] === 'user') {
-  process.stdout.write('test-user\\n');
-  process.exit(0);
-}
+  repo_create_calls=$((repo_create_calls + 1))
+  printf '%s' "$repo_create_calls" > "$FAKE_GH_STATE"
 
-if (
-  args[0] === 'api' &&
-  typeof args[1] === 'string' &&
-  args[1].startsWith('repos/test-user/')
-) {
-  const parts = args[1].split('/');
-  const repoName = parts[2];
-  process.stdout.write(
-    'https://raw.githubusercontent.com/test-user/' +
-      repoName +
-      '/main/tmp-test-cli-log-file.log\\n'
-  );
-  process.exit(0);
-}
+  if [ "$FAKE_GH_MODE" = "repo-create-fails" ]; then
+    printf 'GraphQL: Name already exists on this account (createRepository)\\n' >&2
+    exit 1
+  fi
 
-if (args[0] === 'repo' && args[1] === 'create') {
-  const repoName = args[2];
-  const state = readState();
-  state.repoCreateCalls += 1;
-  writeState(state);
+  if [ "$FAKE_GH_MODE" = "repo-create-retries-once" ] && [ "$repo_create_calls" -eq 1 ]; then
+    printf 'GraphQL: Name already exists on this account (createRepository)\\n' >&2
+    exit 1
+  fi
 
-  if (mode === 'repo-create-fails') {
-    process.stderr.write(
-      'GraphQL: Name already exists on this account (createRepository)\\n'
-    );
-    process.exit(1);
-  }
+  printf 'https://github.com/test-user/%s\\n' "$repo_name"
+  exit 0
+fi
 
-  if (mode === 'repo-create-retries-once' && state.repoCreateCalls === 1) {
-    process.stderr.write(
-      'GraphQL: Name already exists on this account (createRepository)\\n'
-    );
-    process.exit(1);
-  }
-
-  process.stdout.write('https://github.com/test-user/' + repoName + '\\n');
-  process.exit(0);
-}
-
-process.stderr.write('Unexpected gh invocation: ' + args.join(' ') + '\\n');
-process.exit(1);
+printf 'Unexpected gh invocation: %s\\n' "$*" >&2
+exit 1
 `
   );
 
@@ -302,10 +277,7 @@ test('CLI retries repository creation with a unique name after a collision', asy
       .readFileSync(fakeEnv.ghLogPath, 'utf8')
       .trim()
       .split('\n')
-      .map((line) => JSON.parse(line))
-      .filter(
-        (entry) => entry.args[0] === 'repo' && entry.args[1] === 'create'
-      );
+      .filter((line) => line.startsWith('repo create '));
 
     assert.equal(
       repoCreateCalls.length,
@@ -313,16 +285,16 @@ test('CLI retries repository creation with a unique name after a collision', asy
       'Should attempt repo creation twice'
     );
     assert.equal(
-      repoCreateCalls[0].args[2],
+      repoCreateCalls[0].split(' ')[2],
       'log-tmp-test-cli-log-file',
       'Should try the deterministic repository name first'
     );
     assert.ok(
-      repoCreateCalls[1].args[2].startsWith('log-tmp-test-cli-log-file-'),
+      repoCreateCalls[1].split(' ')[2].startsWith('log-tmp-test-cli-log-file-'),
       'Should retry with a timestamp-suffixed repository name'
     );
     assert.ok(
-      repoCreateCalls.every((entry) => entry.args.includes('--public')),
+      repoCreateCalls.every((line) => line.includes('--public')),
       'Should preserve requested public visibility on retry'
     );
   } finally {
