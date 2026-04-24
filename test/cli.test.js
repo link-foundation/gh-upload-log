@@ -16,10 +16,10 @@ const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 
 // Helper function to run CLI command
-function runCLI(args) {
+function runCLI(args, env = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn('node', [cliPath, ...args], {
-      env: { ...process.env },
+      env: { ...process.env, ...env },
     });
 
     let stdout = '';
@@ -44,6 +44,116 @@ function runCLI(args) {
 
     child.on('error', reject);
   });
+}
+
+function writeExecutable(filePath, content) {
+  fs.writeFileSync(filePath, content);
+  fs.chmodSync(filePath, 0o755);
+}
+
+function createFakeRepoUploadEnv(mode) {
+  const fakeBinDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'gh-upload-log-fake-bin-')
+  );
+  const ghLogPath = path.join(fakeBinDir, 'gh-invocations.jsonl');
+  const ghStatePath = path.join(fakeBinDir, 'gh-state.json');
+
+  writeExecutable(
+    path.join(fakeBinDir, 'git'),
+    `#!/usr/bin/env node
+process.exit(0);
+`
+  );
+
+  writeExecutable(
+    path.join(fakeBinDir, 'gh'),
+    `#!/usr/bin/env node
+const fs = require('node:fs');
+
+const args = process.argv.slice(2);
+const mode = process.env.FAKE_GH_MODE;
+const logPath = process.env.FAKE_GH_LOG;
+const statePath = process.env.FAKE_GH_STATE;
+
+function appendLog(entry) {
+  fs.appendFileSync(logPath, JSON.stringify(entry) + '\\n');
+}
+
+function readState() {
+  try {
+    return JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  } catch {
+    return { repoCreateCalls: 0 };
+  }
+}
+
+function writeState(state) {
+  fs.writeFileSync(statePath, JSON.stringify(state));
+}
+
+appendLog({ args });
+
+if (args[0] === 'api' && args[1] === 'user') {
+  process.stdout.write('test-user\\n');
+  process.exit(0);
+}
+
+if (
+  args[0] === 'api' &&
+  typeof args[1] === 'string' &&
+  args[1].startsWith('repos/test-user/')
+) {
+  const parts = args[1].split('/');
+  const repoName = parts[2];
+  process.stdout.write(
+    'https://raw.githubusercontent.com/test-user/' +
+      repoName +
+      '/main/tmp-test-cli-log-file.log\\n'
+  );
+  process.exit(0);
+}
+
+if (args[0] === 'repo' && args[1] === 'create') {
+  const repoName = args[2];
+  const state = readState();
+  state.repoCreateCalls += 1;
+  writeState(state);
+
+  if (mode === 'repo-create-fails') {
+    process.stderr.write(
+      'GraphQL: Name already exists on this account (createRepository)\\n'
+    );
+    process.exit(1);
+  }
+
+  if (mode === 'repo-create-retries-once' && state.repoCreateCalls === 1) {
+    process.stderr.write(
+      'GraphQL: Name already exists on this account (createRepository)\\n'
+    );
+    process.exit(1);
+  }
+
+  process.stdout.write('https://github.com/test-user/' + repoName + '\\n');
+  process.exit(0);
+}
+
+process.stderr.write('Unexpected gh invocation: ' + args.join(' ') + '\\n');
+process.exit(1);
+`
+  );
+
+  return {
+    env: {
+      PATH: `${fakeBinDir}${path.delimiter}${process.env.PATH || ''}`,
+      FAKE_GH_MODE: mode,
+      FAKE_GH_LOG: ghLogPath,
+      FAKE_GH_STATE: ghStatePath,
+    },
+    ghLogPath,
+    cleanup() {
+      fs.rmSync(fakeBinDir, { recursive: true, force: true });
+    },
+  };
 }
 
 // Setup test file
@@ -142,6 +252,82 @@ test('CLI with both --only-gist and --only-repository shows conflict error', asy
     ),
     'Should show mutually exclusive error'
   );
+});
+
+test('CLI fails when gh repo create keeps returning a name collision', async () => {
+  const fakeEnv = createFakeRepoUploadEnv('repo-create-fails');
+
+  try {
+    const result = await runCLI(
+      [testLogFile, '--only-repository', '--public'],
+      fakeEnv.env
+    );
+
+    assert.equal(result.code, 1, 'Should exit with code 1');
+    assert.ok(
+      result.output.includes('GraphQL: Name already exists on this account'),
+      'Should surface the gh repo create error'
+    );
+    assert.ok(
+      !result.output.includes('✅ Repository created'),
+      'Should not report success when repo creation fails'
+    );
+  } finally {
+    fakeEnv.cleanup();
+  }
+});
+
+test('CLI retries repository creation with a unique name after a collision', async () => {
+  const fakeEnv = createFakeRepoUploadEnv('repo-create-retries-once');
+
+  try {
+    const result = await runCLI(
+      [testLogFile, '--only-repository', '--public'],
+      fakeEnv.env
+    );
+
+    assert.equal(result.code, 0, 'Should exit with code 0 after retry');
+    assert.ok(
+      result.output.includes('✅ Repository created (🌐 public)'),
+      'Should report successful public repository creation'
+    );
+    assert.ok(
+      result.output.includes(
+        'https://github.com/test-user/log-tmp-test-cli-log-file-'
+      ),
+      'Should print the retried unique repository URL'
+    );
+
+    const repoCreateCalls = fs
+      .readFileSync(fakeEnv.ghLogPath, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line))
+      .filter(
+        (entry) => entry.args[0] === 'repo' && entry.args[1] === 'create'
+      );
+
+    assert.equal(
+      repoCreateCalls.length,
+      2,
+      'Should attempt repo creation twice'
+    );
+    assert.equal(
+      repoCreateCalls[0].args[2],
+      'log-tmp-test-cli-log-file',
+      'Should try the deterministic repository name first'
+    );
+    assert.ok(
+      repoCreateCalls[1].args[2].startsWith('log-tmp-test-cli-log-file-'),
+      'Should retry with a timestamp-suffixed repository name'
+    );
+    assert.ok(
+      repoCreateCalls.every((entry) => entry.args.includes('--public')),
+      'Should preserve requested public visibility on retry'
+    );
+  } finally {
+    fakeEnv.cleanup();
+  }
 });
 
 // Test: --verbose flag
