@@ -1,0 +1,5 @@
+GraphQL: Name already exists on this account (createRepository)
+{
+  "stdout": "",
+  "stderr": "GraphQL: Name already exists on this account (createRepository)\n"
+}
