@@ -210,7 +210,7 @@ export const GITHUB_REPO_CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB chunks for re
  * @returns {string} Normalized name suitable for GitHub
  */
 export function normalizeFileName(filePath) {
-  return filePath.replace(/^\/*/, '').replace(/\//g, '-');
+  return filePath.replace(/^[\\/]+/, '').replace(/[\\/]/g, '-');
 }
 
 /**

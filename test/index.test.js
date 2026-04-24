@@ -104,6 +104,11 @@ test('normalizeFileName - replaces all slashes with dashes', () => {
   assert.equal(result, 'var-log-app-error.log');
 });
 
+test('normalizeFileName - replaces backslashes with dashes', () => {
+  const result = normalizeFileName('var\\log\\app\\error.log');
+  assert.equal(result, 'var-log-app-error.log');
+});
+
 test('normalizeFileName - handles relative paths', () => {
   const result = normalizeFileName('./logs/app.log');
   assert.equal(result, '.-logs-app.log');
