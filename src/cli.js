@@ -49,6 +49,12 @@ const config = makeConfig({
         type: 'boolean',
         description: 'Upload only as GitHub Repository (disables auto mode)',
       })
+      .option('shared-repository', {
+        type: 'boolean',
+        description:
+          'Upload large repository-mode logs into shared private-logs/public-logs repositories (default: true)',
+        default: getenv('GH_UPLOAD_LOG_SHARED_REPOSITORY', true),
+      })
       .option('dry-mode', {
         alias: 'dry',
         type: 'boolean',
@@ -108,6 +114,10 @@ const config = makeConfig({
         '$0 ./large.log --only-repository --public',
         'Upload only as public repository'
       )
+      .example(
+        '$0 ./large.log --only-repository --no-shared-repository',
+        'Use the legacy dedicated repository mode for a large file'
+      )
       .example('$0 ./app.log --dry-mode', 'Dry run - show what would be done')
       .example('$0 --test', 'Run self-test to verify functionality')
       .example('$0 --quick', 'Run quick self-test (1MB file only)')
@@ -157,6 +167,7 @@ async function main() {
       auto: config.auto,
       onlyGist: config.onlyGist,
       onlyRepository: config.onlyRepository,
+      useSharedRepository: config.sharedRepository,
       dryMode: config.dryMode,
       description: config.description,
       verbose: config.verbose,
@@ -189,11 +200,18 @@ async function main() {
     // Display concise results
     const typeEmoji = result.type === 'gist' ? '📝' : '📦';
     const typeLabel = result.type === 'gist' ? 'Gist' : 'Repository';
-    const successEmoji = result.dryMode ? '🔍' : '✅';
+    const successEmoji = result.dryMode
+      ? '🔍'
+      : result.deduplicated
+        ? 'ℹ️'
+        : '✅';
+    const actionLabel = result.dryMode
+      ? 'would be created'
+      : result.deduplicated
+        ? 'already exists'
+        : 'created';
 
-    console.log(
-      `${successEmoji} ${typeLabel} ${result.dryMode ? 'would be created' : 'created'} (${visibility})`
-    );
+    console.log(`${successEmoji} ${typeLabel} ${actionLabel} (${visibility})`);
 
     if (result.url && !result.dryMode) {
       console.log(`🔗 ${result.url}`);
@@ -225,6 +243,9 @@ async function main() {
         console.log(`  File name: ${result.fileName}`);
       } else if (result.type === 'repo') {
         console.log(`  Repository: ${result.repositoryName}`);
+        if (result.repositoryPath) {
+          console.log(`  Path: ${result.repositoryPath}`);
+        }
       }
       if (result.rawUrl) {
         console.log(`  Raw URL: ${result.rawUrl}`);

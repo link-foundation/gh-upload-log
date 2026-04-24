@@ -1,0 +1,29 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE0MzE5MDQ=",
+    "is_bot": false,
+    "login": "konard",
+    "name": "Konstantin Diachenko"
+  },
+  "body": "What previously was repository name now should be a folder in `{user}/private-logs` and `{user}/public-logs` repositories (selected based on provided configuration by user).\n\nPrevious logic should be kept, but it should turned on with option/env. New logic should be enabled by default. That should prevent growing the number of repositories to hundreds and thousands over time.\n\nWe should also make sure we use latest https://github.com/link-foundation/lino-arguments library.\n\nWe also should support deduplication, meaning it should not be possible to upload the same log twice, if it is already uploaded to private-logs or public-logs repository.\n\nNote that all only for log files, that does not fit in gists.\n\nWe need to collect data related about the issue to this repository, make sure we compile that data to `./docs/case-studies/issue-{id}` folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), list of each and all requirements from the issue, and propose possible solutions and solution plans for each requirement (we should also check known existing components/libraries, that solve similar problem or can help in solutions).\n\n",
+  "createdAt": "2026-04-24T10:36:13Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG5Q",
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG8Q",
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    }
+  ],
+  "number": 29,
+  "state": "OPEN",
+  "title": "By default use special repositories for the user `private-logs` and `public-logs` to upload big files",
+  "updatedAt": "2026-04-24T11:08:54Z",
+  "url": "https://github.com/link-foundation/gh-upload-log/issues/29"
+}
