@@ -90,6 +90,21 @@ function createDefaultLogger(options = {}) {
 }
 
 /**
+ * Load the command-stream tag or a test override
+ *
+ * @param {Object} [options={}] - Optional command runner overrides
+ * @returns {Promise<Function>} command-stream template tag function
+ */
+async function getCommandStream(options = {}) {
+  if (typeof options.commandStreamFactory === 'function') {
+    return options.commandStreamFactory();
+  }
+
+  const { $ } = await import('command-stream');
+  return $;
+}
+
+/**
  * Get the exit code from a command-stream result
  *
  * @param {Object} result - command-stream result object
@@ -363,7 +378,7 @@ export async function splitFileIntoChunks(
  * @returns {Promise<Object>} Gist information including URL
  */
 export async function uploadAsGist(options = {}) {
-  const { $ } = await import('command-stream');
+  const $ = await getCommandStream(options);
 
   const {
     filePath,
@@ -460,7 +475,7 @@ export async function uploadAsGist(options = {}) {
  * @returns {Promise<Object>} Repository information including URL
  */
 export async function uploadAsRepo(options = {}) {
-  const { $ } = await import('command-stream');
+  const $ = await getCommandStream(options);
 
   const {
     filePath,

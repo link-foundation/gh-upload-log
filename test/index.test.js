@@ -18,6 +18,7 @@ import {
   createENOSPCError,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
+  uploadLog,
 } from '../src/index.js';
 
 // Create test directory
@@ -58,6 +59,39 @@ function setupTestFiles() {
 }
 
 setupTestFiles();
+
+function createCommandResult({ code = 0, stdout = '', stderr = '' } = {}) {
+  return {
+    code,
+    stdout,
+    stderr,
+  };
+}
+
+function buildCommand(strings, values) {
+  let command = '';
+
+  for (let index = 0; index < strings.length; index += 1) {
+    command += strings[index];
+    if (index < values.length) {
+      command += String(values[index]);
+    }
+  }
+
+  return command.trim();
+}
+
+function createFakeCommandStream(handler) {
+  const commandStream = (optionsOrStrings, ...values) => {
+    if (Array.isArray(optionsOrStrings?.raw)) {
+      return Promise.resolve(handler(buildCommand(optionsOrStrings, values)));
+    }
+
+    return commandStream;
+  };
+
+  return commandStream;
+}
 
 // Test: normalizeFileName
 test('normalizeFileName - removes leading slashes', () => {
@@ -322,6 +356,166 @@ test('determineUploadStrategy - only picks repo when file exceeds gist limit', (
     'Files >25MB should use repo strategy'
   );
   // This means in auto mode, --only-gist hint can only appear for forced --only-repository
+});
+
+test('uploadLog - surfaces gh repo create failures instead of reporting success', async () => {
+  const collisionFile = path.join('test', 'fixtures', 'repo-collision.log');
+  fs.writeFileSync(collisionFile, 'collision test\n');
+
+  const commands = [];
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command.includes('git init')) {
+      return createCommandResult();
+    }
+    if (command.includes('git branch -m main')) {
+      return createCommandResult();
+    }
+    if (command.includes('git add .')) {
+      return createCommandResult();
+    }
+    if (command.includes('git commit -m "Add log file"')) {
+      return createCommandResult();
+    }
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (command.includes('gh repo create')) {
+      return createCommandResult({
+        code: 1,
+        stderr:
+          'GraphQL: Name already exists on this account (createRepository)\n',
+      });
+    }
+
+    return createCommandResult();
+  });
+
+  try {
+    await uploadLog({
+      filePath: collisionFile,
+      onlyRepository: true,
+      isPublic: true,
+      commandStreamFactory: () => fakeCommandStream,
+    });
+    assert.ok(
+      false,
+      'Expected uploadLog to throw on repeated repo create failure'
+    );
+  } catch (error) {
+    assert.ok(
+      error.message.includes('GraphQL: Name already exists on this account'),
+      `Expected repo create error, got: ${error.message}`
+    );
+
+    const repoCreateCommands = commands.filter((command) =>
+      command.includes('gh repo create')
+    );
+    assert.equal(
+      repoCreateCommands.length,
+      2,
+      'Should retry repo creation once before failing'
+    );
+  }
+});
+
+test('uploadLog - retries with a unique repository name after a collision', async () => {
+  const retryFile = path.join('test', 'fixtures', 'repo-collision-retry.log');
+  fs.writeFileSync(retryFile, 'retry test\n');
+
+  const commands = [];
+  let repoCreateCalls = 0;
+
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command.includes('git init')) {
+      return createCommandResult();
+    }
+    if (command.includes('git branch -m main')) {
+      return createCommandResult();
+    }
+    if (command.includes('git add .')) {
+      return createCommandResult();
+    }
+    if (command.includes('git commit -m "Add log file"')) {
+      return createCommandResult();
+    }
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (command.includes('gh repo create')) {
+      repoCreateCalls += 1;
+
+      if (repoCreateCalls === 1) {
+        return createCommandResult({
+          code: 1,
+          stderr:
+            'GraphQL: Name already exists on this account (createRepository)\n',
+        });
+      }
+
+      const repoName = command.match(/gh repo create ([^ ]+)/)?.[1];
+      return createCommandResult({
+        stdout: `https://github.com/test-user/${repoName}\n`,
+      });
+    }
+    if (
+      command.includes('gh api repos/test-user/') &&
+      command.includes('/contents/')
+    ) {
+      const repoName = command.match(
+        /repos\/test-user\/([^/]+)\/contents\//
+      )?.[1];
+      return createCommandResult({
+        stdout: `https://raw.githubusercontent.com/test-user/${repoName}/main/test-fixtures-repo-collision-retry.log\n`,
+      });
+    }
+
+    return createCommandResult();
+  });
+
+  const result = await uploadLog({
+    filePath: retryFile,
+    onlyRepository: true,
+    isPublic: true,
+    commandStreamFactory: () => fakeCommandStream,
+  });
+
+  assert.equal(result.type, 'repo');
+  assert.equal(result.isPublic, true);
+  assert.ok(
+    result.url.startsWith(
+      'https://github.com/test-user/log-test-fixtures-repo-collision-retry-'
+    ),
+    `Expected retry URL with timestamp suffix, got: ${result.url}`
+  );
+  assert.ok(
+    result.rawUrl.includes('/log-test-fixtures-repo-collision-retry-'),
+    `Expected raw URL for retried repo, got: ${result.rawUrl}`
+  );
+
+  const repoCreateCommands = commands.filter((command) =>
+    command.includes('gh repo create')
+  );
+  assert.equal(
+    repoCreateCommands.length,
+    2,
+    'Should attempt repo creation twice'
+  );
+  assert.ok(
+    repoCreateCommands[0].includes(
+      'gh repo create log-test-fixtures-repo-collision-retry --public --source=. --push'
+    ),
+    `Expected initial deterministic repo name, got: ${repoCreateCommands[0]}`
+  );
+  assert.ok(
+    repoCreateCommands[1].includes(
+      'gh repo create log-test-fixtures-repo-collision-retry-'
+    ) && repoCreateCommands[1].includes('--public --source=. --push'),
+    `Expected timestamp-suffixed retry repo name, got: ${repoCreateCommands[1]}`
+  );
 });
 
 // Clean up function (optional, can be called after tests)
