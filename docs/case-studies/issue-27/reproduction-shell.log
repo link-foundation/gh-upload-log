@@ -1,0 +1,27 @@
+repo=codex-issue27-1777026810
+tmpdir=/tmp/issue27-repro-K31kBK
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /tmp/issue27-repro-K31kBK/.git/
+[main (root-commit) 60c1043] init
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.log
+--- first create (private) ---
+https://github.com/konard/codex-issue27-1777026810
+To https://github.com/konard/codex-issue27-1777026810.git
+ * [new branch]      HEAD -> main
+branch 'main' set up to track 'origin/main'.
+first_status=0
+--- second create (public, same name) ---
+GraphQL: Name already exists on this account (createRepository)
+second_status=1
+--- repo state ---
+{"isPrivate":true,"name":"codex-issue27-1777026810","url":"https://github.com/konard/codex-issue27-1777026810","visibility":"PRIVATE"}

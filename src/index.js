@@ -90,6 +90,105 @@ function createDefaultLogger(options = {}) {
 }
 
 /**
+ * Load the command-stream tag or a test override
+ *
+ * @param {Object} [options={}] - Optional command runner overrides
+ * @returns {Promise<Function>} command-stream template tag function
+ */
+async function getCommandStream(options = {}) {
+  if (typeof options.commandStreamFactory === 'function') {
+    return options.commandStreamFactory();
+  }
+
+  const { $ } = await import('command-stream');
+  return $;
+}
+
+/**
+ * Get the exit code from a command-stream result
+ *
+ * @param {Object} result - command-stream result object
+ * @returns {number} Exit code (0 when unavailable)
+ */
+function getCommandExitCode(result) {
+  if (typeof result?.code === 'number') {
+    return result.code;
+  }
+  if (typeof result?.child?.exitCode === 'number') {
+    return result.child.exitCode;
+  }
+  return 0;
+}
+
+/**
+ * Throw when a command-stream result indicates a failed command
+ *
+ * @param {Object} result - command-stream result object
+ * @param {string} operation - Human-readable operation description
+ * @returns {Object} The original result when successful
+ */
+function ensureCommandSucceeded(result, operation) {
+  const exitCode = getCommandExitCode(result);
+
+  if (exitCode === 0) {
+    return result;
+  }
+
+  const stderr = result?.stderr?.trim();
+  const stdout = result?.stdout?.trim();
+  const detail = stderr || stdout || `Command exited with code ${exitCode}`;
+  const error = new Error(`Failed to ${operation}: ${detail}`);
+
+  error.code = exitCode;
+  error.stdout = result?.stdout || '';
+  error.stderr = result?.stderr || '';
+  error.commandResult = result;
+
+  throw error;
+}
+
+/**
+ * Extract a GitHub repository URL from command output
+ *
+ * @param {string} output - Command stdout
+ * @returns {string|null} Repository URL if found
+ */
+function extractGitHubRepoUrl(output = '') {
+  return (
+    output
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .find((line) => /^https:\/\/github\.com\/[^/\s]+\/[^/\s]+$/.test(line)) ||
+    null
+  );
+}
+
+/**
+ * Check whether repository creation failed because the generated name already exists
+ *
+ * @param {string} errorText - stderr or error message from gh repo create
+ * @returns {boolean} True when the repo name is already taken on the current account
+ */
+function isRepositoryNameConflict(errorText = '') {
+  const normalized = errorText.toLowerCase();
+  return (
+    normalized.includes('name already exists on this account') ||
+    normalized.includes('already exists')
+  );
+}
+
+/**
+ * Generate a collision-safe repository name by appending a timestamp suffix
+ *
+ * @param {string} repositoryName - Base repository name
+ * @param {number} [timestamp=Date.now()] - Timestamp or numeric suffix
+ * @returns {string} Unique repository name candidate
+ */
+function generateCollisionRepoName(repositoryName, timestamp = Date.now()) {
+  return `${repositoryName}-${timestamp}`;
+}
+
+/**
  * Constants for GitHub limits
  *
  * Note: While GitHub documents a 100MB limit for gist files, the API has
@@ -111,7 +210,7 @@ export const GITHUB_REPO_CHUNK_SIZE = 100 * 1024 * 1024; // 100 MB chunks for re
  * @returns {string} Normalized name suitable for GitHub
  */
 export function normalizeFileName(filePath) {
-  return filePath.replace(/^\/*/, '').replace(/\//g, '-');
+  return filePath.replace(/^[\\/]+/, '').replace(/[\\/]/g, '-');
 }
 
 /**
@@ -253,7 +352,9 @@ export async function splitFileIntoChunks(
   // Use split command to create chunks
   // -b: bytes per chunk, -d: use numeric suffixes, -a: suffix length
   const chunkSizeMB = Math.ceil(chunkSize / (1024 * 1024));
-  await $`split -b ${chunkSizeMB}m -d -a 2 ${inputPath} ${path.join(outputDir, chunkPrefix)}`;
+  const splitResult =
+    await $`split -b ${chunkSizeMB}m -d -a 2 ${inputPath} ${path.join(outputDir, chunkPrefix)}`;
+  ensureCommandSucceeded(splitResult, 'split log file into repository chunks');
 
   // Get list of created chunks
   const chunks = fs
@@ -277,7 +378,7 @@ export async function splitFileIntoChunks(
  * @returns {Promise<Object>} Gist information including URL
  */
 export async function uploadAsGist(options = {}) {
-  const { $ } = await import('command-stream');
+  const $ = await getCommandStream(options);
 
   const {
     filePath,
@@ -374,7 +475,7 @@ export async function uploadAsGist(options = {}) {
  * @returns {Promise<Object>} Repository information including URL
  */
 export async function uploadAsRepo(options = {}) {
-  const { $ } = await import('command-stream');
+  const $ = await getCommandStream(options);
 
   const {
     filePath,
@@ -388,9 +489,9 @@ export async function uploadAsRepo(options = {}) {
   }
 
   const log = createDefaultLogger({ verbose, logger });
-  const repositoryName = generateRepoName(filePath);
+  const baseRepositoryName = generateRepoName(filePath);
   const normalized = normalizeFileName(filePath);
-  const workDir = `/tmp/${repositoryName}-${Date.now()}`;
+  const workDir = `/tmp/${baseRepositoryName}-${Date.now()}`;
 
   try {
     // Create work directory
@@ -423,29 +524,68 @@ export async function uploadAsRepo(options = {}) {
 
     // Initialize git repository
     log.debug(() => '→ Initializing git repository...');
-    await $`cd ${workDir} && git init`;
-    await $`cd ${workDir} && git branch -m main`;
+    ensureCommandSucceeded(
+      await $`cd ${workDir} && git init`,
+      'initialize temporary git repository'
+    );
+    ensureCommandSucceeded(
+      await $`cd ${workDir} && git branch -m main`,
+      'rename temporary git branch to main'
+    );
 
     // Add and commit files
     log.debug(() => '→ Adding and committing files...');
-    await $`cd ${workDir} && git add .`;
-    await $`cd ${workDir} && git commit -m "Add log file"`;
+    ensureCommandSucceeded(
+      await $`cd ${workDir} && git add .`,
+      'stage repository upload files'
+    );
+    ensureCommandSucceeded(
+      await $`cd ${workDir} && git commit -m "Add log file"`,
+      'commit repository upload files'
+    );
 
     // Get current GitHub user
     log.debug(() => 'Getting GitHub user information...');
-    const whoamiResult = await $`gh api user --jq .login`;
+    const whoamiResult = ensureCommandSucceeded(
+      await $`gh api user --jq .login`,
+      'fetch authenticated GitHub username'
+    );
     const githubUser = whoamiResult.stdout.trim();
     log.debug(() => `GitHub user: ${githubUser}`);
 
     // Create GitHub repo and push
+    let repositoryName = baseRepositoryName;
+    const visibility = isPublic ? '--public' : '--private';
+    let repoCreateResult;
+
     log.debug(
       () =>
         `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`
     );
-    const visibility = isPublic ? '--public' : '--private';
-    await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
+    repoCreateResult =
+      await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
 
-    const repoUrl = `https://github.com/${githubUser}/${repositoryName}`;
+    if (
+      getCommandExitCode(repoCreateResult) !== 0 &&
+      isRepositoryNameConflict(repoCreateResult.stderr)
+    ) {
+      repositoryName = generateCollisionRepoName(repositoryName);
+      log.warn(
+        () =>
+          `Repository ${baseRepositoryName} already exists; retrying with ${repositoryName}`
+      );
+      repoCreateResult =
+        await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
+    }
+
+    ensureCommandSucceeded(
+      repoCreateResult,
+      `create ${isPublic ? 'public' : 'private'} GitHub repo ${repositoryName}`
+    );
+
+    const repoUrl =
+      extractGitHubRepoUrl(repoCreateResult.stdout) ||
+      `https://github.com/${githubUser}/${repositoryName}`;
 
     log.debug(() => `Repository created successfully: ${repoUrl}`);
 

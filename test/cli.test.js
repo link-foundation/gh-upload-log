@@ -16,10 +16,10 @@ const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 
 // Helper function to run CLI command
-function runCLI(args) {
+function runCLI(args, env = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn('node', [cliPath, ...args], {
-      env: { ...process.env },
+      env: { ...process.env, ...env },
     });
 
     let stdout = '';
