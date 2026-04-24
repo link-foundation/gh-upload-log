@@ -1,5 +1,12 @@
 # gh-upload-log
 
+## 0.7.1
+
+### Patch Changes
+
+- 4c2044e: Handle repository-create exit failures correctly and retry with a unique
+  repository name when the generated name already exists.
+
 ## 0.7.0
 
 ### Minor Changes
