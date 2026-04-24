@@ -1,0 +1,32 @@
+[
+  {
+    "mergedAt": "2026-03-28T22:20:54Z",
+    "number": 26,
+    "title": "feat: handle ENOSPC errors gracefully with actionable error messages",
+    "url": "https://github.com/link-foundation/gh-upload-log/pull/26"
+  },
+  {
+    "mergedAt": "2026-03-28T21:54:27Z",
+    "number": 25,
+    "title": "fix: fail early with clean error when file does not exist",
+    "url": "https://github.com/link-foundation/gh-upload-log/pull/25"
+  },
+  {
+    "mergedAt": "2026-01-27T12:32:23Z",
+    "number": 22,
+    "title": "feat: Add direct raw file URL for single-file uploads",
+    "url": "https://github.com/link-foundation/gh-upload-log/pull/22"
+  },
+  {
+    "mergedAt": "2026-01-06T23:51:24Z",
+    "number": 20,
+    "title": "fix: Handle HTTP 502 errors for large gist uploads",
+    "url": "https://github.com/link-foundation/gh-upload-log/pull/20"
+  },
+  {
+    "mergedAt": "2025-12-26T19:47:46Z",
+    "number": 18,
+    "title": "feat: Add NPM badge to README.md",
+    "url": "https://github.com/link-foundation/gh-upload-log/pull/18"
+  }
+]
