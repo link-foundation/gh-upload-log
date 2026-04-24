@@ -52,10 +52,15 @@ function writeExecutable(filePath, content) {
 }
 
 function createFakeRepoUploadEnv(mode) {
+  const fakeBinRoot = path.join(__dirname, 'fixtures');
+  if (!fs.existsSync(fakeBinRoot)) {
+    fs.mkdirSync(fakeBinRoot, { recursive: true });
+  }
+
   const fakeBinDir = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'gh-upload-log-fake-bin-')
+    path.join(fakeBinRoot, 'gh-upload-log-fake-bin-')
   );
-  const ghLogPath = path.join(fakeBinDir, 'gh-invocations.jsonl');
+  const ghLogPath = path.join(fakeBinDir, 'gh-invocations.log');
   const ghStatePath = path.join(fakeBinDir, 'gh-state.json');
 
   writeExecutable(
