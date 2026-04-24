@@ -136,6 +136,14 @@ exit 1
   };
 }
 
+function readFakeGhLog(fakeEnv) {
+  if (!fs.existsSync(fakeEnv.ghLogPath)) {
+    return '[missing fake gh log]';
+  }
+
+  return fs.readFileSync(fakeEnv.ghLogPath, 'utf8');
+}
+
 // Setup test file
 function setupTestFile() {
   if (!fs.existsSync(testLogFile)) {
@@ -246,11 +254,11 @@ test('CLI fails when gh repo create keeps returning a name collision', async () 
     assert.equal(result.code, 1, 'Should exit with code 1');
     assert.ok(
       result.output.includes('GraphQL: Name already exists on this account'),
-      'Should surface the gh repo create error'
+      `Should surface the gh repo create error.\nOutput:\n${result.output}\nFake gh log:\n${readFakeGhLog(fakeEnv)}`
     );
     assert.ok(
       !result.output.includes('✅ Repository created'),
-      'Should not report success when repo creation fails'
+      `Should not report success when repo creation fails.\nOutput:\n${result.output}\nFake gh log:\n${readFakeGhLog(fakeEnv)}`
     );
   } finally {
     fakeEnv.cleanup();
@@ -266,16 +274,20 @@ test('CLI retries repository creation with a unique name after a collision', asy
       fakeEnv.env
     );
 
-    assert.equal(result.code, 0, 'Should exit with code 0 after retry');
+    assert.equal(
+      result.code,
+      0,
+      `Should exit with code 0 after retry.\nOutput:\n${result.output}\nFake gh log:\n${readFakeGhLog(fakeEnv)}`
+    );
     assert.ok(
       result.output.includes('✅ Repository created (🌐 public)'),
-      'Should report successful public repository creation'
+      `Should report successful public repository creation.\nOutput:\n${result.output}\nFake gh log:\n${readFakeGhLog(fakeEnv)}`
     );
     assert.ok(
       result.output.includes(
         'https://github.com/test-user/log-tmp-test-cli-log-file-'
       ),
-      'Should print the retried unique repository URL'
+      `Should print the retried unique repository URL.\nOutput:\n${result.output}\nFake gh log:\n${readFakeGhLog(fakeEnv)}`
     );
 
     const repoCreateCalls = fs
