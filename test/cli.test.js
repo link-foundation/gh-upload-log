@@ -62,6 +62,7 @@ function setupLargeRepoTestFile() {
     return;
   }
 
+  fs.mkdirSync(path.dirname(largeCliRepoFile), { recursive: true });
   const fd = fs.openSync(largeCliRepoFile, 'w');
   fs.ftruncateSync(fd, 26 * 1024 * 1024);
   fs.closeSync(fd);
