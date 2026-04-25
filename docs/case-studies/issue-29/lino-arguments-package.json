@@ -1,0 +1,15 @@
+{
+  "version": "0.3.0",
+  "time": {
+    "created": "2025-11-15T13:43:20.521Z",
+    "modified": "2026-04-10T22:24:25.303Z",
+    "0.2.1": "2025-11-15T13:43:20.741Z",
+    "0.2.5": "2025-12-09T06:58:29.473Z",
+    "0.3.0": "2026-04-10T22:24:25.006Z"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/link-foundation/lino-arguments.git"
+  },
+  "description": "A setup of Links Notation Environment (lenv) + yargs to support easy configuration of CLI apps"
+}

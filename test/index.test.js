@@ -93,6 +93,16 @@ function createFakeCommandStream(handler) {
   return commandStream;
 }
 
+function ensureLargeTestFile(filePath, sizeBytes = 26 * 1024 * 1024) {
+  if (fs.existsSync(filePath) && fs.statSync(filePath).size === sizeBytes) {
+    return;
+  }
+
+  const fd = fs.openSync(filePath, 'w');
+  fs.ftruncateSync(fd, sizeBytes);
+  fs.closeSync(fd);
+}
+
 // Test: normalizeFileName
 test('normalizeFileName - removes leading slashes', () => {
   const result = normalizeFileName('/home/user/test.log');
@@ -520,6 +530,267 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
       'gh repo create log-test-fixtures-repo-collision-retry-'
     ) && repoCreateCommands[1].includes('--public --source=. --push'),
     `Expected timestamp-suffixed retry repo name, got: ${repoCreateCommands[1]}`
+  );
+});
+
+test('uploadLog - stores large files in the shared visibility repository by default', async () => {
+  const sharedFile = path.join('test', 'fixtures', 'shared-default-large.log');
+  ensureLargeTestFile(sharedFile);
+
+  const sharedFolder = 'log-test-fixtures-shared-default-large';
+  const commands = [];
+  let folderLookupCalls = 0;
+
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (
+      command ===
+      'gh api repos/test-user/private-logs --jq {"defaultBranch": .default_branch, "visibility": .visibility}'
+    ) {
+      return createCommandResult({
+        stdout: '{"defaultBranch":"main","visibility":"private"}\n',
+      });
+    }
+    if (
+      command ===
+      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+    ) {
+      folderLookupCalls += 1;
+
+      if (folderLookupCalls === 1) {
+        return createCommandResult({
+          code: 1,
+          stderr: 'gh: Not Found (HTTP 404)\n',
+        });
+      }
+
+      return createCommandResult({
+        stdout: JSON.stringify([
+          {
+            name: 'test-fixtures-shared-default-large.log',
+            download_url:
+              'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-default-large/test-fixtures-shared-default-large.log',
+          },
+        ]),
+      });
+    }
+    if (command.includes('git init')) {
+      return createCommandResult();
+    }
+    if (command.includes('git branch -m main')) {
+      return createCommandResult();
+    }
+    if (
+      command.includes(
+        'git remote add origin https://github.com/test-user/private-logs.git'
+      )
+    ) {
+      return createCommandResult();
+    }
+    if (command.includes('git sparse-checkout init --no-cone')) {
+      return createCommandResult();
+    }
+    if (command.includes(`git sparse-checkout add ${sharedFolder}`)) {
+      return createCommandResult();
+    }
+    if (
+      command.includes('git fetch --depth 1 --filter=blob:none origin main')
+    ) {
+      return createCommandResult();
+    }
+    if (command.includes('git checkout -B main FETCH_HEAD')) {
+      return createCommandResult();
+    }
+    if (command.includes('git add .')) {
+      return createCommandResult();
+    }
+    if (command.includes('git commit -m "Add log file"')) {
+      return createCommandResult();
+    }
+    if (command.includes('git push -u origin main')) {
+      return createCommandResult();
+    }
+
+    return createCommandResult();
+  });
+
+  const result = await uploadLog({
+    filePath: sharedFile,
+    onlyRepository: true,
+    commandStreamFactory: () => fakeCommandStream,
+  });
+
+  assert.equal(result.type, 'repo');
+  assert.equal(result.repositoryName, 'private-logs');
+  assert.equal(result.repositoryPath, sharedFolder);
+  assert.equal(result.isPublic, false);
+  assert.equal(result.fileCount, 1);
+  assert.equal(result.deduplicated, false);
+  assert.equal(
+    result.url,
+    'https://github.com/test-user/private-logs/tree/main/log-test-fixtures-shared-default-large'
+  );
+  assert.equal(
+    result.rawUrl,
+    'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-default-large/test-fixtures-shared-default-large.log'
+  );
+  assert.ok(
+    commands.some((command) =>
+      command.includes(
+        'git remote add origin https://github.com/test-user/private-logs.git'
+      )
+    ),
+    'Expected shared repository remote to be configured'
+  );
+  assert.ok(
+    !commands.some((command) =>
+      command.includes(
+        'gh repo create log-test-fixtures-shared-default-large --private --source=. --push'
+      )
+    ),
+    'Default large-file uploads should not create a dedicated per-log repository'
+  );
+});
+
+test('uploadLog - skips duplicate uploads already present in the shared repository', async () => {
+  const duplicateFile = path.join(
+    'test',
+    'fixtures',
+    'shared-duplicate-large.log'
+  );
+  ensureLargeTestFile(duplicateFile);
+
+  const sharedFolder = 'log-test-fixtures-shared-duplicate-large';
+  const commands = [];
+
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (
+      command ===
+      'gh api repos/test-user/private-logs --jq {"defaultBranch": .default_branch, "visibility": .visibility}'
+    ) {
+      return createCommandResult({
+        stdout: '{"defaultBranch":"main","visibility":"private"}\n',
+      });
+    }
+    if (
+      command ===
+      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+    ) {
+      return createCommandResult({
+        stdout: JSON.stringify([
+          {
+            name: 'test-fixtures-shared-duplicate-large.log',
+            download_url:
+              'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-duplicate-large/test-fixtures-shared-duplicate-large.log',
+          },
+        ]),
+      });
+    }
+
+    return createCommandResult();
+  });
+
+  const result = await uploadLog({
+    filePath: duplicateFile,
+    onlyRepository: true,
+    commandStreamFactory: () => fakeCommandStream,
+  });
+
+  assert.equal(result.type, 'repo');
+  assert.equal(result.repositoryName, 'private-logs');
+  assert.equal(result.repositoryPath, sharedFolder);
+  assert.equal(result.deduplicated, true);
+  assert.equal(result.fileCount, 1);
+  assert.equal(
+    result.url,
+    'https://github.com/test-user/private-logs/tree/main/log-test-fixtures-shared-duplicate-large'
+  );
+  assert.equal(
+    result.rawUrl,
+    'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-duplicate-large/test-fixtures-shared-duplicate-large.log'
+  );
+  assert.ok(
+    !commands.some((command) => command.includes('git init')),
+    'Duplicate detection should avoid a git working tree'
+  );
+  assert.ok(
+    !commands.some((command) => command.includes('git push')),
+    'Duplicate detection should not push a new commit'
+  );
+});
+
+test('uploadLog - keeps dedicated repository mode available when shared mode is disabled', async () => {
+  const legacyFile = path.join('test', 'fixtures', 'legacy-repo-large.log');
+  ensureLargeTestFile(legacyFile);
+
+  const commands = [];
+
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command.includes('git init')) {
+      return createCommandResult();
+    }
+    if (command.includes('git branch -m main')) {
+      return createCommandResult();
+    }
+    if (command.includes('git add .')) {
+      return createCommandResult();
+    }
+    if (command.includes('git commit -m "Add log file"')) {
+      return createCommandResult();
+    }
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (command.includes('gh repo create')) {
+      const repoName = command.match(/gh repo create ([^ ]+)/)?.[1];
+      return createCommandResult({
+        stdout: `https://github.com/test-user/${repoName}\n`,
+      });
+    }
+    if (
+      command.includes('gh api repos/test-user/') &&
+      command.includes('/contents/')
+    ) {
+      const repoName = command.match(
+        /repos\/test-user\/([^/]+)\/contents\//
+      )?.[1];
+      return createCommandResult({
+        stdout: `https://raw.githubusercontent.com/test-user/${repoName}/main/test-fixtures-legacy-repo-large.part-00\n`,
+      });
+    }
+
+    return createCommandResult();
+  });
+
+  const result = await uploadLog({
+    filePath: legacyFile,
+    onlyRepository: true,
+    useSharedRepository: false,
+    isPublic: true,
+    commandStreamFactory: () => fakeCommandStream,
+  });
+
+  assert.equal(result.type, 'repo');
+  assert.equal(result.repositoryName, 'log-test-fixtures-legacy-repo-large');
+  assert.equal(result.isPublic, true);
+  assert.ok(
+    commands.some((command) =>
+      command.includes(
+        'gh repo create log-test-fixtures-legacy-repo-large --public --source=. --push'
+      )
+    ),
+    'Legacy repository mode should still create a dedicated repository'
   );
 });
 

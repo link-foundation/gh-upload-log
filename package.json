@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "command-stream": "^0.7.1",
-    "lino-arguments": "^0.2.1",
+    "lino-arguments": "^0.3.0",
     "log-lazy": "^1.0.4",
     "use-m": "^8.13.7",
     "yargs": "^17.7.2"

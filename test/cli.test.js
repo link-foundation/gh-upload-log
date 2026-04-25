@@ -14,6 +14,7 @@ const __dirname = path.dirname(__filename);
 
 const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
+const largeCliRepoFile = path.join('test', 'fixtures', 'cli-shared-large.log');
 
 // Helper function to run CLI command
 function runCLI(args, env = {}) {
@@ -53,7 +54,22 @@ function setupTestFile() {
   }
 }
 
+function setupLargeRepoTestFile() {
+  if (
+    fs.existsSync(largeCliRepoFile) &&
+    fs.statSync(largeCliRepoFile).size === 26 * 1024 * 1024
+  ) {
+    return;
+  }
+
+  fs.mkdirSync(path.dirname(largeCliRepoFile), { recursive: true });
+  const fd = fs.openSync(largeCliRepoFile, 'w');
+  fs.ftruncateSync(fd, 26 * 1024 * 1024);
+  fs.closeSync(fd);
+}
+
 setupTestFile();
+setupLargeRepoTestFile();
 
 // Test: Basic usage without flags (should not show conflicts error)
 test('CLI basic usage - accepts positional argument without conflicts error', async () => {
@@ -125,6 +141,43 @@ test('CLI with --only-repository flag', async () => {
   assert.ok(
     result.output.includes('Repository'),
     'Should use repo upload type'
+  );
+});
+
+test('CLI repository dry mode uses shared repositories for large files by default', async () => {
+  const result = await runCLI([
+    largeCliRepoFile,
+    '--only-repository',
+    '--dry-mode',
+    '--verbose',
+  ]);
+  assert.equal(result.code, 0, 'Should exit with code 0');
+  assert.ok(
+    result.output.includes('Repository: private-logs'),
+    'Large repository-mode uploads should default to the shared private repository'
+  );
+  assert.ok(
+    result.output.includes('Path: log-test-fixtures-cli-shared-large'),
+    'Shared repository dry mode should show the folder path'
+  );
+});
+
+test('CLI repository dry mode allows disabling shared repositories', async () => {
+  const result = await runCLI([
+    largeCliRepoFile,
+    '--only-repository',
+    '--no-shared-repository',
+    '--dry-mode',
+    '--verbose',
+  ]);
+  assert.equal(result.code, 0, 'Should exit with code 0');
+  assert.ok(
+    result.output.includes('Repository: log-test-fixtures-cli-shared-large'),
+    'Legacy repository mode should show the dedicated repository name'
+  );
+  assert.ok(
+    !result.output.includes('Repository: private-logs'),
+    'Disabling shared repositories should stop using the shared private repository'
   );
 });
 
