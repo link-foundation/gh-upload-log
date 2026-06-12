@@ -411,6 +411,7 @@ test('uploadLog - surfaces gh repo create failures instead of reporting success'
     await uploadLog({
       filePath: collisionFile,
       onlyRepository: true,
+      useSharedRepository: false,
       isPublic: true,
       commandStreamFactory: () => fakeCommandStream,
     });
@@ -494,6 +495,7 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
   const result = await uploadLog({
     filePath: retryFile,
     onlyRepository: true,
+    useSharedRepository: false,
     isPublic: true,
     commandStreamFactory: () => fakeCommandStream,
   });
@@ -791,6 +793,139 @@ test('uploadLog - keeps dedicated repository mode available when shared mode is 
       )
     ),
     'Legacy repository mode should still create a dedicated repository'
+  );
+});
+
+test('uploadLog - gist fallback uses shared repositories for small files by default', async () => {
+  const fallbackFile = path.join('test', 'fixtures', 'auto-fallback-small.log');
+  fs.writeFileSync(fallbackFile, 'fallback to shared repository\n');
+
+  const sharedFolder = 'log-test-fixtures-auto-fallback-small';
+  const commands = [];
+  let folderLookupCalls = 0;
+
+  const fakeCommandStream = createFakeCommandStream((command) => {
+    commands.push(command);
+
+    if (command.startsWith('gh gist create ')) {
+      return createCommandResult({
+        code: 1,
+        stderr: 'secondary rate limit\n',
+      });
+    }
+    if (command === 'gh api user --jq .login') {
+      return createCommandResult({ stdout: 'test-user\n' });
+    }
+    if (
+      command ===
+      'gh api repos/test-user/public-logs --jq {"defaultBranch": .default_branch, "visibility": .visibility}'
+    ) {
+      return createCommandResult({
+        stdout: '{"defaultBranch":"main","visibility":"public"}\n',
+      });
+    }
+    if (
+      command ===
+      `gh api repos/test-user/public-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+    ) {
+      folderLookupCalls += 1;
+
+      if (folderLookupCalls === 1) {
+        return createCommandResult({
+          code: 1,
+          stderr: 'gh: Not Found (HTTP 404)\n',
+        });
+      }
+
+      return createCommandResult({
+        stdout: JSON.stringify([
+          {
+            name: 'test-fixtures-auto-fallback-small.log',
+            download_url:
+              'https://raw.githubusercontent.com/test-user/public-logs/main/log-test-fixtures-auto-fallback-small/test-fixtures-auto-fallback-small.log',
+          },
+        ]),
+      });
+    }
+    if (command.includes('git init')) {
+      return createCommandResult();
+    }
+    if (command.includes('git branch -m main')) {
+      return createCommandResult();
+    }
+    if (
+      command.includes(
+        'git remote add origin https://github.com/test-user/public-logs.git'
+      )
+    ) {
+      return createCommandResult();
+    }
+    if (command.includes('git sparse-checkout init --no-cone')) {
+      return createCommandResult();
+    }
+    if (command.includes(`git sparse-checkout add ${sharedFolder}`)) {
+      return createCommandResult();
+    }
+    if (
+      command.includes('git fetch --depth 1 --filter=blob:none origin main')
+    ) {
+      return createCommandResult();
+    }
+    if (command.includes('git checkout -B main FETCH_HEAD')) {
+      return createCommandResult();
+    }
+    if (command.includes('git add .')) {
+      return createCommandResult();
+    }
+    if (command.includes('git commit -m "Add log file"')) {
+      return createCommandResult();
+    }
+    if (command.includes('git push -u origin main')) {
+      return createCommandResult();
+    }
+
+    return createCommandResult();
+  });
+
+  const result = await uploadLog({
+    filePath: fallbackFile,
+    isPublic: true,
+    description: 'fallback',
+    commandStreamFactory: () => fakeCommandStream,
+  });
+
+  assert.equal(result.type, 'repo');
+  assert.equal(result.repositoryName, 'public-logs');
+  assert.equal(result.repositoryPath, sharedFolder);
+  assert.equal(result.isPublic, true);
+  assert.equal(result.fileCount, 1);
+  assert.equal(
+    result.url,
+    'https://github.com/test-user/public-logs/tree/main/log-test-fixtures-auto-fallback-small'
+  );
+  assert.equal(
+    result.rawUrl,
+    'https://raw.githubusercontent.com/test-user/public-logs/main/log-test-fixtures-auto-fallback-small/test-fixtures-auto-fallback-small.log'
+  );
+  assert.ok(
+    commands.some((command) => command.startsWith('gh gist create ')),
+    'Auto mode should attempt gist upload first for small files'
+  );
+  assert.ok(
+    commands.some((command) =>
+      command.includes(
+        'git remote add origin https://github.com/test-user/public-logs.git'
+      )
+    ),
+    'Fallback should configure the shared public repository remote'
+  );
+  assert.ok(
+    !commands.some((command) =>
+      command.includes(
+        'gh repo create log-test-fixtures-auto-fallback-small --public --source=. --push'
+      )
+    ),
+    'Fallback should not create a dedicated per-log repository by default'
   );
 });
 

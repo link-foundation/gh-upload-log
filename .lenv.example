@@ -19,7 +19,7 @@
 # Force upload only as GitHub Repository (default: false)
 # GH_UPLOAD_LOG_ONLY_REPOSITORY: false
 
-# Use shared private-logs/public-logs repositories for large files (default: true)
+# Use shared private-logs/public-logs repositories for repository-mode uploads (default: true)
 # GH_UPLOAD_LOG_SHARED_REPOSITORY: true
 
 # Enable dry run mode by default (default: false)
