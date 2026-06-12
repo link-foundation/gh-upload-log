@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.8.1
+
+### Patch Changes
+
+- 647ab73: Route repository fallbacks through shared log repositories by default.
+
 ## 0.8.0
 
 ### Minor Changes
