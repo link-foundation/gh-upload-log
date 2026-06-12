@@ -14,7 +14,6 @@ import {
   getCommandExitCode,
   getCommandStream,
   getFileSize,
-  GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   isRepositoryNameConflict,
@@ -41,10 +40,10 @@ function isMissingRemoteRefError(errorText = '') {
 }
 
 export function shouldUseSharedRepositoryMode(
-  filePath,
+  _filePath,
   useSharedRepository = true
 ) {
-  return useSharedRepository && getFileSize(filePath) > GITHUB_GIST_FILE_LIMIT;
+  return useSharedRepository;
 }
 
 export function getSharedRepositoryName(isPublic = false) {
@@ -552,13 +551,13 @@ async function uploadAsSharedRepo(options = {}) {
 /**
  * Upload a file as a GitHub repository (with splitting if needed)
  *
- * Large files use the shared visibility repositories (`private-logs` or
+ * Repository-mode uploads use the shared visibility repositories (`private-logs` or
  * `public-logs`) by default. The legacy dedicated-repository mode remains
  * available through the `useSharedRepository` option.
  *
  * @param {Object} options - Upload options
  * @param {string} options.filePath - Path to the file to upload
- * @param {boolean} options.useSharedRepository - Use shared log repositories for large files (default: true)
+ * @param {boolean} options.useSharedRepository - Use shared log repositories for repository-mode uploads (default: true)
  * @returns {Promise<Object>} Repository information including URL
  */
 export function uploadAsRepo(options = {}) {

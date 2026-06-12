@@ -144,7 +144,7 @@ test('CLI with --only-repository flag', async () => {
   );
 });
 
-test('CLI repository dry mode uses shared repositories for large files by default', async () => {
+test('CLI repository dry mode uses shared repositories by default', async () => {
   const result = await runCLI([
     largeCliRepoFile,
     '--only-repository',
@@ -154,7 +154,7 @@ test('CLI repository dry mode uses shared repositories for large files by defaul
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(
     result.output.includes('Repository: private-logs'),
-    'Large repository-mode uploads should default to the shared private repository'
+    'Repository-mode uploads should default to the shared private repository'
   );
   assert.ok(
     result.output.includes('Path: log-test-fixtures-cli-shared-large'),
