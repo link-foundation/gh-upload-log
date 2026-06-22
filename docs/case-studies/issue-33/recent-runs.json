@@ -1,0 +1,11 @@
+[
+  {
+    "conclusion": "failure",
+    "createdAt": "2026-06-22T08:55:32Z",
+    "databaseId": 27941129649,
+    "event": "pull_request",
+    "headSha": "2dda592055c383e575efc6e63af60c4f42bc335c",
+    "name": "Checks and release",
+    "status": "completed"
+  }
+]

@@ -134,6 +134,20 @@ test('CLI with --only-gist flag', async () => {
   assert.ok(result.output.includes('Gist'), 'Should use gist upload type');
 });
 
+test('CLI gist dry mode shows .log.txt filename in verbose details', async () => {
+  const result = await runCLI([
+    testLogFile,
+    '--only-gist',
+    '--dry-mode',
+    '--verbose',
+  ]);
+  assert.equal(result.code, 0, 'Should exit with code 0');
+  assert.ok(
+    result.output.includes('File name: tmp-test-cli-log-file.log.txt'),
+    `Should show browser-viewable gist file name, got:\n${result.output}`
+  );
+});
+
 // Test: --only-repository flag
 test('CLI with --only-repository flag', async () => {
   const result = await runCLI([testLogFile, '--only-repository', '--dry-mode']);

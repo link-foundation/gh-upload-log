@@ -1,0 +1,21 @@
+link-foundation/link-cli:docs/case-studies/issue-77/README.md: - `webassembly-25245349330-log.txt` preserves the stale Pages deploy failure. It
+link-foundation/link-cli:docs/case-studies/issue-77/README.md: - `csharp-25594941803-log.txt` preserves the stale C# failure. It included Windows
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-25/data/hive-mind-file-tree.txt: docs/case-studies/issue-1008/failed-case-pr89-log.txt
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-25/data/hive-mind-file-tree.txt: docs/case-studies/issue-1008/working-case-pr124-log.txt
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-25/data/hive-mind-file-tree.txt: docs/case-studies/issue-719-usage-limit/working-session-logs/logs.git-log.txt
+link-foundation/command-stream:js/README.md: await $`deploy staging | tee log.txt`; // Works in pipelines!
+link-foundation/command-stream:js/README.md: await $`git log --oneline | head -n 3 | uppercase | cat > LOG.txt`;
+link-foundation/link-cli:docs/case-studies/issue-79/evidence/link-cli-file-tree-after.txt: docs/case-studies/issue-79/evidence/csharp-25594941803-log.txt
+link-foundation/link-cli:docs/case-studies/issue-79/evidence/link-cli-file-tree-after.txt: docs/case-studies/issue-77/evidence/csharp-25594941803-log.txt
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-41/data/hive-mind-file-tree.txt: docs/case-studies/issue-1008/failed-case-pr89-log.txt
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-41/data/hive-mind-file-tree.txt: docs/case-studies/issue-1008/working-case-pr124-log.txt
+link-foundation/js-ai-driven-development-pipeline-template:docs/case-studies/issue-41/data/hive-mind-file-tree.txt: docs/case-studies/issue-1690/raw-data/full-log.txt
+link-foundation/meta-theory:docs/case-studies/issue-9/README.md: - [Solution Draft Log](./solution-draft-log.txt)
+link-foundation/link-cli:docs/case-studies/issue-79/evidence/link-cli-file-tree-before.txt: docs/case-studies/issue-77/evidence/csharp-25594941803-log.txt
+link-foundation/link-cli:docs/case-studies/issue-79/evidence/link-cli-file-tree-before.txt: docs/case-studies/issue-77/evidence/webassembly-25245349330-log.txt
+link-foundation/link-cli:docs/case-studies/issue-79/README.md: - `run-25594941803.json` and `csharp-25594941803-log.txt` preserve the stale
+link-foundation/link-cli:docs/case-studies/issue-77/evidence/link-cli-file-tree-after.txt: docs/case-studies/issue-77/evidence/csharp-25594941803-log.txt
+link-foundation/link-cli:docs/case-studies/issue-77/evidence/link-cli-file-tree-after.txt: docs/case-studies/issue-77/evidence/webassembly-25245349330-log.txt
+link-foundation/command-stream:js/examples/test-raw-function.mjs: const analyzeCmd = raw('cat log.txt | grep ERROR | wc -l');
+link-foundation/meta-theory:scripts/test-capture-quality.mjs: writeFileSync(join(outputDir, 'capture-log.txt'), captureLog);
+link-foundation/meta-theory:scripts/test-capture-quality.mjs: const captureLogPath = join(outputDir, 'capture-log.txt');

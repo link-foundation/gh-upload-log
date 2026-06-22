@@ -199,6 +199,7 @@ export const GITHUB_GIST_WEB_LIMIT = 25 * 1024 * 1024;
 export const GITHUB_REPO_CHUNK_SIZE = 100 * 1024 * 1024;
 export const DEFAULT_PRIVATE_LOGS_REPOSITORY = 'private-logs';
 export const DEFAULT_PUBLIC_LOGS_REPOSITORY = 'public-logs';
+export const LOG_TEXT_EXTENSION = '.log.txt';
 
 /**
  * Normalize a file path to create a valid GitHub name
@@ -209,6 +210,34 @@ export const DEFAULT_PUBLIC_LOGS_REPOSITORY = 'public-logs';
  */
 export function normalizeFileName(filePath) {
   return filePath.replace(/^[\\/]+/, '').replace(/[\\/]/g, '-');
+}
+
+/**
+ * Ensure uploaded log files use a browser-friendly text extension
+ *
+ * @param {string} fileName - Normalized file name
+ * @returns {string} File name ending in .log.txt
+ */
+export function ensureLogTextExtension(fileName) {
+  if (fileName.endsWith(LOG_TEXT_EXTENSION)) {
+    return fileName;
+  }
+
+  if (fileName.endsWith('.log')) {
+    return `${fileName}.txt`;
+  }
+
+  return `${fileName}${LOG_TEXT_EXTENSION}`;
+}
+
+/**
+ * Generate the user-facing uploaded log file name from a file path
+ *
+ * @param {string} filePath - The file path
+ * @returns {string} Normalized file name ending in .log.txt
+ */
+export function generateUploadedLogFileName(filePath) {
+  return ensureLogTextExtension(normalizeFileName(filePath));
 }
 
 /**
@@ -232,7 +261,7 @@ export function generateRepoName(filePath) {
  * @returns {string} Gist file name
  */
 export function generateGistFileName(filePath) {
-  return normalizeFileName(filePath);
+  return generateUploadedLogFileName(filePath);
 }
 
 /**
@@ -299,7 +328,11 @@ export async function splitFileIntoChunks(
 ) {
   const { $ } = await import('command-stream');
 
-  const baseName = path.basename(normalizeFileName(inputPath), '.log');
+  const inputFileName = inputPath.split(/[\\/]/).pop();
+  const uploadedFileName = ensureLogTextExtension(
+    normalizeFileName(inputFileName)
+  );
+  const baseName = uploadedFileName.slice(0, -LOG_TEXT_EXTENSION.length);
   const chunkPrefix = `${baseName}.part-`;
 
   if (!fs.existsSync(outputDir)) {
@@ -311,9 +344,22 @@ export async function splitFileIntoChunks(
     await $`split -b ${chunkSizeMB}m -d -a 2 ${inputPath} ${path.join(outputDir, chunkPrefix)}`;
   ensureCommandSucceeded(splitResult, 'split log file into repository chunks');
 
-  return fs
+  const splitFiles = fs
     .readdirSync(outputDir)
     .filter((file) => file.startsWith(chunkPrefix))
     .sort()
-    .map((file) => path.join(outputDir, file));
+    .map((file) => {
+      const currentPath = path.join(outputDir, file);
+      const finalPath = currentPath.endsWith(LOG_TEXT_EXTENSION)
+        ? currentPath
+        : `${currentPath}${LOG_TEXT_EXTENSION}`;
+
+      if (currentPath !== finalPath) {
+        fs.renameSync(currentPath, finalPath);
+      }
+
+      return finalPath;
+    });
+
+  return splitFiles.sort();
 }

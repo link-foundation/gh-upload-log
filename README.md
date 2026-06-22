@@ -306,6 +306,7 @@ Determine the best upload strategy for a file.
 
 - `normalizeFileName(filePath)`: Convert file path to GitHub-safe name
 - `generateRepoName(filePath)`: Generate repository name (with `log-` prefix)
+- `generateUploadedLogFileName(filePath)`: Generate uploaded `.log.txt` file name
 - `generateGistFileName(filePath)`: Generate gist file name
 - `fileExists(filePath)`: Check if file exists
 - `getFileSize(filePath)`: Get file size in bytes
@@ -329,11 +330,12 @@ File paths are normalized for GitHub compatibility:
 - Leading slashes are removed
 - All `/` characters are replaced with `-`
 - Repository names are prefixed with `log-`
+- Uploaded log files use `.log.txt` so raw file links open as text in browsers
 
 Examples:
 
-- `/home/user/app.log` → Gist: `home-user-app.log`, Repo: `log-home-user-app`
-- `./logs/error.log` → Gist: `.-logs-error.log`, Repo: `log-.-logs-error`
+- `/home/user/app.log` → Uploaded file: `home-user-app.log.txt`, Repo: `log-home-user-app`
+- `./logs/error.log` → Uploaded file: `.-logs-error.log.txt`, Repo: `log-.-logs-error`
 
 ### Upload Strategy
 
