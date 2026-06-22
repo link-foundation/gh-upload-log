@@ -8,6 +8,9 @@
  * - Repositories (for larger files that need repository storage)
  */
 
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {
   createDefaultLogger,
   createENOSPCError,
@@ -17,6 +20,7 @@ import {
   formatFileSize,
   generateGistFileName,
   generateRepoName,
+  generateUploadedLogFileName,
   getCommandStream,
   getFileSize,
   GITHUB_GIST_FILE_LIMIT,
@@ -40,6 +44,7 @@ export {
   formatFileSize,
   generateGistFileName,
   generateRepoName,
+  generateUploadedLogFileName,
   getFileSize,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
@@ -113,6 +118,8 @@ export async function uploadAsGist(options = {}) {
 
   const log = createDefaultLogger({ verbose, logger });
   const gistFileName = generateGistFileName(filePath);
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-upload-log-gist-'));
+  const stagedFilePath = path.join(workDir, gistFileName);
   const desc = description || `Log file: ${filePath.split('/').pop()}`;
 
   log.debug(() => `Creating GitHub Gist for ${filePath}`);
@@ -120,10 +127,17 @@ export async function uploadAsGist(options = {}) {
   log.debug(() => `Description: ${desc}`);
 
   let result;
-  if (isPublic) {
-    result = await $`gh gist create ${filePath} --public --desc ${desc}`;
-  } else {
-    result = await $`gh gist create ${filePath} --desc ${desc}`;
+  try {
+    fs.copyFileSync(filePath, stagedFilePath);
+
+    if (isPublic) {
+      result =
+        await $`gh gist create ${stagedFilePath} --public --desc ${desc}`;
+    } else {
+      result = await $`gh gist create ${stagedFilePath} --desc ${desc}`;
+    }
+  } finally {
+    fs.rmSync(workDir, { recursive: true, force: true });
   }
 
   const gistUrl = result.stdout.trim();
@@ -315,6 +329,7 @@ export default {
   normalizeFileName,
   generateRepoName,
   generateGistFileName,
+  generateUploadedLogFileName,
   fileExists,
   getFileSize,
   formatFileSize,

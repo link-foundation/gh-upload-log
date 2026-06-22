@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
+import { generateGistFileName } from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -132,6 +133,21 @@ test('CLI with --only-gist flag', async () => {
   const result = await runCLI([testLogFile, '--only-gist', '--dry-mode']);
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(result.output.includes('Gist'), 'Should use gist upload type');
+});
+
+test('CLI gist dry mode shows .log.txt filename in verbose details', async () => {
+  const expectedFileName = generateGistFileName(testLogFile);
+  const result = await runCLI([
+    testLogFile,
+    '--only-gist',
+    '--dry-mode',
+    '--verbose',
+  ]);
+  assert.equal(result.code, 0, 'Should exit with code 0');
+  assert.ok(
+    result.output.includes(`File name: ${expectedFileName}`),
+    `Should show browser-viewable gist file name, got:\n${result.output}`
+  );
 });
 
 // Test: --only-repository flag

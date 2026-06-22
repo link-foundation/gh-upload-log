@@ -11,13 +11,13 @@ import {
   extractGitHubRepoUrl,
   generateCollisionRepoName,
   generateRepoName,
+  generateUploadedLogFileName,
   getCommandExitCode,
   getCommandStream,
   getFileSize,
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   isRepositoryNameConflict,
-  normalizeFileName,
   splitFileIntoChunks,
 } from './common.js';
 
@@ -198,7 +198,7 @@ async function ensureSharedRepositoryExists(
 }
 
 async function stageRepositoryFiles(filePath, outputDir, log) {
-  const normalized = normalizeFileName(filePath);
+  const normalized = generateUploadedLogFileName(filePath);
   const stagedFilePath = path.join(outputDir, normalized);
 
   fs.mkdirSync(outputDir, { recursive: true });
