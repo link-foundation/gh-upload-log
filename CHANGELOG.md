@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.8.2
+
+### Patch Changes
+
+- 5d82718: Use `.log.txt` names for uploaded log files so raw gist and repository links open as text in browsers.
+
 ## 0.8.1
 
 ### Patch Changes
