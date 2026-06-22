@@ -131,12 +131,12 @@ test('uploadLog - creates gists with browser-viewable log text filenames', async
   assert.equal(result.type, 'gist');
   assert.equal(result.fileName, expectedFileName);
   assert.equal(result.rawUrl, expectedRawUrl);
+  const gistCreateCommand = commands.find((command) =>
+    command.startsWith('gh gist create ')
+  );
   assert.ok(
-    commands.some(
-      (command) =>
-        command.includes('gh gist create /tmp/') &&
-        command.includes(expectedFileName)
-    ),
+    gistCreateCommand?.includes('gh-upload-log-gist-') &&
+      gistCreateCommand.includes(expectedFileName),
     `Expected gist creation to use staged ${expectedFileName}, got: ${commands.join('\n')}`
   );
 });
