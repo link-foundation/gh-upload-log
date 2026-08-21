@@ -12,6 +12,7 @@ import {
   getFileSize,
   formatFileSize,
   fileExists,
+  resolveLogFilePath,
   isENOSPC,
 } from './index.js';
 
@@ -142,14 +143,18 @@ async function main() {
       process.exit(result.passed ? 0 : 1);
     }
 
-    const logFile = config.logFile;
+    const rawLogFile = config.logFile;
 
-    if (!logFile) {
+    if (!rawLogFile) {
       console.error('❌ Error: Log file path is required');
       console.error('Usage: gh-upload-log <log-file> [options]');
       console.error('Run "gh-upload-log --help" for more information');
       process.exit(1);
     }
+
+    // Resolve relative and home-relative paths up front so every later step
+    // (existence check, name generation, git commands) sees the same file.
+    const logFile = resolveLogFilePath(rawLogFile);
 
     if (!fileExists(logFile)) {
       console.error(`❌ Error: File does not exist: ${logFile}`);

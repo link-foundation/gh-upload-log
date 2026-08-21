@@ -10,6 +10,7 @@ import {
   normalizeFileName,
   generateRepoName,
   generateGistFileName,
+  generateUploadedLogFileName,
   fileExists,
   getFileSize,
   formatFileSize,
@@ -389,13 +390,13 @@ test('uploadLog - surfaces gh repo create failures instead of reporting success'
     if (command.includes('git init')) {
       return createCommandResult();
     }
-    if (command.includes('git branch -m main')) {
+    if (command.includes('git branch -M main')) {
       return createCommandResult();
     }
     if (command.includes('git add .')) {
       return createCommandResult();
     }
-    if (command.includes('git commit -m "Add log file"')) {
+    if (command.includes('git commit -q -m "Add log file"')) {
       return createCommandResult();
     }
     if (command === 'gh api user --jq .login') {
@@ -444,6 +445,7 @@ test('uploadLog - surfaces gh repo create failures instead of reporting success'
 test('uploadLog - retries with a unique repository name after a collision', async () => {
   const retryFile = path.join('test', 'fixtures', 'repo-collision-retry.log');
   fs.writeFileSync(retryFile, 'retry test\n');
+  const retryRepoName = generateRepoName(path.resolve(retryFile));
 
   const commands = [];
   let repoCreateCalls = 0;
@@ -454,13 +456,13 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
     if (command.includes('git init')) {
       return createCommandResult();
     }
-    if (command.includes('git branch -m main')) {
+    if (command.includes('git branch -M main')) {
       return createCommandResult();
     }
     if (command.includes('git add .')) {
       return createCommandResult();
     }
-    if (command.includes('git commit -m "Add log file"')) {
+    if (command.includes('git commit -q -m "Add log file"')) {
       return createCommandResult();
     }
     if (command === 'gh api user --jq .login') {
@@ -508,13 +510,11 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
   assert.equal(result.type, 'repo');
   assert.equal(result.isPublic, true);
   assert.ok(
-    result.url.startsWith(
-      'https://github.com/test-user/log-test-fixtures-repo-collision-retry-'
-    ),
+    result.url.startsWith(`https://github.com/test-user/${retryRepoName}-`),
     `Expected retry URL with timestamp suffix, got: ${result.url}`
   );
   assert.ok(
-    result.rawUrl.includes('/log-test-fixtures-repo-collision-retry-'),
+    result.rawUrl.includes(`/${retryRepoName}-`),
     `Expected raw URL for retried repo, got: ${result.rawUrl}`
   );
 
@@ -528,14 +528,13 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
   );
   assert.ok(
     repoCreateCommands[0].includes(
-      'gh repo create log-test-fixtures-repo-collision-retry --public --source=. --push'
+      `gh repo create ${retryRepoName} --public --source=. --push`
     ),
     `Expected initial deterministic repo name, got: ${repoCreateCommands[0]}`
   );
   assert.ok(
-    repoCreateCommands[1].includes(
-      'gh repo create log-test-fixtures-repo-collision-retry-'
-    ) && repoCreateCommands[1].includes('--public --source=. --push'),
+    repoCreateCommands[1].includes(`gh repo create ${retryRepoName}-`) &&
+      repoCreateCommands[1].includes('--public --source=. --push'),
     `Expected timestamp-suffixed retry repo name, got: ${repoCreateCommands[1]}`
   );
 });
@@ -544,7 +543,8 @@ test('uploadLog - stores large files in the shared visibility repository by defa
   const sharedFile = path.join('test', 'fixtures', 'shared-default-large.log');
   ensureLargeTestFile(sharedFile);
 
-  const sharedFolder = 'log-test-fixtures-shared-default-large';
+  const sharedFolder = generateRepoName(path.resolve(sharedFile));
+  const sharedFileName = generateUploadedLogFileName(path.resolve(sharedFile));
   const commands = [];
   let folderLookupCalls = 0;
 
@@ -578,9 +578,8 @@ test('uploadLog - stores large files in the shared visibility repository by defa
       return createCommandResult({
         stdout: JSON.stringify([
           {
-            name: 'test-fixtures-shared-default-large.log.txt',
-            download_url:
-              'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-default-large/test-fixtures-shared-default-large.log.txt',
+            name: sharedFileName,
+            download_url: `https://raw.githubusercontent.com/test-user/private-logs/main/${sharedFolder}/${sharedFileName}`,
           },
         ]),
       });
@@ -588,7 +587,7 @@ test('uploadLog - stores large files in the shared visibility repository by defa
     if (command.includes('git init')) {
       return createCommandResult();
     }
-    if (command.includes('git branch -m main')) {
+    if (command.includes('git branch -M main')) {
       return createCommandResult();
     }
     if (
@@ -605,20 +604,20 @@ test('uploadLog - stores large files in the shared visibility repository by defa
       return createCommandResult();
     }
     if (
-      command.includes('git fetch --depth 1 --filter=blob:none origin main')
+      command.includes('git fetch -q --depth 1 --filter=blob:none origin main')
     ) {
       return createCommandResult();
     }
-    if (command.includes('git checkout -B main FETCH_HEAD')) {
+    if (command.includes('git checkout -q -B main FETCH_HEAD')) {
       return createCommandResult();
     }
     if (command.includes('git add .')) {
       return createCommandResult();
     }
-    if (command.includes('git commit -m "Add log file"')) {
+    if (command.includes('git commit -q -m "Add log file"')) {
       return createCommandResult();
     }
-    if (command.includes('git push -u origin main')) {
+    if (command.includes('git push -q -u origin main')) {
       return createCommandResult();
     }
 
@@ -639,20 +638,14 @@ test('uploadLog - stores large files in the shared visibility repository by defa
   assert.equal(result.deduplicated, false);
   assert.equal(
     result.url,
-    'https://github.com/test-user/private-logs/tree/main/log-test-fixtures-shared-default-large'
+    `https://github.com/test-user/private-logs/tree/main/${sharedFolder}`
   );
   assert.equal(
     result.rawUrl,
-    'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-default-large/test-fixtures-shared-default-large.log.txt'
+    `https://raw.githubusercontent.com/test-user/private-logs/main/${sharedFolder}/${sharedFileName}`
   );
   assert.ok(
-    fs.existsSync(
-      path.join(
-        result.workDir,
-        sharedFolder,
-        'test-fixtures-shared-default-large.log.txt'
-      )
-    ),
+    fs.existsSync(path.join(result.workDir, sharedFolder, sharedFileName)),
     'Shared repository uploads should stage a .log.txt file'
   );
   assert.ok(
@@ -666,7 +659,7 @@ test('uploadLog - stores large files in the shared visibility repository by defa
   assert.ok(
     !commands.some((command) =>
       command.includes(
-        'gh repo create log-test-fixtures-shared-default-large --private --source=. --push'
+        `gh repo create ${sharedFolder} --private --source=. --push`
       )
     ),
     'Default large-file uploads should not create a dedicated per-log repository'
@@ -681,7 +674,10 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
   );
   ensureLargeTestFile(duplicateFile);
 
-  const sharedFolder = 'log-test-fixtures-shared-duplicate-large';
+  const sharedFolder = generateRepoName(path.resolve(duplicateFile));
+  const sharedFileName = generateUploadedLogFileName(
+    path.resolve(duplicateFile)
+  );
   const commands = [];
 
   const fakeCommandStream = createFakeCommandStream((command) => {
@@ -705,9 +701,8 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
       return createCommandResult({
         stdout: JSON.stringify([
           {
-            name: 'test-fixtures-shared-duplicate-large.log.txt',
-            download_url:
-              'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-duplicate-large/test-fixtures-shared-duplicate-large.log.txt',
+            name: sharedFileName,
+            download_url: `https://raw.githubusercontent.com/test-user/private-logs/main/${sharedFolder}/${sharedFileName}`,
           },
         ]),
       });
@@ -729,11 +724,11 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
   assert.equal(result.fileCount, 1);
   assert.equal(
     result.url,
-    'https://github.com/test-user/private-logs/tree/main/log-test-fixtures-shared-duplicate-large'
+    `https://github.com/test-user/private-logs/tree/main/${sharedFolder}`
   );
   assert.equal(
     result.rawUrl,
-    'https://raw.githubusercontent.com/test-user/private-logs/main/log-test-fixtures-shared-duplicate-large/test-fixtures-shared-duplicate-large.log.txt'
+    `https://raw.githubusercontent.com/test-user/private-logs/main/${sharedFolder}/${sharedFileName}`
   );
   assert.ok(
     !commands.some((command) => command.includes('git init')),
@@ -757,13 +752,13 @@ test('uploadLog - keeps dedicated repository mode available when shared mode is 
     if (command.includes('git init')) {
       return createCommandResult();
     }
-    if (command.includes('git branch -m main')) {
+    if (command.includes('git branch -M main')) {
       return createCommandResult();
     }
     if (command.includes('git add .')) {
       return createCommandResult();
     }
-    if (command.includes('git commit -m "Add log file"')) {
+    if (command.includes('git commit -q -m "Add log file"')) {
       return createCommandResult();
     }
     if (command === 'gh api user --jq .login') {
@@ -799,18 +794,24 @@ test('uploadLog - keeps dedicated repository mode available when shared mode is 
   });
 
   assert.equal(result.type, 'repo');
-  assert.equal(result.repositoryName, 'log-test-fixtures-legacy-repo-large');
+  assert.equal(
+    result.repositoryName,
+    generateRepoName(path.resolve(legacyFile))
+  );
   assert.equal(result.isPublic, true);
   assert.ok(
     fs.existsSync(
-      path.join(result.workDir, 'test-fixtures-legacy-repo-large.log.txt')
+      path.join(
+        result.workDir,
+        generateUploadedLogFileName(path.resolve(legacyFile))
+      )
     ),
     'Dedicated repository uploads should stage a .log.txt file'
   );
   assert.ok(
     commands.some((command) =>
       command.includes(
-        'gh repo create log-test-fixtures-legacy-repo-large --public --source=. --push'
+        `gh repo create ${generateRepoName(path.resolve(legacyFile))} --public --source=. --push`
       )
     ),
     'Legacy repository mode should still create a dedicated repository'
@@ -821,7 +822,10 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
   const fallbackFile = path.join('test', 'fixtures', 'auto-fallback-small.log');
   fs.writeFileSync(fallbackFile, 'fallback to shared repository\n');
 
-  const sharedFolder = 'log-test-fixtures-auto-fallback-small';
+  const sharedFolder = generateRepoName(path.resolve(fallbackFile));
+  const sharedFileName = generateUploadedLogFileName(
+    path.resolve(fallbackFile)
+  );
   const commands = [];
   let folderLookupCalls = 0;
 
@@ -861,9 +865,8 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
       return createCommandResult({
         stdout: JSON.stringify([
           {
-            name: 'test-fixtures-auto-fallback-small.log.txt',
-            download_url:
-              'https://raw.githubusercontent.com/test-user/public-logs/main/log-test-fixtures-auto-fallback-small/test-fixtures-auto-fallback-small.log.txt',
+            name: sharedFileName,
+            download_url: `https://raw.githubusercontent.com/test-user/public-logs/main/${sharedFolder}/${sharedFileName}`,
           },
         ]),
       });
@@ -871,7 +874,7 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
     if (command.includes('git init')) {
       return createCommandResult();
     }
-    if (command.includes('git branch -m main')) {
+    if (command.includes('git branch -M main')) {
       return createCommandResult();
     }
     if (
@@ -888,20 +891,20 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
       return createCommandResult();
     }
     if (
-      command.includes('git fetch --depth 1 --filter=blob:none origin main')
+      command.includes('git fetch -q --depth 1 --filter=blob:none origin main')
     ) {
       return createCommandResult();
     }
-    if (command.includes('git checkout -B main FETCH_HEAD')) {
+    if (command.includes('git checkout -q -B main FETCH_HEAD')) {
       return createCommandResult();
     }
     if (command.includes('git add .')) {
       return createCommandResult();
     }
-    if (command.includes('git commit -m "Add log file"')) {
+    if (command.includes('git commit -q -m "Add log file"')) {
       return createCommandResult();
     }
-    if (command.includes('git push -u origin main')) {
+    if (command.includes('git push -q -u origin main')) {
       return createCommandResult();
     }
 
@@ -922,20 +925,14 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
   assert.equal(result.fileCount, 1);
   assert.equal(
     result.url,
-    'https://github.com/test-user/public-logs/tree/main/log-test-fixtures-auto-fallback-small'
+    `https://github.com/test-user/public-logs/tree/main/${sharedFolder}`
   );
   assert.equal(
     result.rawUrl,
-    'https://raw.githubusercontent.com/test-user/public-logs/main/log-test-fixtures-auto-fallback-small/test-fixtures-auto-fallback-small.log.txt'
+    `https://raw.githubusercontent.com/test-user/public-logs/main/${sharedFolder}/${sharedFileName}`
   );
   assert.ok(
-    fs.existsSync(
-      path.join(
-        result.workDir,
-        sharedFolder,
-        'test-fixtures-auto-fallback-small.log.txt'
-      )
-    ),
+    fs.existsSync(path.join(result.workDir, sharedFolder, sharedFileName)),
     'Gist fallback repository uploads should stage a .log.txt file'
   );
   assert.ok(
@@ -953,7 +950,7 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
   assert.ok(
     !commands.some((command) =>
       command.includes(
-        'gh repo create log-test-fixtures-auto-fallback-small --public --source=. --push'
+        `gh repo create ${sharedFolder} --public --source=. --push`
       )
     ),
     'Fallback should not create a dedicated per-log repository by default'

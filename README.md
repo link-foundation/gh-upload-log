@@ -24,7 +24,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 - **Flexible configuration**: CLI arguments, environment variables, or `.lenv` files using [Links Notation](https://github.com/link-foundation/links-notation)
 - **Cross-platform**: Works on macOS, Linux, and Windows
 - **Dual interface**: Use as CLI tool or JavaScript library
-- **Path normalization**: Converts file paths into valid GitHub names
+- **Path normalization**: Accepts relative, `./`, `../`, `~/` and absolute paths, and converts them into valid GitHub names
 - **Verbose logging**: Built-in verbose mode using [log-lazy](https://github.com/link-foundation/log-lazy) for efficient lazy evaluation
 - **Configurable logging**: Customize logging behavior with custom log targets (silent mode, custom loggers, etc.)
 
@@ -304,6 +304,7 @@ Determine the best upload strategy for a file.
 
 #### Utility Functions
 
+- `resolveLogFilePath(filePath)`: Resolve a relative, `./`, `../` or `~/` path to an absolute path
 - `normalizeFileName(filePath)`: Convert file path to GitHub-safe name
 - `generateRepoName(filePath)`: Generate repository name (with `log-` prefix)
 - `generateUploadedLogFileName(filePath)`: Generate uploaded `.log.txt` file name
@@ -325,17 +326,24 @@ import {
 
 ### File Naming
 
-File paths are normalized for GitHub compatibility:
+Every accepted path form — `app.log`, `./app.log`, `../logs/app.log`,
+`~/app.log` and `/home/user/app.log` — is first resolved to an absolute path,
+so the same file always produces the same names no matter how it was spelled.
+The absolute path is then normalized for GitHub compatibility:
 
-- Leading slashes are removed
+- Leading slashes (and a Windows drive colon) are removed
 - All `/` characters are replaced with `-`
 - Repository names are prefixed with `log-`
 - Uploaded log files use `.log.txt` so raw file links open as text in browsers
+- Very long names are shortened deterministically with a short hash prefix to
+  stay within GitHub's 100-character repository name limit and the 255-byte
+  path component limit
 
-Examples:
+Examples (run from `/home/user`):
 
 - `/home/user/app.log` → Uploaded file: `home-user-app.log.txt`, Repo: `log-home-user-app`
-- `./logs/error.log` → Uploaded file: `.-logs-error.log.txt`, Repo: `log-.-logs-error`
+- `app.log` → Uploaded file: `home-user-app.log.txt`, Repo: `log-home-user-app`
+- `./logs/error.log` → Uploaded file: `home-user-logs-error.log.txt`, Repo: `log-home-user-logs-error`
 
 ### Upload Strategy
 

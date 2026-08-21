@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
-import { generateGistFileName } from '../src/index.js';
+import { generateGistFileName, generateRepoName } from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 const largeCliRepoFile = path.join('test', 'fixtures', 'cli-shared-large.log');
+const largeCliRepoFolder = generateRepoName(path.resolve(largeCliRepoFile));
 
 // Helper function to run CLI command
 function runCLI(args, env = {}) {
@@ -173,7 +174,7 @@ test('CLI repository dry mode uses shared repositories by default', async () => 
     'Repository-mode uploads should default to the shared private repository'
   );
   assert.ok(
-    result.output.includes('Path: log-test-fixtures-cli-shared-large'),
+    result.output.includes(`Path: ${largeCliRepoFolder}`),
     'Shared repository dry mode should show the folder path'
   );
 });
@@ -188,12 +189,83 @@ test('CLI repository dry mode allows disabling shared repositories', async () =>
   ]);
   assert.equal(result.code, 0, 'Should exit with code 0');
   assert.ok(
-    result.output.includes('Repository: log-test-fixtures-cli-shared-large'),
+    result.output.includes(`Repository: ${largeCliRepoFolder}`),
     'Legacy repository mode should show the dedicated repository name'
   );
   assert.ok(
     !result.output.includes('Repository: private-logs'),
     'Disabling shared repositories should stop using the shared private repository'
+  );
+});
+
+// Test: every path form is accepted (issue #35)
+test('CLI accepts a bare relative path', async () => {
+  const relativeFile = path.join('test', 'fixtures', 'cli-relative.log');
+  fs.mkdirSync(path.dirname(relativeFile), { recursive: true });
+  fs.writeFileSync(relativeFile, 'relative path\n');
+
+  const result = await runCLI([relativeFile, '--dry-mode', '--verbose']);
+  assert.equal(
+    result.code,
+    0,
+    `Should exit with code 0, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes('does not exist'),
+    `Relative paths must be accepted, got:\n${result.output}`
+  );
+});
+
+test('CLI accepts an explicit ./ relative path', async () => {
+  const relativeFile = `./${path.join('test', 'fixtures', 'cli-dot-relative.log')}`;
+  fs.mkdirSync(path.join('test', 'fixtures'), { recursive: true });
+  fs.writeFileSync(relativeFile, 'dot relative path\n');
+
+  const result = await runCLI([relativeFile, '--dry-mode', '--verbose']);
+  assert.equal(
+    result.code,
+    0,
+    `Should exit with code 0, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes('does not exist'),
+    `./ paths must be accepted, got:\n${result.output}`
+  );
+});
+
+test('CLI accepts a quoted home-relative path', async () => {
+  const homeFile = path.join(os.homedir(), 'gh-upload-log-cli-home-test.log');
+  fs.writeFileSync(homeFile, 'home relative path\n');
+
+  try {
+    const result = await runCLI([
+      '~/gh-upload-log-cli-home-test.log',
+      '--dry-mode',
+      '--verbose',
+    ]);
+    assert.equal(
+      result.code,
+      0,
+      `Should exit with code 0, got:\n${result.output}`
+    );
+    assert.ok(
+      !result.output.includes('does not exist'),
+      `~ paths must be accepted, got:\n${result.output}`
+    );
+  } finally {
+    fs.rmSync(homeFile, { force: true });
+  }
+});
+
+test('CLI never prints the git master branch hint', async () => {
+  const result = await runCLI([testLogFile, '--dry-mode', '--verbose']);
+  assert.ok(
+    !result.output.includes('hint:'),
+    `CLI output should not contain git hints, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes("Using 'master' as the name"),
+    `CLI output should not contain the master branch hint, got:\n${result.output}`
   );
 });
 
