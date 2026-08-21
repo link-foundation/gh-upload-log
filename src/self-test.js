@@ -8,6 +8,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {
   uploadLog,
@@ -86,7 +87,7 @@ async function cleanupRepo(repoName) {
 async function runTest(testCase) {
   const { name, sizeMB, mode, expectedType, cleanup = true } = testCase;
 
-  const testDir = '/tmp/gh-upload-log-selftest';
+  const testDir = path.join(os.tmpdir(), 'gh-upload-log-selftest');
   if (!fs.existsSync(testDir)) {
     fs.mkdirSync(testDir, { recursive: true });
   }

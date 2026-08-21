@@ -28,6 +28,7 @@ import {
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   normalizeFileName,
+  resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
 import {
@@ -51,6 +52,7 @@ export {
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   normalizeFileName,
+  resolveLogFilePath,
   splitFileIntoChunks,
   uploadAsRepo,
 };
@@ -61,7 +63,9 @@ export {
  * @param {string} filePath - Path to the log file
  * @returns {Object} Strategy object with type ('gist' or 'repo') and additional info
  */
-export function determineUploadStrategy(filePath) {
+export function determineUploadStrategy(rawFilePath) {
+  const filePath = resolveLogFilePath(rawFilePath);
+
   if (!fileExists(filePath)) {
     throw new Error(`File does not exist: ${filePath}`);
   }
@@ -105,22 +109,24 @@ export function determineUploadStrategy(filePath) {
 export async function uploadAsGist(options = {}) {
   const $ = await getCommandStream(options);
   const {
-    filePath,
     isPublic = false,
     description,
     verbose = false,
     logger = console,
   } = options;
 
-  if (!filePath) {
+  if (!options.filePath) {
     throw new Error('filePath is required in options');
   }
 
+  // Resolve to an absolute path so relative and home-relative paths keep
+  // working even if the working directory changes during the upload.
+  const filePath = resolveLogFilePath(options.filePath);
   const log = createDefaultLogger({ verbose, logger });
   const gistFileName = generateGistFileName(filePath);
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-upload-log-gist-'));
   const stagedFilePath = path.join(workDir, gistFileName);
-  const desc = description || `Log file: ${filePath.split('/').pop()}`;
+  const desc = description || `Log file: ${path.basename(filePath)}`;
 
   log.debug(() => `Creating GitHub Gist for ${filePath}`);
   log.debug(() => `Gist file name: ${gistFileName}`);
@@ -205,7 +211,6 @@ export async function uploadAsGist(options = {}) {
  */
 export async function uploadLog(options = {}) {
   const {
-    filePath,
     isPublic = false,
     auto = true,
     onlyGist = false,
@@ -217,9 +222,14 @@ export async function uploadLog(options = {}) {
     logger = console,
   } = options;
 
-  if (!filePath) {
+  if (!options.filePath) {
     throw new Error('filePath is required in options');
   }
+
+  // Resolve once and reuse the absolute path for every downstream step so that
+  // relative paths (`app.log`, `./app.log`, `~/app.log`) are fully supported.
+  const filePath = resolveLogFilePath(options.filePath);
+  const resolvedOptions = { ...options, filePath };
 
   if (!fileExists(filePath)) {
     throw new Error(`File does not exist: ${filePath}`);
@@ -284,7 +294,7 @@ export async function uploadLog(options = {}) {
 
   if (uploadType === 'gist') {
     try {
-      return await uploadAsGist(options);
+      return await uploadAsGist(resolvedOptions);
     } catch (gistError) {
       if (isENOSPC(gistError)) {
         throw createENOSPCError('gist upload', gistError);
@@ -299,12 +309,12 @@ export async function uploadLog(options = {}) {
           `Gist upload failed: ${gistError.message}. Falling back to repository mode...`
       );
 
-      return uploadAsRepo(options);
+      return uploadAsRepo(resolvedOptions);
     }
   }
 
   try {
-    return await uploadAsRepo(options);
+    return await uploadAsRepo(resolvedOptions);
   } catch (repoError) {
     if (isENOSPC(repoError)) {
       const fileSize = getFileSize(filePath);
@@ -327,6 +337,7 @@ export default {
   uploadAsRepo,
   determineUploadStrategy,
   normalizeFileName,
+  resolveLogFilePath,
   generateRepoName,
   generateGistFileName,
   generateUploadedLogFileName,

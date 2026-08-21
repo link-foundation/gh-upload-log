@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import makeLog from 'log-lazy';
 
@@ -202,6 +204,76 @@ export const DEFAULT_PUBLIC_LOGS_REPOSITORY = 'public-logs';
 export const LOG_TEXT_EXTENSION = '.log.txt';
 
 /**
+ * GitHub rejects repository names longer than 100 characters, and git limits a
+ * single path component to 255 bytes. Absolute paths are used to build both
+ * names, so deep paths have to be shortened deterministically.
+ */
+export const MAX_REPOSITORY_NAME_LENGTH = 100;
+export const MAX_UPLOADED_FILE_NAME_LENGTH = 200;
+
+/**
+ * Shorten a generated name deterministically when it exceeds a limit
+ *
+ * Keeps the most specific (trailing) part of the name and prefixes it with a
+ * short hash of the full name, so the result stays unique and stable for the
+ * same input path (which keeps shared-repository deduplication working).
+ *
+ * @param {string} name - Name to shorten
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {string} Name guaranteed to be at most maxLength characters
+ */
+export function shortenGeneratedName(name, maxLength) {
+  if (name.length <= maxLength) {
+    return name;
+  }
+
+  const hash = createHash('sha1').update(name).digest('hex').slice(0, 8);
+  const keptLength = Math.max(maxLength - hash.length - 1, 0);
+  return `${hash}-${name.slice(name.length - keptLength)}`.slice(0, maxLength);
+}
+
+/**
+ * Resolve a user-supplied log file path into an absolute path
+ *
+ * Accepts every path form a shell user can type: relative (`app.log`,
+ * `./app.log`, `../logs/app.log`), home-relative (`~/app.log`, quoted so the
+ * shell does not expand it), and absolute paths. Resolving early guarantees
+ * that later file operations keep working even when the working directory
+ * changes during the upload, and that generated names are identical no matter
+ * how the same file was addressed.
+ *
+ * @param {string} filePath - Raw file path from CLI arguments or library options
+ * @returns {string} Absolute file path
+ */
+export function resolveLogFilePath(filePath) {
+  if (typeof filePath !== 'string' || filePath.trim() === '') {
+    throw new Error('filePath is required in options');
+  }
+
+  const home = os.homedir();
+  let expanded = filePath;
+
+  if (filePath === '~') {
+    expanded = home;
+  } else if (filePath.startsWith('~/') || filePath.startsWith('~\\')) {
+    expanded = path.join(home, filePath.slice(2));
+  }
+
+  return path.resolve(expanded);
+}
+
+/**
+ * Create a temporary working directory path inside the OS temp directory
+ *
+ * @param {string} prefix - Directory name prefix
+ * @param {number} [timestamp=Date.now()] - Unique suffix
+ * @returns {string} Absolute path to the temporary working directory
+ */
+export function createWorkDirPath(prefix, timestamp = Date.now()) {
+  return path.join(os.tmpdir(), `${prefix}-${timestamp}`);
+}
+
+/**
  * Normalize a file path to create a valid GitHub name
  * Replaces all '/' with '-' and removes leading slashes
  *
@@ -209,7 +281,10 @@ export const LOG_TEXT_EXTENSION = '.log.txt';
  * @returns {string} Normalized name suitable for GitHub
  */
 export function normalizeFileName(filePath) {
-  return filePath.replace(/^[\\/]+/, '').replace(/[\\/]/g, '-');
+  return filePath
+    .replace(/^([A-Za-z]):/, '$1')
+    .replace(/^[\\/]+/, '')
+    .replace(/[\\/]/g, '-');
 }
 
 /**
@@ -237,7 +312,18 @@ export function ensureLogTextExtension(fileName) {
  * @returns {string} Normalized file name ending in .log.txt
  */
 export function generateUploadedLogFileName(filePath) {
-  return ensureLogTextExtension(normalizeFileName(filePath));
+  const fileName = ensureLogTextExtension(normalizeFileName(filePath));
+
+  if (fileName.length <= MAX_UPLOADED_FILE_NAME_LENGTH) {
+    return fileName;
+  }
+
+  const baseName = fileName.slice(0, -LOG_TEXT_EXTENSION.length);
+  const shortened = shortenGeneratedName(
+    baseName,
+    MAX_UPLOADED_FILE_NAME_LENGTH - LOG_TEXT_EXTENSION.length
+  );
+  return `${shortened}${LOG_TEXT_EXTENSION}`;
 }
 
 /**
@@ -250,7 +336,7 @@ export function generateUploadedLogFileName(filePath) {
 export function generateRepoName(filePath) {
   const normalized = normalizeFileName(filePath);
   const baseName = path.basename(normalized, '.log');
-  return `log-${baseName}`;
+  return `log-${shortenGeneratedName(baseName, MAX_REPOSITORY_NAME_LENGTH - 'log-'.length)}`;
 }
 
 /**

@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   createDefaultLogger,
   createENOSPCError,
+  createWorkDirPath,
   DEFAULT_PRIVATE_LOGS_REPOSITORY,
   DEFAULT_PUBLIC_LOGS_REPOSITORY,
   ensureCommandSucceeded,
@@ -18,6 +19,7 @@ import {
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   isRepositoryNameConflict,
+  resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
 
@@ -25,6 +27,48 @@ const REPOSITORY_METADATA_QUERY =
   '{"defaultBranch": .default_branch, "visibility": .visibility}';
 const REPOSITORY_FOLDER_CONTENTS_QUERY =
   'map({name: .name, download_url: .download_url})';
+
+/**
+ * Create a command runner bound to a working directory
+ *
+ * Uses the `cwd` option instead of a `cd <dir> && ...` prefix: command-stream's
+ * `cd` builtin changes the working directory of the host process itself
+ * (documented in link-foundation/command-stream#50), which breaks any relative
+ * path resolved afterwards. Output is mirrored only in verbose mode so that
+ * git/gh chatter never pollutes the CLI output.
+ *
+ * @param {Function} $ - command-stream template tag
+ * @param {string} workDir - Absolute working directory for the commands
+ * @param {boolean} verbose - Mirror command output when true
+ * @returns {Function} command-stream template tag bound to workDir
+ */
+function createWorkDirRunner($, workDir, verbose = false) {
+  return $({ cwd: workDir, mirror: Boolean(verbose), capture: true });
+}
+
+/**
+ * Initialize a git repository quietly on the requested default branch
+ *
+ * `git init` prints an "hint: Using 'master' as the name for the initial
+ * branch" advice block when `init.defaultBranch` is not configured globally.
+ * Passing the config explicitly (plus `-q`) keeps the output clean and makes
+ * the initial branch deterministic.
+ *
+ * @param {Function} $workDir - command-stream tag bound to the work directory
+ * @param {string} branchName - Desired initial branch name
+ * @returns {Promise<void>}
+ */
+async function initializeGitRepository($workDir, branchName) {
+  ensureCommandSucceeded(
+    await $workDir`git -c init.defaultBranch=${branchName} init -q`,
+    'initialize temporary git repository'
+  );
+  // Older git versions ignore init.defaultBranch, so force the branch name.
+  ensureCommandSucceeded(
+    await $workDir`git branch -M ${branchName}`,
+    `rename temporary git branch to ${branchName}`
+  );
+}
 
 function isGitHubNotFoundError(errorText = '') {
   const normalized = errorText.toLowerCase();
@@ -72,19 +116,18 @@ function listUploadedFiles(directoryPath) {
     .sort();
 }
 
-async function getGitHubUsername($) {
+async function getGitHubUsername($quiet) {
   const whoamiResult = ensureCommandSucceeded(
-    await $`gh api user --jq .login`,
+    await $quiet`gh api user --jq .login`,
     'fetch authenticated GitHub username'
   );
 
   return whoamiResult.stdout.trim();
 }
 
-async function getRepositoryMetadata($, githubUser, repositoryName) {
-  const $silent = $({ mirror: false, capture: true });
+async function getRepositoryMetadata($quiet, githubUser, repositoryName) {
   const result =
-    await $silent`gh api repos/${githubUser}/${repositoryName} --jq ${REPOSITORY_METADATA_QUERY}`;
+    await $quiet`gh api repos/${githubUser}/${repositoryName} --jq ${REPOSITORY_METADATA_QUERY}`;
 
   if (getCommandExitCode(result) !== 0) {
     if (isGitHubNotFoundError(result.stderr || result.stdout)) {
@@ -100,14 +143,13 @@ async function getRepositoryMetadata($, githubUser, repositoryName) {
 }
 
 async function getRepositoryFolderContents(
-  $,
+  $quiet,
   githubUser,
   repositoryName,
   repositoryPath
 ) {
-  const $silent = $({ mirror: false, capture: true });
   const result =
-    await $silent`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
+    await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
 
   if (getCommandExitCode(result) !== 0) {
     if (isGitHubNotFoundError(result.stderr || result.stdout)) {
@@ -124,7 +166,7 @@ async function getRepositoryFolderContents(
 }
 
 async function ensureSharedRepositoryExists(
-  $,
+  $quiet,
   githubUser,
   repositoryName,
   isPublic,
@@ -132,7 +174,7 @@ async function ensureSharedRepositoryExists(
 ) {
   const expectedVisibility = isPublic ? 'public' : 'private';
   const existingMetadata = await getRepositoryMetadata(
-    $,
+    $quiet,
     githubUser,
     repositoryName
   );
@@ -157,14 +199,14 @@ async function ensureSharedRepositoryExists(
       `→ Creating shared ${expectedVisibility} GitHub repo: ${repositoryName}`
   );
   const createResult =
-    await $`gh repo create ${repositoryName} ${visibilityFlag}`;
+    await $quiet`gh repo create ${repositoryName} ${visibilityFlag}`;
 
   if (
     getCommandExitCode(createResult) !== 0 &&
     isRepositoryNameConflict(createResult.stderr)
   ) {
     const racedMetadata = await getRepositoryMetadata(
-      $,
+      $quiet,
       githubUser,
       repositoryName
     );
@@ -257,20 +299,18 @@ function buildSharedRepositoryResult({
 
 async function uploadAsDedicatedRepo(options = {}) {
   const $ = await getCommandStream(options);
-  const {
-    filePath,
-    isPublic = false,
-    verbose = false,
-    logger = console,
-  } = options;
+  const { isPublic = false, verbose = false, logger = console } = options;
 
-  if (!filePath) {
+  if (!options.filePath) {
     throw new Error('filePath is required in options');
   }
 
+  const filePath = resolveLogFilePath(options.filePath);
   const log = createDefaultLogger({ verbose, logger });
   const baseRepositoryName = generateRepoName(filePath);
-  const workDir = `/tmp/${baseRepositoryName}-${Date.now()}`;
+  const workDir = createWorkDirPath(baseRepositoryName);
+  const $workDir = createWorkDirRunner($, workDir, verbose);
+  const $quiet = $({ mirror: Boolean(verbose), capture: true });
 
   try {
     log.debug(() => `→ Creating work directory: ${workDir}`);
@@ -278,27 +318,20 @@ async function uploadAsDedicatedRepo(options = {}) {
     await stageRepositoryFiles(filePath, workDir, log);
 
     log.debug(() => '→ Initializing git repository...');
-    ensureCommandSucceeded(
-      await $`cd ${workDir} && git init`,
-      'initialize temporary git repository'
-    );
-    ensureCommandSucceeded(
-      await $`cd ${workDir} && git branch -m main`,
-      'rename temporary git branch to main'
-    );
+    await initializeGitRepository($workDir, 'main');
 
     log.debug(() => '→ Adding and committing files...');
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git add .`,
+      await $workDir`git add .`,
       'stage repository upload files'
     );
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git commit -m "Add log file"`,
+      await $workDir`git commit -q -m "Add log file"`,
       'commit repository upload files'
     );
 
     log.debug(() => 'Getting GitHub user information...');
-    const githubUser = await getGitHubUsername($);
+    const githubUser = await getGitHubUsername($quiet);
     log.debug(() => `GitHub user: ${githubUser}`);
 
     let repositoryName = baseRepositoryName;
@@ -310,7 +343,7 @@ async function uploadAsDedicatedRepo(options = {}) {
         `→ Creating ${isPublic ? 'public' : 'private'} GitHub repo: ${repositoryName}`
     );
     repoCreateResult =
-      await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
+      await $workDir`gh repo create ${repositoryName} ${visibility} --source=. --push`;
 
     if (
       getCommandExitCode(repoCreateResult) !== 0 &&
@@ -322,7 +355,7 @@ async function uploadAsDedicatedRepo(options = {}) {
           `Repository ${baseRepositoryName} already exists; retrying with ${repositoryName}`
       );
       repoCreateResult =
-        await $`cd ${workDir} && gh repo create ${repositoryName} ${visibility} --source=. --push`;
+        await $workDir`gh repo create ${repositoryName} ${visibility} --source=. --push`;
     }
 
     ensureCommandSucceeded(
@@ -344,9 +377,8 @@ async function uploadAsDedicatedRepo(options = {}) {
       const singleFileName = uploadedFiles[0];
       try {
         log.debug(() => `Fetching raw URL for single file: ${singleFileName}`);
-        const $silent = $({ mirror: false, capture: true });
         const contentResult =
-          await $silent`gh api repos/${githubUser}/${repositoryName}/contents/${singleFileName} --jq '.download_url'`;
+          await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${singleFileName} --jq '.download_url'`;
         rawUrl = contentResult.stdout.trim();
 
         if (rawUrl) {
@@ -394,28 +426,26 @@ async function uploadAsDedicatedRepo(options = {}) {
 
 async function uploadAsSharedRepo(options = {}) {
   const $ = await getCommandStream(options);
-  const {
-    filePath,
-    isPublic = false,
-    verbose = false,
-    logger = console,
-  } = options;
+  const { isPublic = false, verbose = false, logger = console } = options;
 
-  if (!filePath) {
+  if (!options.filePath) {
     throw new Error('filePath is required in options');
   }
 
+  const filePath = resolveLogFilePath(options.filePath);
   const log = createDefaultLogger({ verbose, logger });
   const repositoryName = getSharedRepositoryName(isPublic);
   const repositoryPath = generateRepoName(filePath);
-  const workDir = `/tmp/${repositoryPath}-${Date.now()}`;
+  const workDir = createWorkDirPath(repositoryPath);
+  const $workDir = createWorkDirRunner($, workDir, verbose);
+  const $quiet = $({ mirror: Boolean(verbose), capture: true });
 
   try {
-    const githubUser = await getGitHubUsername($);
+    const githubUser = await getGitHubUsername($quiet);
     log.debug(() => `GitHub user: ${githubUser}`);
 
     const sharedRepository = await ensureSharedRepositoryExists(
-      $,
+      $quiet,
       githubUser,
       repositoryName,
       isPublic,
@@ -424,7 +454,7 @@ async function uploadAsSharedRepo(options = {}) {
     const defaultBranch = sharedRepository.defaultBranch || 'main';
 
     const existingContents = await getRepositoryFolderContents(
-      $,
+      $quiet,
       githubUser,
       repositoryName,
       repositoryPath
@@ -452,32 +482,25 @@ async function uploadAsSharedRepo(options = {}) {
     fs.mkdirSync(workDir, { recursive: true });
 
     log.debug(() => '→ Initializing git repository...');
+    await initializeGitRepository($workDir, defaultBranch);
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git init`,
-      'initialize temporary git repository'
-    );
-    ensureCommandSucceeded(
-      await $`cd ${workDir} && git branch -m ${defaultBranch}`,
-      `rename temporary git branch to ${defaultBranch}`
-    );
-    ensureCommandSucceeded(
-      await $`cd ${workDir} && git remote add origin https://github.com/${githubUser}/${repositoryName}.git`,
+      await $workDir`git remote add origin https://github.com/${githubUser}/${repositoryName}.git`,
       `add remote for shared GitHub repo ${repositoryName}`
     );
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git sparse-checkout init --no-cone`,
+      await $workDir`git sparse-checkout init --no-cone`,
       'initialize sparse checkout for shared log repository'
     );
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git sparse-checkout add ${repositoryPath}`,
+      await $workDir`git sparse-checkout add ${repositoryPath}`,
       `prepare sparse checkout path ${repositoryPath}`
     );
 
     const fetchResult =
-      await $`cd ${workDir} && git fetch --depth 1 --filter=blob:none origin ${defaultBranch}`;
+      await $workDir`git fetch -q --depth 1 --filter=blob:none origin ${defaultBranch}`;
     if (getCommandExitCode(fetchResult) === 0) {
       ensureCommandSucceeded(
-        await $`cd ${workDir} && git checkout -B ${defaultBranch} FETCH_HEAD`,
+        await $workDir`git checkout -q -B ${defaultBranch} FETCH_HEAD`,
         `check out ${defaultBranch} from shared GitHub repo ${repositoryName}`
       );
     } else if (
@@ -499,21 +522,21 @@ async function uploadAsSharedRepo(options = {}) {
 
     log.debug(() => '→ Adding and committing files...');
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git add .`,
+      await $workDir`git add .`,
       'stage shared repository upload files'
     );
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git commit -m "Add log file"`,
+      await $workDir`git commit -q -m "Add log file"`,
       'commit shared repository upload files'
     );
     ensureCommandSucceeded(
-      await $`cd ${workDir} && git push -u origin ${defaultBranch}`,
+      await $workDir`git push -q -u origin ${defaultBranch}`,
       `push shared repository upload to ${repositoryName}`
     );
 
     const uploadedContents =
       (await getRepositoryFolderContents(
-        $,
+        $quiet,
         githubUser,
         repositoryName,
         repositoryPath
