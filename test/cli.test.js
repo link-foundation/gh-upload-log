@@ -198,6 +198,77 @@ test('CLI repository dry mode allows disabling shared repositories', async () =>
   );
 });
 
+// Test: every path form is accepted (issue #35)
+test('CLI accepts a bare relative path', async () => {
+  const relativeFile = path.join('test', 'fixtures', 'cli-relative.log');
+  fs.mkdirSync(path.dirname(relativeFile), { recursive: true });
+  fs.writeFileSync(relativeFile, 'relative path\n');
+
+  const result = await runCLI([relativeFile, '--dry-mode', '--verbose']);
+  assert.equal(
+    result.code,
+    0,
+    `Should exit with code 0, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes('does not exist'),
+    `Relative paths must be accepted, got:\n${result.output}`
+  );
+});
+
+test('CLI accepts an explicit ./ relative path', async () => {
+  const relativeFile = `./${path.join('test', 'fixtures', 'cli-dot-relative.log')}`;
+  fs.mkdirSync(path.join('test', 'fixtures'), { recursive: true });
+  fs.writeFileSync(relativeFile, 'dot relative path\n');
+
+  const result = await runCLI([relativeFile, '--dry-mode', '--verbose']);
+  assert.equal(
+    result.code,
+    0,
+    `Should exit with code 0, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes('does not exist'),
+    `./ paths must be accepted, got:\n${result.output}`
+  );
+});
+
+test('CLI accepts a quoted home-relative path', async () => {
+  const homeFile = path.join(os.homedir(), 'gh-upload-log-cli-home-test.log');
+  fs.writeFileSync(homeFile, 'home relative path\n');
+
+  try {
+    const result = await runCLI([
+      '~/gh-upload-log-cli-home-test.log',
+      '--dry-mode',
+      '--verbose',
+    ]);
+    assert.equal(
+      result.code,
+      0,
+      `Should exit with code 0, got:\n${result.output}`
+    );
+    assert.ok(
+      !result.output.includes('does not exist'),
+      `~ paths must be accepted, got:\n${result.output}`
+    );
+  } finally {
+    fs.rmSync(homeFile, { force: true });
+  }
+});
+
+test('CLI never prints the git master branch hint', async () => {
+  const result = await runCLI([testLogFile, '--dry-mode', '--verbose']);
+  assert.ok(
+    !result.output.includes('hint:'),
+    `CLI output should not contain git hints, got:\n${result.output}`
+  );
+  assert.ok(
+    !result.output.includes("Using 'master' as the name"),
+    `CLI output should not contain the master branch hint, got:\n${result.output}`
+  );
+});
+
 // Test: Mutually exclusive --only-gist and --only-repository
 test('CLI with both --only-gist and --only-repository shows conflict error', async () => {
   const result = await runCLI([
