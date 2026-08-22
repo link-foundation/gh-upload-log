@@ -171,7 +171,10 @@ test('issue #38 - the example from the issue maps to home-box/<hash>/file.log.tx
 
 test('issue #38 - chunked uploads are recognized as the stored log file', () => {
   assert.equal(isStoredLogFileName('app.log.txt', 'app.log.txt'), true);
-  assert.equal(isStoredLogFileName('app.part-000.log.txt', 'app.log.txt'), true);
+  assert.equal(
+    isStoredLogFileName('app.part-000.log.txt', 'app.log.txt'),
+    true
+  );
   assert.equal(isStoredLogFileName('other.log.txt', 'app.log.txt'), false);
 });
 
