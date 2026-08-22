@@ -18,7 +18,8 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 
 - **Automatic strategy selection**: Chooses between Gist and Repository based on file size
 - **Shared repository uploads by default**: Repository-mode files go into `private-logs` or `public-logs`
-- **Duplicate protection**: Re-uploading the same repository-mode log path reuses the existing shared repository folder
+- **Content-addressed versions**: Repository-mode logs are stored under `<directory>/<content-hash>/<file-name>.log.txt`, so every version of the same path is kept
+- **Duplicate protection**: Re-uploading unchanged content reuses the existing file, while changed content is always uploaded again
 - **Smart file splitting**: Automatically splits large files into manageable chunks
 - **Public/Private control**: Upload as public or private (default: private)
 - **Flexible configuration**: CLI arguments, environment variables, or `.lenv` files using [Links Notation](https://github.com/link-foundation/links-notation)
@@ -112,6 +113,8 @@ gh-upload-log /var/log/app.log
 - `GH_UPLOAD_LOG_DRY_MODE` - Enable dry run mode (default: false)
 - `GH_UPLOAD_LOG_DESCRIPTION` - Default description for uploads
 - `GH_UPLOAD_LOG_VERBOSE` - Enable verbose output (default: false)
+- `GH_UPLOAD_LOG_GIST_LIMIT` - Maximum file size uploaded as a gist, e.g. `25MB` (default: 25MB, clamped to GitHub's documented 100MB limit)
+- `GH_UPLOAD_LOG_CHECK_RAW_URL` - Verify that the resulting raw URL is reachable (default: false)
 
 See [.lenv.example](./.lenv.example) for a complete configuration template.
 
@@ -146,6 +149,9 @@ Options:
   --dry-mode, --dry    Dry run - show what would be done without uploading
   --description, -d    Description for the upload
   --verbose, -v        Enable verbose output
+  --gist-limit         Maximum file size uploaded as a gist (e.g. 25MB, 100MB).
+                       Larger files use repository mode (default: 25MB)
+  --check-raw-url      Verify that the resulting raw URL is reachable
   --help, -h           Show help
   --version            Show version number
 ```
@@ -176,6 +182,12 @@ gh-upload-log ./debug.log -d "Debug logs from production" --public
 
 # Disable auto mode and force repository
 gh-upload-log ./file.log --no-auto --only-repository
+
+# Raise the gist threshold (GitHub documents 100MB per gist file)
+gh-upload-log ./big.log --gist-limit 100MB
+
+# Verify that the produced raw URL really works
+gh-upload-log ./app.log --check-raw-url --verbose
 ```
 
 ## Library Usage
@@ -307,7 +319,13 @@ Determine the best upload strategy for a file.
 - `resolveLogFilePath(filePath)`: Resolve a relative, `./`, `../` or `~/` path to an absolute path
 - `normalizeFileName(filePath)`: Convert file path to GitHub-safe name
 - `generateRepoName(filePath)`: Generate repository name (with `log-` prefix)
-- `generateUploadedLogFileName(filePath)`: Generate uploaded `.log.txt` file name
+- `generateUploadedLogFileName(filePath)`: Generate the legacy flattened `.log.txt` file name
+- `generateStoredLogFileName(filePath)`: Generate the stored `.log.txt` file name (base name only)
+- `generateLogDirectorySegment(filePath)`: Generate the normalized directory folder name
+- `generateFileContentHash(filePath)`: Compute the truncated SHA-256 content hash (async)
+- `buildLogRepositoryPath(filePath, contentHash)`: Build the `<directory>/<hash>` repository path
+- `checkRawUrlExists(rawUrl)`: Check whether a raw URL is reachable (async)
+- `parseFileSize(value)`: Parse `25MB`, `1.5GB`, `1024B` (plain numbers are megabytes)
 - `generateGistFileName(filePath)`: Generate gist file name
 - `fileExists(filePath)`: Check if file exists
 - `getFileSize(filePath)`: Get file size in bytes
@@ -316,9 +334,11 @@ Determine the best upload strategy for a file.
 
 ```javascript
 import {
-  GITHUB_GIST_FILE_LIMIT, // 25 MB
-  GITHUB_GIST_WEB_LIMIT, // 25 MB
+  GITHUB_GIST_FILE_LIMIT, // 25 MB (default threshold)
+  GITHUB_GIST_WEB_LIMIT, // 25 MB (github.com upload form)
+  GITHUB_GIST_DOCUMENTED_FILE_LIMIT, // 100 MB (documented API maximum)
   GITHUB_REPO_CHUNK_SIZE, // 100 MB
+  LOG_CONTENT_HASH_LENGTH, // 16 hex characters
 } from 'gh-upload-log';
 ```
 
@@ -333,17 +353,34 @@ The absolute path is then normalized for GitHub compatibility:
 
 - Leading slashes (and a Windows drive colon) are removed
 - All `/` characters are replaced with `-`
-- Repository names are prefixed with `log-`
 - Uploaded log files use `.log.txt` so raw file links open as text in browsers
 - Very long names are shortened deterministically with a short hash prefix to
   stay within GitHub's 100-character repository name limit and the 255-byte
   path component limit
 
+### Repository layout
+
+Repository-mode uploads are content addressed. The directory of the log becomes
+a folder, the first 16 hex characters of the file's SHA-256 become a sub-folder,
+and the file keeps its own name:
+
+```
+<normalized-directory>/<content-hash>/<file-name>.log.txt
+```
+
 Examples (run from `/home/user`):
 
-- `/home/user/app.log` → Uploaded file: `home-user-app.log.txt`, Repo: `log-home-user-app`
-- `app.log` → Uploaded file: `home-user-app.log.txt`, Repo: `log-home-user-app`
-- `./logs/error.log` → Uploaded file: `home-user-logs-error.log.txt`, Repo: `log-home-user-logs-error`
+- `/home/box/hive-telegram-bot.log` → `home-box/8f14e45fceea167a/hive-telegram-bot.log.txt`
+- `/home/user/app.log` → `home-user/<hash>/app.log.txt`
+- `./logs/error.log` → `home-user-logs/<hash>/error.log.txt`
+
+Because the hash is part of the path, every version of the same log file is
+kept side by side and a changed file is always uploaded again. Uploading the
+exact same bytes twice reuses the existing file instead of pushing a duplicate.
+
+Gist file names still use the flattened `home-user-app.log.txt` form, and the
+legacy dedicated-repository mode still names the repository `log-home-user-app`
+(with the same hashed folder inside).
 
 ### Upload Strategy
 
@@ -356,7 +393,8 @@ Examples (run from `/home/user`):
 2. **Files >25MB**: Uploaded as GitHub Repository
    - By default, uploads go into the shared `private-logs` or `public-logs` repository
    - The old dedicated-repository flow is still available with `--no-shared-repository` or `useSharedRepository: false`
-   - Re-uploading the same repository path reuses the existing shared repository folder instead of pushing a duplicate
+   - Re-uploading identical content reuses the existing file; changed content is uploaded into a new content-hash folder
+   - The threshold can be raised with `--gist-limit` (up to GitHub's documented 100MB gist limit)
 
 3. **Files >100MB**: Uploaded as a chunked GitHub Repository folder
    - File is split into 100MB chunks
@@ -372,10 +410,20 @@ By default, all uploads are **private**:
 
 Use `--public` flag or `isPublic: true` option for public uploads.
 
+### Raw URLs
+
+Raw URLs of **private** repositories carry a short-lived `?token=` parameter and
+return `404` once it expires (and also when it is stripped). This is GitHub
+behavior, not a missing file — use the repository page URL for a permanent link,
+or make the upload public. Pass `--check-raw-url` to verify reachability right
+after the upload.
+
 ## GitHub Limits
 
-- **Safe gist API limit**: 25 MB
-- **Repository-mode threshold**: Files larger than 25 MB switch to repository uploads
+- **Default gist threshold**: 25 MB (configurable with `--gist-limit`)
+- **Documented gist file limit**: 100 MB (measured: uploads up to 102 MB succeeded, ≥104 MB returned HTTP 502; see [docs/case-studies/issue-38](./docs/case-studies/issue-38/README.md))
+- **github.com gist upload form limit**: 25 MB
+- **Repository-mode threshold**: Files larger than the gist threshold switch to repository uploads
 - **Repository size**: No strict limit, but large repos may have performance issues
 - **Chunk size**: Files are split into 100 MB chunks for repositories
 
@@ -393,6 +441,7 @@ See the `examples/` directory for more usage examples:
 
 - `examples/basic-usage.js`: Basic library usage
 - `examples/library-api.js`: API function examples
+- `examples/changed-file-reupload.js`: How a growing log file is uploaded again (issue #38)
 
 Run examples:
 

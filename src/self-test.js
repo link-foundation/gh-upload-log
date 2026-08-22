@@ -14,6 +14,8 @@ import {
   uploadLog,
   formatFileSize,
   determineUploadStrategy,
+  DEFAULT_PRIVATE_LOGS_REPOSITORY,
+  DEFAULT_PUBLIC_LOGS_REPOSITORY,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
 } from './index.js';
@@ -70,6 +72,18 @@ async function cleanupGist(gistId) {
  * @param {string} repoName - Repository name to delete
  */
 async function cleanupRepo(repoName) {
+  // Repository-mode uploads land in the shared log repositories by default, and
+  // those hold real logs of the user. Deleting them would destroy data.
+  if (
+    repoName === DEFAULT_PRIVATE_LOGS_REPOSITORY ||
+    repoName === DEFAULT_PUBLIC_LOGS_REPOSITORY
+  ) {
+    console.log(
+      `  ⚠️  Skipping cleanup of shared log repository ${repoName} (it holds real logs)`
+    );
+    return false;
+  }
+
   try {
     await $`gh repo delete ${repoName} --yes`;
     return true;
