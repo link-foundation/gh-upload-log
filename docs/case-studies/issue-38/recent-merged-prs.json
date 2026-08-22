@@ -1,0 +1,52 @@
+[
+  {
+    "mergedAt": "2026-08-21T18:15:48Z",
+    "number": 36,
+    "title": "fix: accept every log file path form and stop printing the git master branch hint"
+  },
+  {
+    "mergedAt": "2026-06-22T09:41:31Z",
+    "number": 34,
+    "title": "Use .log.txt filenames for uploaded logs"
+  },
+  {
+    "mergedAt": "2026-06-12T08:05:39Z",
+    "number": 32,
+    "title": "Fix gist fallback shared repository routing"
+  },
+  {
+    "mergedAt": "2026-04-25T08:35:18Z",
+    "number": 30,
+    "title": "feat: use shared repositories for large log uploads"
+  },
+  {
+    "mergedAt": "2026-04-24T11:07:38Z",
+    "number": 28,
+    "title": "fix: handle repository name collisions without false public success"
+  },
+  {
+    "mergedAt": "2026-03-28T22:20:54Z",
+    "number": 26,
+    "title": "feat: handle ENOSPC errors gracefully with actionable error messages"
+  },
+  {
+    "mergedAt": "2026-03-28T21:54:27Z",
+    "number": 25,
+    "title": "fix: fail early with clean error when file does not exist"
+  },
+  {
+    "mergedAt": "2026-01-27T12:32:23Z",
+    "number": 22,
+    "title": "feat: Add direct raw file URL for single-file uploads"
+  },
+  {
+    "mergedAt": "2026-01-06T23:51:24Z",
+    "number": 20,
+    "title": "fix: Handle HTTP 502 errors for large gist uploads"
+  },
+  {
+    "mergedAt": "2025-12-26T19:47:46Z",
+    "number": 18,
+    "title": "feat: Add NPM badge to README.md"
+  }
+]

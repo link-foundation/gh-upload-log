@@ -12,58 +12,99 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  buildLogRepositoryPath,
   createDefaultLogger,
   createENOSPCError,
   DEFAULT_PRIVATE_LOGS_REPOSITORY,
   DEFAULT_PUBLIC_LOGS_REPOSITORY,
   fileExists,
   formatFileSize,
+  generateFileContentHash,
   generateGistFileName,
+  generateLogDirectorySegment,
   generateRepoName,
+  generateStoredLogFileName,
   generateUploadedLogFileName,
   getCommandStream,
   getFileSize,
+  GITHUB_GIST_DOCUMENTED_FILE_LIMIT,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
+  isStoredLogFileName,
+  LOG_CONTENT_HASH_LENGTH,
   normalizeFileName,
+  parseFileSize,
   resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
 import {
+  checkRawUrlExists,
   getSharedRepositoryName,
   shouldUseSharedRepositoryMode,
   uploadAsRepo,
 } from './repository-upload.js';
 
 export {
+  buildLogRepositoryPath,
+  checkRawUrlExists,
   createENOSPCError,
   DEFAULT_PRIVATE_LOGS_REPOSITORY,
   DEFAULT_PUBLIC_LOGS_REPOSITORY,
   fileExists,
   formatFileSize,
+  generateFileContentHash,
   generateGistFileName,
+  generateLogDirectorySegment,
   generateRepoName,
+  generateStoredLogFileName,
   generateUploadedLogFileName,
   getFileSize,
+  GITHUB_GIST_DOCUMENTED_FILE_LIMIT,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
+  isStoredLogFileName,
+  LOG_CONTENT_HASH_LENGTH,
   normalizeFileName,
+  parseFileSize,
   resolveLogFilePath,
   splitFileIntoChunks,
   uploadAsRepo,
 };
 
 /**
+ * Normalize the configured gist size threshold
+ *
+ * Values are clamped to GitHub's documented 100MB gist file limit, because
+ * anything above it is rejected by the API (measured in docs/case-studies/issue-38).
+ *
+ * @param {number} [gistFileLimit] - Requested threshold in bytes
+ * @returns {number} Threshold in bytes
+ */
+export function resolveGistFileLimit(gistFileLimit) {
+  if (typeof gistFileLimit !== 'number' || !Number.isFinite(gistFileLimit)) {
+    return GITHUB_GIST_FILE_LIMIT;
+  }
+
+  if (gistFileLimit <= 0) {
+    return 0;
+  }
+
+  return Math.min(gistFileLimit, GITHUB_GIST_DOCUMENTED_FILE_LIMIT);
+}
+
+/**
  * Determine the best upload strategy for a log file
  *
- * @param {string} filePath - Path to the log file
+ * @param {string} rawFilePath - Path to the log file
+ * @param {Object} [options={}] - Strategy options
+ * @param {number} [options.gistFileLimit] - Maximum size uploaded as a gist (bytes)
  * @returns {Object} Strategy object with type ('gist' or 'repo') and additional info
  */
-export function determineUploadStrategy(rawFilePath) {
+export function determineUploadStrategy(rawFilePath, options = {}) {
   const filePath = resolveLogFilePath(rawFilePath);
 
   if (!fileExists(filePath)) {
@@ -71,13 +112,15 @@ export function determineUploadStrategy(rawFilePath) {
   }
 
   const fileSize = getFileSize(filePath);
+  const gistFileLimit = resolveGistFileLimit(options.gistFileLimit);
 
-  if (fileSize <= GITHUB_GIST_FILE_LIMIT) {
+  if (fileSize <= gistFileLimit) {
     return {
       type: 'gist',
       fileSize,
+      gistFileLimit,
       needsSplit: false,
-      reason: 'File fits within GitHub Gist API limit (25MB)',
+      reason: `File fits within the configured GitHub Gist limit (${formatFileSize(gistFileLimit)})`,
     };
   }
 
@@ -86,6 +129,7 @@ export function determineUploadStrategy(rawFilePath) {
   return {
     type: 'repo',
     fileSize,
+    gistFileLimit,
     needsSplit,
     numChunks,
     chunkSize: GITHUB_REPO_CHUNK_SIZE,
@@ -96,12 +140,34 @@ export function determineUploadStrategy(rawFilePath) {
 }
 
 /**
+ * Number of extra `gh gist create` attempts made after a transient failure
+ */
+export const DEFAULT_GIST_RETRIES = 2;
+
+/**
+ * Detect gateway errors that GitHub returns intermittently for large gists
+ *
+ * The size probes recorded in docs/case-studies/issue-38 show the same payload
+ * failing with HTTP 502/504 and succeeding on the next attempt, so these are
+ * worth retrying before falling back to repository mode.
+ *
+ * @param {string} errorText - stderr from `gh gist create`
+ * @returns {boolean} True when the failure looks transient
+ */
+export function isTransientGistError(errorText = '') {
+  return /http (502|503|504)|bad gateway|gateway time-?out|server error|couldn't respond to your request in time/i.test(
+    errorText
+  );
+}
+
+/**
  * Upload a file as a GitHub Gist
  *
  * @param {Object} options - Upload options
  * @param {string} options.filePath - Path to the file to upload
  * @param {boolean} options.isPublic - Whether the gist should be public (default: false)
  * @param {string} options.description - Description for the gist
+ * @param {number} options.gistRetries - Retries for transient gateway errors (default: 2)
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Gist information including URL
@@ -111,6 +177,7 @@ export async function uploadAsGist(options = {}) {
   const {
     isPublic = false,
     description,
+    gistRetries = DEFAULT_GIST_RETRIES,
     verbose = false,
     logger = console,
   } = options;
@@ -136,11 +203,29 @@ export async function uploadAsGist(options = {}) {
   try {
     fs.copyFileSync(filePath, stagedFilePath);
 
-    if (isPublic) {
-      result =
-        await $`gh gist create ${stagedFilePath} --public --desc ${desc}`;
-    } else {
-      result = await $`gh gist create ${stagedFilePath} --desc ${desc}`;
+    const maxAttempts = Math.max(1, Number(gistRetries) + 1);
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      result = isPublic
+        ? await $`gh gist create ${stagedFilePath} --public --desc ${desc}`
+        : await $`gh gist create ${stagedFilePath} --desc ${desc}`;
+
+      const failureText = `${result?.stderr || ''}${result?.stdout || ''}`;
+      const succeeded = result?.stdout
+        ?.trim()
+        .startsWith('https://gist.github.com/');
+
+      if (succeeded || attempt === maxAttempts) {
+        break;
+      }
+
+      if (!isTransientGistError(failureText)) {
+        break;
+      }
+
+      log.warn(
+        () =>
+          `Gist upload attempt ${attempt}/${maxAttempts} hit a transient GitHub error; retrying...`
+      );
     }
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });
@@ -205,6 +290,8 @@ export async function uploadAsGist(options = {}) {
  * @param {boolean} options.useSharedRepository - Use shared log repositories for repository-mode uploads (default: true)
  * @param {boolean} options.dryMode - Dry run mode - don't actually upload
  * @param {string} options.description - Description for the upload
+ * @param {number} options.gistFileLimit - Maximum size uploaded as a gist (bytes, default: 25MB)
+ * @param {boolean} options.checkRawUrl - Verify the returned raw URL is reachable (default: false)
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
@@ -218,6 +305,8 @@ export async function uploadLog(options = {}) {
     useSharedRepository = true,
     dryMode = false,
     description,
+    gistFileLimit,
+    checkRawUrl = false,
     verbose = false,
     logger = console,
   } = options;
@@ -236,7 +325,7 @@ export async function uploadLog(options = {}) {
   }
 
   const log = createDefaultLogger({ verbose, logger });
-  const strategy = determineUploadStrategy(filePath);
+  const strategy = determineUploadStrategy(filePath, { gistFileLimit });
 
   log.debug(() => `File size: ${formatFileSize(strategy.fileSize)}`);
   log.debug(() => `Strategy: ${strategy.reason}`);
@@ -267,9 +356,15 @@ export async function uploadLog(options = {}) {
         : sharedRepositoryMode
           ? getSharedRepositoryName(isPublic)
           : generateRepoName(filePath);
+    // Hashing the file is the only way to know the target folder up front, and
+    // dry mode is expected to print the exact path a real upload would use.
+    const contentHash =
+      uploadType === 'repo'
+        ? await generateFileContentHash(filePath)
+        : undefined;
     const repositoryPath =
-      uploadType === 'repo' && sharedRepositoryMode
-        ? generateRepoName(filePath)
+      uploadType === 'repo'
+        ? buildLogRepositoryPath(filePath, contentHash)
         : undefined;
 
     return {
@@ -277,14 +372,15 @@ export async function uploadLog(options = {}) {
       url:
         uploadType === 'gist'
           ? '[DRY MODE] Would create gist'
-          : sharedRepositoryMode
-            ? `[DRY MODE] Would upload to ${repositoryName}/${repositoryPath}`
-            : '[DRY MODE] Would create repository',
+          : `[DRY MODE] Would upload to ${repositoryName}/${repositoryPath}`,
       rawUrl: null,
       fileName:
-        uploadType === 'gist' ? generateGistFileName(filePath) : undefined,
+        uploadType === 'gist'
+          ? generateGistFileName(filePath)
+          : generateStoredLogFileName(filePath),
       repositoryName,
       repositoryPath,
+      contentHash,
       fileCount: 1,
       isPublic: isPublic || false,
       dryMode: true,
@@ -292,9 +388,38 @@ export async function uploadLog(options = {}) {
     };
   }
 
+  /**
+   * Optionally confirm the raw URL really resolves before it is printed
+   *
+   * Issue #38 reported raw URLs that answered 404; this turns such a report
+   * into a checked fact instead of a guess.
+   */
+  const withRawUrlCheck = async (result) => {
+    if (!checkRawUrl || !result?.rawUrl) {
+      return result;
+    }
+
+    const rawUrlCheck = await checkRawUrlExists(result.rawUrl);
+    log.debug(
+      () =>
+        `Raw URL check: ${rawUrlCheck.ok ? 'reachable' : 'unreachable'}` +
+        `${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}` +
+        `${rawUrlCheck.error ? ` (${rawUrlCheck.error})` : ''}`
+    );
+
+    if (!rawUrlCheck.ok) {
+      log.warn(
+        () =>
+          `Raw URL is not reachable${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}: ${result.rawUrl}`
+      );
+    }
+
+    return { ...result, rawUrlCheck };
+  };
+
   if (uploadType === 'gist') {
     try {
-      return await uploadAsGist(resolvedOptions);
+      return await withRawUrlCheck(await uploadAsGist(resolvedOptions));
     } catch (gistError) {
       if (isENOSPC(gistError)) {
         throw createENOSPCError('gist upload', gistError);
@@ -309,12 +434,12 @@ export async function uploadLog(options = {}) {
           `Gist upload failed: ${gistError.message}. Falling back to repository mode...`
       );
 
-      return uploadAsRepo(resolvedOptions);
+      return withRawUrlCheck(await uploadAsRepo(resolvedOptions));
     }
   }
 
   try {
-    return await uploadAsRepo(resolvedOptions);
+    return await withRawUrlCheck(await uploadAsRepo(resolvedOptions));
   } catch (repoError) {
     if (isENOSPC(repoError)) {
       const fileSize = getFileSize(filePath);
@@ -341,15 +466,24 @@ export default {
   generateRepoName,
   generateGistFileName,
   generateUploadedLogFileName,
+  generateStoredLogFileName,
+  parseFileSize,
+  generateLogDirectorySegment,
+  generateFileContentHash,
+  buildLogRepositoryPath,
+  isStoredLogFileName,
+  checkRawUrlExists,
   fileExists,
   getFileSize,
   formatFileSize,
   splitFileIntoChunks,
   isENOSPC,
   createENOSPCError,
+  GITHUB_GIST_DOCUMENTED_FILE_LIMIT,
   GITHUB_GIST_FILE_LIMIT,
   GITHUB_GIST_WEB_LIMIT,
   GITHUB_REPO_CHUNK_SIZE,
+  LOG_CONTENT_HASH_LENGTH,
   DEFAULT_PRIVATE_LOGS_REPOSITORY,
   DEFAULT_PUBLIC_LOGS_REPOSITORY,
 };

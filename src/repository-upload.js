@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  buildLogRepositoryPath,
   createDefaultLogger,
   createENOSPCError,
   createWorkDirPath,
@@ -11,14 +12,16 @@ import {
   ensureCommandSucceeded,
   extractGitHubRepoUrl,
   generateCollisionRepoName,
+  generateFileContentHash,
   generateRepoName,
-  generateUploadedLogFileName,
+  generateStoredLogFileName,
   getCommandExitCode,
   getCommandStream,
   getFileSize,
   GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   isRepositoryNameConflict,
+  isStoredLogFileName,
   resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
@@ -107,6 +110,35 @@ function buildGitHubRepositoryTreeUrl(
   repositoryPath
 ) {
   return `${buildGitHubRepositoryUrl(githubUser, repositoryName)}/tree/${branchName}/${repositoryPath}`;
+}
+
+/**
+ * Check that a raw URL really serves the uploaded file
+ *
+ * Issue #38 reported raw URLs that answered 404. This opt-in check (CLI:
+ * `--check-raw-url`) turns that class of report into a verifiable fact instead
+ * of a guess: it requests a single byte and reports the HTTP status.
+ *
+ * @param {string} rawUrl - Raw URL to probe
+ * @returns {Promise<{ok: boolean, status: number|null, error: string|null}>} Probe result
+ */
+export async function checkRawUrlExists(rawUrl) {
+  if (!rawUrl) {
+    return { ok: false, status: null, error: 'no raw URL available' };
+  }
+
+  try {
+    const response = await fetch(rawUrl, {
+      headers: { Range: 'bytes=0-0' },
+    });
+    return {
+      ok: response.ok || response.status === 206,
+      status: response.status,
+      error: null,
+    };
+  } catch (error) {
+    return { ok: false, status: null, error: error.message };
+  }
 }
 
 function listUploadedFiles(directoryPath) {
@@ -240,8 +272,10 @@ async function ensureSharedRepositoryExists(
 }
 
 async function stageRepositoryFiles(filePath, outputDir, log) {
-  const normalized = generateUploadedLogFileName(filePath);
-  const stagedFilePath = path.join(outputDir, normalized);
+  const stagedFilePath = path.join(
+    outputDir,
+    generateStoredLogFileName(filePath)
+  );
 
   fs.mkdirSync(outputDir, { recursive: true });
   log.debug(() => `→ Copying file into ${outputDir}...`);
@@ -272,6 +306,8 @@ function buildSharedRepositoryResult({
   defaultBranch,
   repositoryPath,
   contents,
+  contentHash,
+  fileName,
   isPublic,
   workDir,
   deduplicated = false,
@@ -290,6 +326,8 @@ function buildSharedRepositoryResult({
     rawUrl,
     repositoryName,
     repositoryPath,
+    contentHash,
+    fileName,
     fileCount,
     isPublic,
     workDir,
@@ -313,9 +351,15 @@ async function uploadAsDedicatedRepo(options = {}) {
   const $quiet = $({ mirror: Boolean(verbose), capture: true });
 
   try {
+    const contentHash = await generateFileContentHash(filePath);
+    const repositoryPath = buildLogRepositoryPath(filePath, contentHash);
+    log.debug(() => `Content hash: ${contentHash}`);
+    log.debug(() => `Repository path: ${repositoryPath}`);
+
     log.debug(() => `→ Creating work directory: ${workDir}`);
     fs.mkdirSync(workDir, { recursive: true });
-    await stageRepositoryFiles(filePath, workDir, log);
+    const outputDir = path.join(workDir, repositoryPath);
+    await stageRepositoryFiles(filePath, outputDir, log);
 
     log.debug(() => '→ Initializing git repository...');
     await initializeGitRepository($workDir, 'main');
@@ -369,12 +413,12 @@ async function uploadAsDedicatedRepo(options = {}) {
 
     log.debug(() => `Repository created successfully: ${repoUrl}`);
 
-    const uploadedFiles = listUploadedFiles(workDir);
+    const uploadedFiles = listUploadedFiles(outputDir);
     const fileCount = uploadedFiles.length;
     let rawUrl = null;
 
     if (fileCount === 1) {
-      const singleFileName = uploadedFiles[0];
+      const singleFileName = `${repositoryPath}/${uploadedFiles[0]}`;
       try {
         log.debug(() => `Fetching raw URL for single file: ${singleFileName}`);
         const contentResult =
@@ -401,9 +445,12 @@ async function uploadAsDedicatedRepo(options = {}) {
 
     return {
       type: 'repo',
-      url: repoUrl,
+      url: `${repoUrl}/tree/main/${repositoryPath}`,
       rawUrl,
       repositoryName,
+      repositoryPath,
+      contentHash,
+      fileName: generateStoredLogFileName(filePath),
       fileCount,
       isPublic,
       workDir,
@@ -435,12 +482,19 @@ async function uploadAsSharedRepo(options = {}) {
   const filePath = resolveLogFilePath(options.filePath);
   const log = createDefaultLogger({ verbose, logger });
   const repositoryName = getSharedRepositoryName(isPublic);
-  const repositoryPath = generateRepoName(filePath);
-  const workDir = createWorkDirPath(repositoryPath);
+  const storedFileName = generateStoredLogFileName(filePath);
+  const workDir = createWorkDirPath(generateRepoName(filePath));
   const $workDir = createWorkDirRunner($, workDir, verbose);
   const $quiet = $({ mirror: Boolean(verbose), capture: true });
+  let repositoryPath;
 
   try {
+    const contentHash = await generateFileContentHash(filePath);
+    repositoryPath = buildLogRepositoryPath(filePath, contentHash);
+    log.debug(() => `Content hash: ${contentHash}`);
+    log.debug(() => `Repository path: ${repositoryPath}`);
+    log.debug(() => `Stored file name: ${storedFileName}`);
+
     const githubUser = await getGitHubUsername($quiet);
     log.debug(() => `GitHub user: ${githubUser}`);
 
@@ -460,10 +514,18 @@ async function uploadAsSharedRepo(options = {}) {
       repositoryPath
     );
 
-    if (existingContents !== null) {
+    // The folder is keyed by content hash, so an existing folder means the very
+    // same bytes were already uploaded. The file name is checked as well: an
+    // empty or partially written folder (for example an upload that died before
+    // pushing) must not be reported as an existing log (issue #38).
+    const existingLogFiles = (existingContents || []).filter((entry) =>
+      isStoredLogFileName(entry.name, storedFileName)
+    );
+
+    if (existingLogFiles.length > 0) {
       log.debug(
         () =>
-          `Log ${repositoryPath} already exists in ${repositoryName}; skipping duplicate upload`
+          `Identical content already uploaded to ${repositoryName}/${repositoryPath}; reusing it`
       );
 
       return buildSharedRepositoryResult({
@@ -471,11 +533,20 @@ async function uploadAsSharedRepo(options = {}) {
         repositoryName,
         defaultBranch,
         repositoryPath,
-        contents: existingContents,
+        contents: existingLogFiles,
+        contentHash,
+        fileName: storedFileName,
         isPublic,
         workDir: null,
         deduplicated: true,
       });
+    }
+
+    if (existingContents !== null) {
+      log.debug(
+        () =>
+          `Folder ${repositoryPath} exists in ${repositoryName} but does not contain ${storedFileName}; uploading it`
+      );
     }
 
     log.debug(() => `→ Creating work directory: ${workDir}`);
@@ -552,6 +623,8 @@ async function uploadAsSharedRepo(options = {}) {
       defaultBranch,
       repositoryPath,
       contents: uploadedContents,
+      contentHash,
+      fileName: storedFileName,
       isPublic,
       workDir,
       deduplicated: false,

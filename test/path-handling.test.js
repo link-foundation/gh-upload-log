@@ -13,12 +13,18 @@ import os from 'node:os';
 import path from 'node:path';
 import { cwd } from 'node:process';
 import {
+  MAX_LOG_FOLDER_SEGMENT_LENGTH,
   MAX_REPOSITORY_NAME_LENGTH,
   MAX_UPLOADED_FILE_NAME_LENGTH,
+  ROOT_LOG_FOLDER_SEGMENT,
 } from '../src/common.js';
 import {
   generateRepoName,
   generateUploadedLogFileName,
+  generateStoredLogFileName,
+  generateLogDirectorySegment,
+  generateFileContentHash,
+  buildLogRepositoryPath,
   resolveLogFilePath,
   uploadLog,
 } from '../src/index.js';
@@ -157,6 +163,33 @@ test('generated names stay within GitHub and git length limits', () => {
   );
 });
 
+test('generated folder segments stay within git length limits', () => {
+  const deepPath = `/${Array.from({ length: 40 }, (_, index) => `directory-segment-${index}`).join('/')}/application.log`;
+
+  const segment = generateLogDirectorySegment(deepPath);
+
+  assert.ok(
+    segment.length <= MAX_LOG_FOLDER_SEGMENT_LENGTH,
+    `Folder segment should be at most ${MAX_LOG_FOLDER_SEGMENT_LENGTH} characters, got ${segment.length}`
+  );
+  assert.equal(
+    generateLogDirectorySegment(deepPath),
+    segment,
+    'Shortening must be deterministic so deduplication keeps working'
+  );
+});
+
+test('generated folder segment falls back to a root name', () => {
+  assert.equal(
+    generateLogDirectorySegment('/application.log'),
+    ROOT_LOG_FOLDER_SEGMENT
+  );
+  assert.equal(
+    generateLogDirectorySegment('application.log'),
+    ROOT_LOG_FOLDER_SEGMENT
+  );
+});
+
 // --- uploads with a working directory that changes mid-run -------------------
 
 test('uploadLog - accepts a relative path even when the working directory changes', async () => {
@@ -169,8 +202,11 @@ test('uploadLog - accepts a relative path even when the working directory change
   fs.writeFileSync(relativeFile, 'relative upload\n');
 
   const originalCwd = cwd();
-  const expectedFolder = generateRepoName(path.resolve(relativeFile));
-  const expectedFileName = generateUploadedLogFileName(
+  const expectedFolder = buildLogRepositoryPath(
+    path.resolve(relativeFile),
+    await generateFileContentHash(path.resolve(relativeFile))
+  );
+  const expectedFileName = generateStoredLogFileName(
     path.resolve(relativeFile)
   );
   const invocations = [];

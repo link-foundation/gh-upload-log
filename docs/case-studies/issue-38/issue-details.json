@@ -1,0 +1,23 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE0MzE5MDQ=",
+    "is_bot": false,
+    "login": "konard",
+    "name": "Konstantin Diachenko"
+  },
+  "body": "```\nbox@a8a054dda4ef:~$ gh-upload-log /home/box/hive-telegram-bot.log \n⏳ Uploading 30.98 MB (🔒 private)...\nkonard\nℹ️ Repository already exists (🔒 private)\n🔗 https://github.com/konard/private-logs/tree/main/log-home-box-hive-telegram-bot\n📄 https://raw.githubusercontent.com/konard/private-logs/main/log-home-box-hive-telegram-bot/home-box-hive-telegram-bot.log.txt?token=AAK5SYBVQ7P6L4D2P2UWTS3KRHFKXAA\n⚠️  Note: Raw URL token expires in ~10 minutes for private repositories\nbox@a8a054dda4ef:~$ gh-upload-log /home/box/hive-telegram-bot.log \n⏳ Uploading 31.02 MB (🔒 private)...\nkonard\nℹ️ Repository already exists (🔒 private)\n🔗 https://github.com/konard/private-logs/tree/main/log-home-box-hive-telegram-bot\n📄 https://raw.githubusercontent.com/konard/private-logs/main/log-home-box-hive-telegram-bot/home-box-hive-telegram-bot.log.txt?token=AAK5SYBIYHHOG5BC3H5ZWHDKRHFQHAA\n⚠️  Note: Raw URL token expires in ~10 minutes for private repositories\nbox@a8a054dda4ef:~$ \n```\n\nWe also should double check if gist really does not allow files with that size.\n\nWe should use hash as a sub folder of `log-home-box-hive-telegram-bot` path folder, so files with the same path can exist in multiple versions.\n\nAlso the path itself should not be duplicated. So for all files we go from `log-home-box-hive-telegram-bot/home-box-` to `home-box/<hash>/file-name.extension`, no need to duplicate `log`.\n\nAnd if file with same <hash> and file name and path already exists we can give link to the same file, that actually exists, if it is.\n\nFor example given url `https://raw.githubusercontent.com/konard/private-logs/main/log-home-box-hive-telegram-bot/home-box-hive-telegram-bot.log.txt?token=AAK5SYBIYHHOG5BC3H5ZWHDKRHFQHAA` does not exist, and not even `https://raw.githubusercontent.com/konard/private-logs/main/log-home-box-hive-telegram-bot/home-box-hive-telegram-bot.log.txt`.\n\nWe need to download all logs and data related about the issue to this repository, make sure we compile that data to `./docs/case-studies/issue-{id}` folder, and use it to do deep case study analysis (also make sure to search online for additional facts and data), in which we will reconstruct timeline/sequence of events, list of each and all requirements from the issue, find root causes of the each problem, and propose possible solutions and solution plans for each requirement (we should also check known existing components/libraries, that solve similar problem or can help in solutions).\n\nIf there is not enough data to find actual root cause, add debug output and verbose mode if not present, that will allow us to find root cause on next iteration.\n\nIf issue related to any other repository/project, where we can report issues on GitHub, please do so. Each issue must contain reproducible examples, workarounds and suggestions for fix the issue in code. Also double check to fully apply requirements to entire codebase, so if we have issue in multiple places, it should be fixed in all them.\n\nPlease plan and execute everything in this single pull request, you have unlimited time and context, as context auto-compacts and you can continue indefinitely, until it is each and every requirement fully addressed, and everything is totally done.",
+  "comments": [],
+  "createdAt": "2026-08-22T16:25:23Z",
+  "labels": [
+    {
+      "id": "LA_kwDOQU1fXM8AAAACPnyG3Q",
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    }
+  ],
+  "number": 38,
+  "state": "OPEN",
+  "title": "File that changed should be uploaded again, even if the same path exists",
+  "updatedAt": "2026-08-22T16:25:23Z"
+}
