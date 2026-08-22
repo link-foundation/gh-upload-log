@@ -1,0 +1,89 @@
+[
+  {
+    "sizeMB": 40,
+    "sizeBytes": 41943040,
+    "exitCode": 0,
+    "durationMs": 9153,
+    "url": "https://gist.github.com/konard/0b41b68b1c4aa87f41df77d58f050760",
+    "stderr": "- Creating gist probe-40mb.log.txt\n✓ Created secret gist probe-40mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 50,
+    "sizeBytes": 52428800,
+    "exitCode": 0,
+    "durationMs": 12213,
+    "url": "https://gist.github.com/konard/94172b4181da023386458327cdc6ad87",
+    "stderr": "- Creating gist probe-50mb.log.txt\n✓ Created secret gist probe-50mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 50,
+    "sizeBytes": 52428800,
+    "exitCode": 1,
+    "durationMs": 14606,
+    "url": null,
+    "stderr": "- Creating gist probe-50mb.log.txt\nX Failed to create gist: HTTP 504: We couldn't respond to your request in time. Sorry about that. Please try resubmitting your request and contact us if the problem persists. (https://api.github.com/gists)",
+    "deleted": false
+  },
+  {
+    "sizeMB": 60,
+    "sizeBytes": 62914560,
+    "exitCode": 0,
+    "durationMs": 11063,
+    "url": "https://gist.github.com/konard/7212c60449aee9e48792b2259f601f18",
+    "stderr": "- Creating gist probe-60mb.log.txt\n✓ Created secret gist probe-60mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 75,
+    "sizeBytes": 78643200,
+    "exitCode": 0,
+    "durationMs": 11536,
+    "url": "https://gist.github.com/konard/2dfc1e41c174742fe77a35bd9d6271d6",
+    "stderr": "- Creating gist probe-75mb.log.txt\n✓ Created secret gist probe-75mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 90,
+    "sizeBytes": 94371840,
+    "exitCode": 1,
+    "durationMs": 14948,
+    "url": null,
+    "stderr": "- Creating gist probe-90mb.log.txt\nX Failed to create gist: HTTP 502: Server Error (https://api.github.com/gists)",
+    "deleted": false
+  },
+  {
+    "sizeMB": 100,
+    "sizeBytes": 104857600,
+    "exitCode": 0,
+    "durationMs": 14175,
+    "url": "https://gist.github.com/konard/cb6f03b4899c4f913728f7159b311042",
+    "stderr": "- Creating gist probe-100mb.log.txt\n✓ Created secret gist probe-100mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 101,
+    "sizeBytes": 105906176,
+    "exitCode": 0,
+    "durationMs": 14029,
+    "url": "https://gist.github.com/konard/5dd9d9357fe522a2b6715bfed9d92df4",
+    "stderr": "- Creating gist probe-101mb.log.txt\n✓ Created secret gist probe-101mb.log.txt",
+    "deleted": true,
+    "deleteStderr": ""
+  },
+  {
+    "sizeMB": 105,
+    "sizeBytes": 110100480,
+    "exitCode": 1,
+    "durationMs": 15514,
+    "url": null,
+    "stderr": "- Creating gist probe-105mb.log.txt\nX Failed to create gist: HTTP 502: Server Error (https://api.github.com/gists)",
+    "deleted": false
+  }
+]

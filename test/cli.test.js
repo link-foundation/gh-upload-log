@@ -8,7 +8,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
-import { generateGistFileName, generateRepoName } from '../src/index.js';
+import {
+  buildLogRepositoryPath,
+  generateFileContentHash,
+  generateGistFileName,
+  generateRepoName,
+} from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +77,11 @@ function setupLargeRepoTestFile() {
 
 setupTestFile();
 setupLargeRepoTestFile();
+
+const largeCliRepoPath = buildLogRepositoryPath(
+  path.resolve(largeCliRepoFile),
+  await generateFileContentHash(path.resolve(largeCliRepoFile))
+);
 
 // Test: Basic usage without flags (should not show conflicts error)
 test('CLI basic usage - accepts positional argument without conflicts error', async () => {
@@ -174,7 +184,7 @@ test('CLI repository dry mode uses shared repositories by default', async () => 
     'Repository-mode uploads should default to the shared private repository'
   );
   assert.ok(
-    result.output.includes(`Path: ${largeCliRepoFolder}`),
+    result.output.includes(`Path: ${largeCliRepoPath}`),
     'Shared repository dry mode should show the folder path'
   );
 });

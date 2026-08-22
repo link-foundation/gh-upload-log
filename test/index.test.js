@@ -10,7 +10,9 @@ import {
   normalizeFileName,
   generateRepoName,
   generateGistFileName,
-  generateUploadedLogFileName,
+  generateStoredLogFileName,
+  generateFileContentHash,
+  buildLogRepositoryPath,
   fileExists,
   getFileSize,
   formatFileSize,
@@ -543,8 +545,11 @@ test('uploadLog - stores large files in the shared visibility repository by defa
   const sharedFile = path.join('test', 'fixtures', 'shared-default-large.log');
   ensureLargeTestFile(sharedFile);
 
-  const sharedFolder = generateRepoName(path.resolve(sharedFile));
-  const sharedFileName = generateUploadedLogFileName(path.resolve(sharedFile));
+  const sharedFolder = buildLogRepositoryPath(
+    path.resolve(sharedFile),
+    await generateFileContentHash(path.resolve(sharedFile))
+  );
+  const sharedFileName = generateStoredLogFileName(path.resolve(sharedFile));
   const commands = [];
   let folderLookupCalls = 0;
 
@@ -674,10 +679,11 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
   );
   ensureLargeTestFile(duplicateFile);
 
-  const sharedFolder = generateRepoName(path.resolve(duplicateFile));
-  const sharedFileName = generateUploadedLogFileName(
-    path.resolve(duplicateFile)
+  const sharedFolder = buildLogRepositoryPath(
+    path.resolve(duplicateFile),
+    await generateFileContentHash(path.resolve(duplicateFile))
   );
+  const sharedFileName = generateStoredLogFileName(path.resolve(duplicateFile));
   const commands = [];
 
   const fakeCommandStream = createFakeCommandStream((command) => {
@@ -799,11 +805,19 @@ test('uploadLog - keeps dedicated repository mode available when shared mode is 
     generateRepoName(path.resolve(legacyFile))
   );
   assert.equal(result.isPublic, true);
+  assert.equal(
+    result.repositoryPath,
+    buildLogRepositoryPath(
+      path.resolve(legacyFile),
+      await generateFileContentHash(path.resolve(legacyFile))
+    )
+  );
   assert.ok(
     fs.existsSync(
       path.join(
         result.workDir,
-        generateUploadedLogFileName(path.resolve(legacyFile))
+        result.repositoryPath,
+        generateStoredLogFileName(path.resolve(legacyFile))
       )
     ),
     'Dedicated repository uploads should stage a .log.txt file'
@@ -822,10 +836,11 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
   const fallbackFile = path.join('test', 'fixtures', 'auto-fallback-small.log');
   fs.writeFileSync(fallbackFile, 'fallback to shared repository\n');
 
-  const sharedFolder = generateRepoName(path.resolve(fallbackFile));
-  const sharedFileName = generateUploadedLogFileName(
-    path.resolve(fallbackFile)
+  const sharedFolder = buildLogRepositoryPath(
+    path.resolve(fallbackFile),
+    await generateFileContentHash(path.resolve(fallbackFile))
   );
+  const sharedFileName = generateStoredLogFileName(path.resolve(fallbackFile));
   const commands = [];
   let folderLookupCalls = 0;
 

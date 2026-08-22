@@ -189,15 +189,22 @@ export function generateCollisionRepoName(
 /**
  * Constants for GitHub limits
  *
- * Note: While GitHub documents a 100MB limit for gist files, the API has
- * practical limitations. Large files (>25MB) can cause HTTP 502 errors
- * due to request payload size limits. The safe threshold for gists via
- * the API matches the web interface limit of 25MB.
+ * Note: GitHub documents a 100MB limit for gist files. Measurements taken for
+ * issue #38 (see docs/case-studies/issue-38) show that the API does accept
+ * files well above 25MB - 26MB, 31MB, 40MB, 60MB, 75MB, 90MB, 100MB and 102MB
+ * uploads all succeeded and the raw URL served byte-identical content - but the
+ * failure rate grows with size: the same payload can answer HTTP 502/504 once
+ * and succeed on the next attempt, and everything at/above ~104MB failed.
+ *
+ * The default threshold therefore stays at the reliable 25MB web-interface
+ * limit, and callers who prefer gists for bigger files can raise it with the
+ * `gistFileLimit` option (CLI: `--gist-limit`, env: GH_UPLOAD_LOG_GIST_LIMIT).
  *
  * See: https://github.com/orgs/community/discussions/147837
  */
 export const GITHUB_GIST_FILE_LIMIT = 25 * 1024 * 1024;
 export const GITHUB_GIST_WEB_LIMIT = 25 * 1024 * 1024;
+export const GITHUB_GIST_DOCUMENTED_FILE_LIMIT = 100 * 1024 * 1024;
 export const GITHUB_REPO_CHUNK_SIZE = 100 * 1024 * 1024;
 export const DEFAULT_PRIVATE_LOGS_REPOSITORY = 'private-logs';
 export const DEFAULT_PUBLIC_LOGS_REPOSITORY = 'public-logs';
@@ -210,6 +217,21 @@ export const LOG_TEXT_EXTENSION = '.log.txt';
  */
 export const MAX_REPOSITORY_NAME_LENGTH = 100;
 export const MAX_UPLOADED_FILE_NAME_LENGTH = 200;
+export const MAX_LOG_FOLDER_SEGMENT_LENGTH = 200;
+
+/**
+ * Length of the content hash used as the version folder of an uploaded log
+ *
+ * 16 hex characters of SHA-256 (64 bits) keep folder names readable while the
+ * chance of two different logs colliding stays negligible for a personal log
+ * archive.
+ */
+export const LOG_CONTENT_HASH_LENGTH = 16;
+
+/**
+ * Folder used when a log file lives directly in the filesystem root
+ */
+export const ROOT_LOG_FOLDER_SEGMENT = 'root';
 
 /**
  * Shorten a generated name deterministically when it exceeds a limit
@@ -351,6 +373,113 @@ export function generateGistFileName(filePath) {
 }
 
 /**
+ * Generate the file name a log is stored under inside a repository folder
+ *
+ * Repository uploads already encode the directory in the folder path
+ * (`home-box/<hash>/`), so the file itself only needs its own base name. Using
+ * the full normalized path here would repeat the directory in every file name
+ * (`home-box/<hash>/home-box-app.log.txt`), which is what issue #38 asks to
+ * stop doing.
+ *
+ * @param {string} filePath - The file path
+ * @returns {string} File name ending in .log.txt
+ */
+export function generateStoredLogFileName(filePath) {
+  return generateUploadedLogFileName(path.basename(filePath));
+}
+
+/**
+ * Generate the folder segment that represents the directory of a log file
+ *
+ * `/home/box/app.log` becomes `home-box`. Files that live in the filesystem
+ * root (or in a path without a directory part) use `root` so the generated
+ * repository path always has two components.
+ *
+ * @param {string} filePath - Absolute path of the log file
+ * @returns {string} Normalized directory segment
+ */
+export function generateLogDirectorySegment(filePath) {
+  const directory = path.dirname(filePath);
+  const normalized = normalizeFileName(directory)
+    .replace(/^\.+$/, '')
+    .replace(/^-+|-+$/g, '');
+
+  if (!normalized) {
+    return ROOT_LOG_FOLDER_SEGMENT;
+  }
+
+  return shortenGeneratedName(normalized, MAX_LOG_FOLDER_SEGMENT_LENGTH);
+}
+
+/**
+ * Compute the content hash used as the version folder of an uploaded log
+ *
+ * The file is streamed so that multi-gigabyte logs are hashed without being
+ * loaded into memory.
+ *
+ * @param {string} filePath - Absolute path of the log file
+ * @param {number} [length=LOG_CONTENT_HASH_LENGTH] - Hex characters to keep
+ * @returns {Promise<string>} Truncated lowercase SHA-256 hex digest
+ */
+export function generateFileContentHash(
+  filePath,
+  length = LOG_CONTENT_HASH_LENGTH
+) {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+
+    stream.on('error', reject);
+    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('end', () => resolve(hash.digest('hex').slice(0, length)));
+  });
+}
+
+/**
+ * Build the repository folder a log version is stored in
+ *
+ * The layout is `<normalized-directory>/<content-hash>`, so re-uploading a file
+ * whose content changed creates a new folder instead of silently keeping the
+ * previous version (issue #38), while re-uploading identical content resolves
+ * to the folder that already holds it.
+ *
+ * @param {string} filePath - Absolute path of the log file
+ * @param {string} contentHash - Content hash from generateFileContentHash
+ * @returns {string} Repository-relative folder path
+ */
+export function buildLogRepositoryPath(filePath, contentHash) {
+  return `${generateLogDirectorySegment(filePath)}/${contentHash}`;
+}
+
+/**
+ * Build the chunk file name prefix used when a log is split into parts
+ *
+ * @param {string} storedFileName - File name returned by generateStoredLogFileName
+ * @returns {string} Chunk prefix, e.g. `app.part-`
+ */
+export function buildChunkFileNamePrefix(storedFileName) {
+  return `${storedFileName.slice(0, -LOG_TEXT_EXTENSION.length)}.part-`;
+}
+
+/**
+ * Check whether a repository folder entry belongs to the given stored log
+ *
+ * Matches both single-file uploads and the `.part-NN.log.txt` chunks produced
+ * for logs larger than the repository chunk size.
+ *
+ * @param {string} entryName - File name inside the repository folder
+ * @param {string} storedFileName - Expected stored file name
+ * @returns {boolean} True when the entry is the log or one of its chunks
+ */
+export function isStoredLogFileName(entryName, storedFileName) {
+  if (entryName === storedFileName) {
+    return true;
+  }
+
+  return entryName.startsWith(buildChunkFileNamePrefix(storedFileName));
+}
+
+/**
  * Check if a file exists
  *
  * @param {string} filePath - Path to check
@@ -400,6 +529,47 @@ export function formatFileSize(bytes) {
 }
 
 /**
+ * Parse a human-readable size into bytes
+ *
+ * Accepts plain numbers (interpreted as megabytes, the unit users think in for
+ * this tool) and explicit units: `40MB`, `1.5 GB`, `500KB`, `1048576B`.
+ *
+ * @param {string|number} value - Size to parse
+ * @returns {number|null} Size in bytes, or null when the value is unparseable
+ */
+export function parseFileSize(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.round(value * 1024 * 1024);
+  }
+
+  if (typeof value !== 'string' || value.trim() === '') {
+    return null;
+  }
+
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb|k|m|g)?$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const amount = Number(match[1]);
+  const multipliers = {
+    b: 1,
+    k: 1024,
+    kb: 1024,
+    m: 1024 * 1024,
+    mb: 1024 * 1024,
+    g: 1024 * 1024 * 1024,
+    gb: 1024 * 1024 * 1024,
+  };
+
+  return Math.round(amount * multipliers[match[2] || 'mb']);
+}
+
+/**
  * Split a file into chunks
  *
  * @param {string} inputPath - Path to input file
@@ -418,8 +588,7 @@ export async function splitFileIntoChunks(
   const uploadedFileName = ensureLogTextExtension(
     normalizeFileName(inputFileName)
   );
-  const baseName = uploadedFileName.slice(0, -LOG_TEXT_EXTENSION.length);
-  const chunkPrefix = `${baseName}.part-`;
+  const chunkPrefix = buildChunkFileNamePrefix(uploadedFileName);
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });

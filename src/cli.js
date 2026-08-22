@@ -14,6 +14,7 @@ import {
   fileExists,
   resolveLogFilePath,
   isENOSPC,
+  parseFileSize,
 } from './index.js';
 
 // Parse command-line arguments with environment variable and .lenv support
@@ -74,6 +75,18 @@ const config = makeConfig({
         description: 'Enable verbose output',
         default: getenv('GH_UPLOAD_LOG_VERBOSE', false),
       })
+      .option('gist-limit', {
+        type: 'string',
+        description:
+          'Maximum file size uploaded as a gist (e.g. 25MB, 100MB). Larger files use repository mode',
+        default: getenv('GH_UPLOAD_LOG_GIST_LIMIT', ''),
+      })
+      .option('check-raw-url', {
+        type: 'boolean',
+        description:
+          'Verify that the resulting raw URL is reachable before reporting success',
+        default: getenv('GH_UPLOAD_LOG_CHECK_RAW_URL', false),
+      })
       .option('test', {
         alias: 't',
         type: 'boolean',
@@ -102,6 +115,12 @@ const config = makeConfig({
         // If --only-gist or --only-repository is used, auto mode is disabled
         if (argv.onlyGist || argv.onlyRepository) {
           argv.auto = false;
+        }
+        // Validate --gist-limit early so users see the problem before uploading
+        if (argv.gistLimit && parseFileSize(argv.gistLimit) === null) {
+          throw new Error(
+            `Invalid --gist-limit value: ${argv.gistLimit} (expected something like 25MB, 100MB or 1GB)`
+          );
         }
         return true;
       })
@@ -176,7 +195,12 @@ async function main() {
       dryMode: config.dryMode,
       description: config.description,
       verbose: config.verbose,
+      checkRawUrl: config.checkRawUrl,
     };
+
+    if (config.gistLimit) {
+      options.gistFileLimit = parseFileSize(config.gistLimit);
+    }
 
     if (options.verbose) {
       console.log('Options:', options);
@@ -213,7 +237,7 @@ async function main() {
     const actionLabel = result.dryMode
       ? 'would be created'
       : result.deduplicated
-        ? 'already exists'
+        ? 'already contains this exact file'
         : 'created';
 
     console.log(`${successEmoji} ${typeLabel} ${actionLabel} (${visibility})`);
@@ -237,6 +261,21 @@ async function main() {
       }
     }
 
+    if (result.rawUrlCheck && !result.rawUrlCheck.ok && !result.dryMode) {
+      console.log(
+        `⚠️  Raw URL check failed${
+          result.rawUrlCheck.status
+            ? ` (HTTP ${result.rawUrlCheck.status})`
+            : ''
+        }${result.rawUrlCheck.error ? `: ${result.rawUrlCheck.error}` : ''}`
+      );
+      if (result.type === 'repo' && !result.isPublic) {
+        console.log(
+          '   Private repository raw URLs require a fresh token; use the page URL above instead.'
+        );
+      }
+    }
+
     // Show additional details only in verbose mode
     if (options.verbose) {
       console.log('');
@@ -251,9 +290,27 @@ async function main() {
         if (result.repositoryPath) {
           console.log(`  Path: ${result.repositoryPath}`);
         }
+        if (result.contentHash) {
+          console.log(`  Content hash: ${result.contentHash}`);
+        }
+        if (result.fileName) {
+          console.log(`  File name: ${result.fileName}`);
+        }
+        console.log(`  Deduplicated: ${result.deduplicated ? 'yes' : 'no'}`);
       }
       if (result.rawUrl) {
         console.log(`  Raw URL: ${result.rawUrl}`);
+      }
+      if (result.rawUrlCheck) {
+        const status = result.rawUrlCheck.status
+          ? ` (HTTP ${result.rawUrlCheck.status})`
+          : '';
+        const reason = result.rawUrlCheck.error
+          ? ` (${result.rawUrlCheck.error})`
+          : '';
+        console.log(
+          `  Raw URL reachable: ${result.rawUrlCheck.ok ? 'yes' : 'no'}${status}${reason}`
+        );
       }
     }
 

@@ -1,0 +1,22 @@
+{
+  "sizeMB": 31,
+  "localSize": 33000000,
+  "localHash": "0d0d66787b4a532b7083b4e02317f44de140b61fc1d82482270fede1edb6b11f",
+  "createExitCode": 0,
+  "url": "https://gist.github.com/konard/db1e9f556fc39d8f04f166b27ca4dc9f",
+  "createStderr": "- Creating gist integrity-31mb.log.txt\n✓ Created secret gist integrity-31mb.log.txt",
+  "apiFiles": [
+    {
+      "filename": "integrity-31mb.log.txt",
+      "raw_url": "https://gist.githubusercontent.com/konard/db1e9f556fc39d8f04f166b27ca4dc9f/raw/734401efdc7d050d8da13fe3b4a8d0cb68f80848/integrity-31mb.log.txt",
+      "size": 33000000,
+      "truncated": true
+    }
+  ],
+  "apiStderr": "",
+  "downloadExitCode": 0,
+  "downloadedSize": 33000000,
+  "downloadedHash": "0d0d66787b4a532b7083b4e02317f44de140b61fc1d82482270fede1edb6b11f",
+  "identical": true,
+  "deleted": true
+}
