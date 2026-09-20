@@ -7,6 +7,7 @@
  */
 
 import { makeConfig } from 'lino-arguments';
+import { PACKAGE_VERSION } from './package-version.js';
 import {
   uploadLog,
   getFileSize,
@@ -143,7 +144,7 @@ const config = makeConfig({
       .example('$0 --quick', 'Run quick self-test (1MB file only)')
       .help('h')
       .alias('h', 'help')
-      .version('0.1.0')
+      .version(PACKAGE_VERSION)
       .strict(),
 });
 

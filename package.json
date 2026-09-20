@@ -32,7 +32,7 @@
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/link-foundation/gh-upload-log.git"
+    "url": "git+https://github.com/link-foundation/gh-upload-log.git"
   },
   "engines": {
     "bun": ">=1.0.0"
