@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.9.1
+
+### Patch Changes
+
+- 770cea8: Ship the existing relative-path upload fix to npm by repairing trusted publishing, reject failed publish commands instead of creating false-success GitHub releases, and report the installed package version from the CLI.
+
 ## 0.9.0
 
 ### Minor Changes
