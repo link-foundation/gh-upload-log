@@ -132,12 +132,20 @@ test('release-note parent fails when its formatter child exits non-zero', () => 
     fs.writeFileSync(
       fakeGhScript,
       [
+        'const args = process.argv.slice(2);',
         "if (process.argv.includes('--jq')) {",
         "  console.log('123');",
         '  process.exit(0);',
         '}',
-        "console.error('simulated formatter child failure');",
-        'process.exit(42);',
+        "if (args.includes('-X')) {",
+        "  console.error('simulated formatter child failure');",
+        '  process.exit(42);',
+        '}',
+        "if (args.some((argument) => argument.includes('/commits/'))) {",
+        "  console.log('[]');",
+        '  process.exit(0);',
+        '}',
+        "console.log(JSON.stringify({ body: '### Patch Changes\\n- Test change' }));",
         '',
       ].join('\n')
     );
@@ -177,6 +185,10 @@ test('release-note parent fails when its formatter child exits non-zero', () => 
       result.status,
       0,
       `Parent must fail after a failed formatter child. Output:\n${output}`
+    );
+    assert.ok(
+      output.includes('simulated formatter child failure'),
+      `The Bun formatter child must run and preserve its diagnostics. Output:\n${output}`
     );
     assert.ok(
       !output.includes('✅ Formatted release notes for v9.9.9'),
