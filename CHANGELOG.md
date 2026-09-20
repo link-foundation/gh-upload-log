@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.9.2
+
+### Patch Changes
+
+- 1b31255: Fail the release workflow when release-note formatting commands fail, and run both formatting helpers with Bun and locked dependencies.
+
 ## 0.9.1
 
 ### Patch Changes
