@@ -1,5 +1,7 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assert, test } from 'test-anywhere';
 import { publishWithRetries } from '../scripts/publish-to-npm.mjs';
@@ -117,3 +119,70 @@ test('setupNpm rejects when the npm upgrade command has a non-zero exit code', a
     'Version verification must not run after failure'
   );
 });
+
+test('release-note parent fails when its formatter child exits non-zero', () => {
+  const projectRoot = path.join(__dirname, '..');
+  const fakeBin = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'gh-upload-log-release-test-')
+  );
+  const fakeGhScript = path.join(fakeBin, 'fake-gh.mjs');
+  const fakeGh = path.join(fakeBin, 'gh');
+
+  try {
+    fs.writeFileSync(
+      fakeGhScript,
+      [
+        "if (process.argv.includes('--jq')) {",
+        "  console.log('123');",
+        '  process.exit(0);',
+        '}',
+        "console.error('simulated formatter child failure');",
+        'process.exit(42);',
+        '',
+      ].join('\n')
+    );
+    fs.writeFileSync(
+      fakeGh,
+      `#!${process.execPath}\nimport './fake-gh.mjs';\n`,
+      { mode: 0o755 }
+    );
+    fs.writeFileSync(
+      `${fakeGh}.cmd`,
+      `@echo off\r\n"${process.execPath}" "%~dp0\\fake-gh.mjs" %*\r\n`
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(projectRoot, 'scripts', 'format-github-release.mjs'),
+        '--release-version',
+        '9.9.9',
+        '--repository',
+        'owner/repository',
+        '--commit-sha',
+        'abc123',
+      ],
+      {
+        cwd: projectRoot,
+        env: {
+          ...process.env,
+          PATH: `${fakeBin}${path.delimiter}${process.env.PATH || ''}`,
+        },
+        encoding: 'utf8',
+      }
+    );
+    const output = `${result.stdout || ''}${result.stderr || ''}`;
+
+    assert.notEqual(
+      result.status,
+      0,
+      `Parent must fail after a failed formatter child. Output:\n${output}`
+    );
+    assert.ok(
+      !output.includes('✅ Formatted release notes for v9.9.9'),
+      `Parent must not claim formatting succeeded. Output:\n${output}`
+    );
+  } finally {
+    fs.rmSync(fakeBin, { recursive: true, force: true });
+  }
+}, 30000);
