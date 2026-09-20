@@ -3,35 +3,48 @@
 /**
  * Update npm for OIDC trusted publishing
  * npm trusted publishing requires npm >= 11.5.1
- * Node.js 20.x ships with npm 10.x, so we need to update
- *
- * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
- * - command-stream: Modern shell command execution with streaming support
+ * The release workflow uses Node.js 24.x and installs a compatible npm 11.x.
  */
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { $ } from 'command-stream';
+import { ensureCommandSucceeded } from '../src/common.js';
 
-// Import command-stream for shell command execution
-const { $ } = await use('command-stream');
+export const TRUSTED_PUBLISHING_NPM_RANGE = '^11.5.1';
 
-try {
+export async function setupNpm(commandStream = $) {
   // Get current npm version
-  const currentResult = await $`npm --version`.run({ capture: true });
+  const currentResult = await commandStream`npm --version`.run({
+    capture: true,
+  });
+  ensureCommandSucceeded(currentResult, 'read the current npm version');
   const currentVersion = currentResult.stdout.trim();
   console.log(`Current npm version: ${currentVersion}`);
 
-  // Update npm to latest
-  await $`npm install -g npm@latest`;
+  // npm 11.5.1 introduced OIDC publishing. Stay on npm 11 so future npm major
+  // releases cannot unexpectedly require a newer Node runtime.
+  const npmPackage = `npm@${TRUSTED_PUBLISHING_NPM_RANGE}`;
+  const installResult = await commandStream`npm install -g ${npmPackage}`;
+  ensureCommandSucceeded(installResult, `install ${npmPackage}`);
 
   // Get updated npm version
-  const updatedResult = await $`npm --version`.run({ capture: true });
+  const updatedResult = await commandStream`npm --version`.run({
+    capture: true,
+  });
+  ensureCommandSucceeded(updatedResult, 'read the updated npm version');
   const updatedVersion = updatedResult.stdout.trim();
   console.log(`Updated npm version: ${updatedVersion}`);
-} catch (error) {
-  console.error('Error updating npm:', error.message);
-  process.exit(1);
+}
+
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) ===
+    path.resolve(fileURLToPath(import.meta.url));
+
+if (isMain) {
+  setupNpm().catch((error) => {
+    console.error('Error updating npm:', error.message);
+    process.exit(1);
+  });
 }
