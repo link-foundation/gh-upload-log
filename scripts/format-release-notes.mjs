@@ -60,6 +60,11 @@ const config = makeConfig({
         type: 'string',
         default: getenv('COMMIT_SHA', ''),
         describe: 'Commit SHA for PR detection',
+      })
+      .option('gh-command', {
+        type: 'string',
+        default: getenv('GH_COMMAND', 'gh'),
+        describe: 'GitHub CLI executable',
       }),
 });
 
@@ -67,6 +72,7 @@ const releaseId = config.releaseId;
 const version = config.releaseVersion;
 const repository = config.repository;
 const passedCommitSha = config.commitSha;
+const ghCommand = config.ghCommand;
 
 if (!releaseId || !version || !repository) {
   console.error(
@@ -77,9 +83,10 @@ if (!releaseId || !version || !repository) {
 
 try {
   // Get current release body
-  const result = await $`gh api repos/${repository}/releases/${releaseId}`.run({
-    capture: true,
-  });
+  const result =
+    await $`${ghCommand} api repos/${repository}/releases/${releaseId}`.run({
+      capture: true,
+    });
   ensureCommandSucceeded(result, `read GitHub release ${releaseId}`);
   const releaseData = JSON.parse(result.stdout);
 
@@ -156,7 +163,7 @@ try {
 
     try {
       const prResult =
-        await $`gh api "repos/${repository}/commits/${commitShaToLookup}/pulls"`.run(
+        await $`${ghCommand} api "repos/${repository}/commits/${commitShaToLookup}/pulls"`.run(
           { capture: true }
         );
       ensureCommandSucceeded(
@@ -217,7 +224,7 @@ try {
   try {
     await writeFile(payloadPath, updatePayload);
     const updateResult =
-      await $`gh api repos/${repository}/releases/${releaseId} -X PATCH --input "${payloadPath}"`.run(
+      await $`${ghCommand} api repos/${repository}/releases/${releaseId} -X PATCH --input "${payloadPath}"`.run(
         { capture: true }
       );
     ensureCommandSucceeded(updateResult, `update GitHub release ${releaseId}`);

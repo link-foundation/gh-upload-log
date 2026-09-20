@@ -127,6 +127,7 @@ test('release-note parent fails when its formatter child exits non-zero', () => 
   );
   const fakeGhScript = path.join(fakeBin, 'fake-gh.mjs');
   const fakeGh = path.join(fakeBin, 'gh');
+  const fakeGhCommand = process.platform === 'win32' ? `${fakeGh}.cmd` : fakeGh;
 
   try {
     fs.writeFileSync(
@@ -169,13 +170,11 @@ test('release-note parent fails when its formatter child exits non-zero', () => 
         'owner/repository',
         '--commit-sha',
         'abc123',
+        '--gh-command',
+        fakeGhCommand,
       ],
       {
         cwd: projectRoot,
-        env: {
-          ...process.env,
-          PATH: `${fakeBin}${path.delimiter}${process.env.PATH || ''}`,
-        },
         encoding: 'utf8',
       }
     );

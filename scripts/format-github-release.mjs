@@ -39,10 +39,15 @@ const config = makeConfig({
         type: 'string',
         default: getenv('COMMIT_SHA', ''),
         describe: 'Commit SHA for PR detection',
+      })
+      .option('gh-command', {
+        type: 'string',
+        default: getenv('GH_COMMAND', 'gh'),
+        describe: 'GitHub CLI executable',
       }),
 });
 
-const { releaseVersion: version, repository, commitSha } = config;
+const { releaseVersion: version, repository, commitSha, ghCommand } = config;
 
 if (!version || !repository || !commitSha) {
   console.error('Error: Missing required arguments');
@@ -59,7 +64,7 @@ try {
   let releaseId = '';
   try {
     const result =
-      await $`gh api "repos/${repository}/releases/tags/${tag}" --jq '.id'`.run(
+      await $`${ghCommand} api "repos/${repository}/releases/tags/${tag}" --jq '.id'`.run(
         { capture: true }
       );
     ensureCommandSucceeded(result, `find GitHub release ${tag}`);
@@ -74,7 +79,7 @@ try {
     // Pass the trigger commit SHA for PR detection
     // This allows proper PR lookup even if the changelog doesn't have a commit hash
     const formatterResult =
-      await $`${process.execPath} scripts/format-release-notes.mjs --release-id "${releaseId}" --release-version "${tag}" --repository "${repository}" --commit-sha "${commitSha}"`.run();
+      await $`${process.execPath} scripts/format-release-notes.mjs --release-id "${releaseId}" --release-version "${tag}" --repository "${repository}" --commit-sha "${commitSha}" --gh-command "${ghCommand}"`.run();
     ensureCommandSucceeded(formatterResult, `format release notes for ${tag}`);
     console.log(`\u2705 Formatted release notes for ${tag}`);
   }
