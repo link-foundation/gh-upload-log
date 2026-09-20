@@ -19,6 +19,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
+const packageVersion = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
+).version;
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 const largeCliRepoFile = path.join('test', 'fixtures', 'cli-shared-large.log');
 const largeCliRepoFolder = generateRepoName(path.resolve(largeCliRepoFile));
@@ -82,6 +85,21 @@ const largeCliRepoPath = buildLogRepositoryPath(
   path.resolve(largeCliRepoFile),
   await generateFileContentHash(path.resolve(largeCliRepoFile))
 );
+
+test('CLI --version reports the installed package version', async () => {
+  const result = await runCLI(['--version']);
+
+  assert.equal(
+    result.code,
+    0,
+    `Should exit with code 0, got:\n${result.output}`
+  );
+  assert.equal(
+    result.stdout.trim(),
+    packageVersion,
+    'The reported version must identify the package users actually installed'
+  );
+});
 
 // Test: Basic usage without flags (should not show conflicts error)
 test('CLI basic usage - accepts positional argument without conflicts error', async () => {
