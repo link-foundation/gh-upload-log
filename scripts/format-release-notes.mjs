@@ -16,24 +16,25 @@
  * 4. If no PR found, simply don't display any PR link (no guessing)
  *
  * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
  * - command-stream: Modern shell command execution with streaming support
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  *
  * Note: Uses --release-version instead of --version to avoid conflict with yargs' built-in --version flag.
  */
 
+import { $ } from 'command-stream';
+import { makeConfig } from 'lino-arguments';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { ensureCommandSucceeded } from '../src/common.js';
+
 // TODO: Update this to match your package name in package.json
 const PACKAGE_NAME = 'gh-upload-log';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+if (typeof $ !== 'function') {
+  throw new TypeError('command-stream did not export a callable `$` function');
+}
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -59,6 +60,11 @@ const config = makeConfig({
         type: 'string',
         default: getenv('COMMIT_SHA', ''),
         describe: 'Commit SHA for PR detection',
+      })
+      .option('gh-command', {
+        type: 'string',
+        default: getenv('GH_COMMAND', 'gh'),
+        describe: 'GitHub CLI executable',
       }),
 });
 
@@ -66,6 +72,7 @@ const releaseId = config.releaseId;
 const version = config.releaseVersion;
 const repository = config.repository;
 const passedCommitSha = config.commitSha;
+const ghCommand = config.ghCommand;
 
 if (!releaseId || !version || !repository) {
   console.error(
@@ -76,9 +83,11 @@ if (!releaseId || !version || !repository) {
 
 try {
   // Get current release body
-  const result = await $`gh api repos/${repository}/releases/${releaseId}`.run({
-    capture: true,
-  });
+  const result =
+    await $`${ghCommand} api repos/${repository}/releases/${releaseId}`.run({
+      capture: true,
+    });
+  ensureCommandSucceeded(result, `read GitHub release ${releaseId}`);
   const releaseData = JSON.parse(result.stdout);
 
   const currentBody = releaseData.body || '';
@@ -154,9 +163,13 @@ try {
 
     try {
       const prResult =
-        await $`gh api "repos/${repository}/commits/${commitShaToLookup}/pulls"`.run(
+        await $`${ghCommand} api "repos/${repository}/commits/${commitShaToLookup}/pulls"`.run(
           { capture: true }
         );
+      ensureCommandSucceeded(
+        prResult,
+        `find pull requests for commit ${commitShaToLookup}`
+      );
       const prsData = JSON.parse(prResult.stdout);
 
       // Find the PR that's not the version bump PR (not "chore: version packages")
@@ -203,9 +216,21 @@ try {
 
   // Update the release using JSON input to properly handle special characters
   const updatePayload = JSON.stringify({ body: formattedBody });
-  await $`gh api repos/${repository}/releases/${releaseId} -X PATCH --input -`.run(
-    { stdin: updatePayload }
+  const payloadDirectory = await mkdtemp(
+    path.join(os.tmpdir(), 'gh-upload-log-release-')
   );
+  const payloadPath = path.join(payloadDirectory, 'release.json');
+
+  try {
+    await writeFile(payloadPath, updatePayload);
+    const updateResult =
+      await $`${ghCommand} api repos/${repository}/releases/${releaseId} -X PATCH --input "${payloadPath}"`.run(
+        { capture: true }
+      );
+    ensureCommandSucceeded(updateResult, `update GitHub release ${releaseId}`);
+  } finally {
+    await rm(payloadDirectory, { recursive: true, force: true });
+  }
 
   console.log(`✅ Formatted release notes for v${versionWithoutV}`);
   if (prNumber) {
