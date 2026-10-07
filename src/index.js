@@ -36,6 +36,7 @@ import {
   LOG_CONTENT_HASH_LENGTH,
   normalizeFileName,
   parseFileSize,
+  resolveChunkSize,
   resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
@@ -70,6 +71,7 @@ export {
   LOG_CONTENT_HASH_LENGTH,
   normalizeFileName,
   parseFileSize,
+  resolveChunkSize,
   resolveLogFilePath,
   splitFileIntoChunks,
   uploadAsRepo,
@@ -101,6 +103,7 @@ export function resolveGistFileLimit(gistFileLimit) {
  *
  * @param {string} rawFilePath - Path to the log file
  * @param {Object} [options={}] - Strategy options
+ * @param {number} [options.chunkSize] - Repository chunk limit in bytes (default: 100MB)
  * @param {number} [options.gistFileLimit] - Maximum size uploaded as a gist (bytes)
  * @returns {Object} Strategy object with type ('gist' or 'repo') and additional info
  */
@@ -113,6 +116,7 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
 
   const fileSize = getFileSize(filePath);
   const gistFileLimit = resolveGistFileLimit(options.gistFileLimit);
+  const chunkSize = resolveChunkSize(options.chunkSize);
 
   if (fileSize <= gistFileLimit) {
     return {
@@ -124,17 +128,17 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
     };
   }
 
-  const numChunks = Math.ceil(fileSize / GITHUB_REPO_CHUNK_SIZE);
-  const needsSplit = fileSize > GITHUB_REPO_CHUNK_SIZE;
+  const numChunks = Math.ceil(fileSize / chunkSize);
+  const needsSplit = fileSize > chunkSize;
   return {
     type: 'repo',
     fileSize,
     gistFileLimit,
     needsSplit,
     numChunks,
-    chunkSize: GITHUB_REPO_CHUNK_SIZE,
+    chunkSize,
     reason: needsSplit
-      ? `File exceeds Gist limit, will be split into ${numChunks} chunks`
+      ? `File exceeds Gist limit, will be split into at least ${numChunks} chunks`
       : 'File exceeds Gist limit, will upload as repository',
   };
 }
@@ -292,6 +296,8 @@ export async function uploadAsGist(options = {}) {
  * @param {string} options.description - Description for the upload
  * @param {number} options.gistFileLimit - Maximum size uploaded as a gist (bytes, default: 25MB)
  * @param {boolean} options.checkRawUrl - Verify the returned raw URL is reachable (default: false)
+ * @param {number} options.chunkSize - Repository chunk limit in bytes (default: 100MB)
+ * @param {number} options.pushRetries - Extra shared-repository push attempts (default: 2)
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
@@ -306,6 +312,7 @@ export async function uploadLog(options = {}) {
     dryMode = false,
     description,
     gistFileLimit,
+    chunkSize,
     checkRawUrl = false,
     verbose = false,
     logger = console,
@@ -325,7 +332,10 @@ export async function uploadLog(options = {}) {
   }
 
   const log = createDefaultLogger({ verbose, logger });
-  const strategy = determineUploadStrategy(filePath, { gistFileLimit });
+  const strategy = determineUploadStrategy(filePath, {
+    gistFileLimit,
+    chunkSize,
+  });
 
   log.debug(() => `File size: ${formatFileSize(strategy.fileSize)}`);
   log.debug(() => `Strategy: ${strategy.reason}`);
@@ -381,7 +391,13 @@ export async function uploadLog(options = {}) {
       repositoryName,
       repositoryPath,
       contentHash,
-      fileCount: 1,
+      fileCount:
+        uploadType === 'repo'
+          ? Math.max(
+              1,
+              Math.ceil(strategy.fileSize / resolveChunkSize(chunkSize))
+            )
+          : 1,
       isPublic: isPublic || false,
       dryMode: true,
       deduplicated: false,
@@ -462,6 +478,7 @@ export default {
   uploadAsRepo,
   determineUploadStrategy,
   normalizeFileName,
+  resolveChunkSize,
   resolveLogFilePath,
   generateRepoName,
   generateGistFileName,

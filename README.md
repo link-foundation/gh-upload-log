@@ -12,7 +12,7 @@ A smart tool to upload log files to GitHub as Gists or Repositories
 
 - **Small files (≤25MB)**: Uploaded as GitHub Gists
 - **Large files (>25MB)**: Uploaded as GitHub Repositories
-- **Very large files (>100MB)**: Split into 100MB chunks before repository upload
+- **Very large files (>100MB)**: Split into readable chunks of at most 100MB before repository upload
 
 ## Features
 
@@ -114,6 +114,7 @@ gh-upload-log /var/log/app.log
 - `GH_UPLOAD_LOG_DESCRIPTION` - Default description for uploads
 - `GH_UPLOAD_LOG_VERBOSE` - Enable verbose output (default: false)
 - `GH_UPLOAD_LOG_GIST_LIMIT` - Maximum file size uploaded as a gist, e.g. `25MB` (default: 25MB, clamped to GitHub's documented 100MB limit)
+- `GH_UPLOAD_LOG_CHUNK_SIZE` - Maximum repository chunk size, e.g. `50MB` (default: 100MB; accepts 4B through 100MB)
 - `GH_UPLOAD_LOG_CHECK_RAW_URL` - Verify that the resulting raw URL is reachable (default: false)
 
 See [.lenv.example](./.lenv.example) for a complete configuration template.
@@ -151,6 +152,7 @@ Options:
   --verbose, -v        Enable verbose output
   --gist-limit         Maximum file size uploaded as a gist (e.g. 25MB, 100MB).
                        Larger files use repository mode (default: 25MB)
+  --chunk-size         Maximum repository chunk size (e.g. 50MB; default: 100MB)
   --check-raw-url      Verify that the resulting raw URL is reachable
   --help, -h           Show help
   --version            Show version number
@@ -189,6 +191,38 @@ gh-upload-log ./big.log --gist-limit 100MB
 # Verify that the produced raw URL really works
 gh-upload-log ./app.log --check-raw-url --verbose
 ```
+
+### Reliable large log uploads
+
+For slow or proxied connections, use smaller repository chunks:
+
+```bash
+gh-upload-log ./session.log --only-repository --public --chunk-size 50MB
+# Or set GH_UPLOAD_LOG_CHUNK_SIZE=50MB in your environment or .lenv
+```
+
+Shared-repository uploads commit and push one chunk at a time. Transient HTTP
+408/429/5xx, RPC failures, connection drops, and concurrent push rejections get
+up to two retries, after 1 and 2 seconds. Each retry fetches and rebases onto the
+latest remote branch. Authentication, permission, and file-size failures stop
+immediately. Use `--verbose` to see chunk progress and retry details.
+
+An interrupted upload keeps the chunks already pushed. Uploading the same log
+again skips chunks that match the remote. A hidden `.pending` file marks the
+upload in progress and a `.complete` file replaces it
+with the last chunk, so incomplete folders are never treated as complete uploads.
+Complete legacy chunked uploads without a pending marker are recognized by their
+total byte size. Pending uploads are resumed even when changing the chunk size
+has left a mixture of old and new parts.
+
+Chunks end at line boundaries where possible and preserve the original bytes.
+A line longer than the configured limit is split between UTF-8 characters to keep
+each chunk within the limit. CRLF and a missing final newline are preserved.
+The number of chunks shown before upload is a minimum estimate; line boundaries
+can produce additional chunks. Smaller chunks do not change the gist threshold.
+
+The legacy dedicated-repository mode supports the chunk size and readable
+splitting options, but still creates its repository with a single initial push.
 
 ## Library Usage
 
@@ -288,6 +322,9 @@ Upload a file as a GitHub Repository. Repository-mode uploads use the shared
   - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make repo public (default: false)
   - `useSharedRepository` (boolean): Use shared repositories for repository-mode uploads (default: true)
+  - `chunkSize` (number): Maximum chunk size in bytes (default: `100 * 1024 * 1024`; accepts 4 bytes through 100MB)
+  - `pushRetries` (number): Extra shared-repository push attempts (default: 2; accepts 0 through 10)
+  - `pushRetryDelayMs` (number): Initial retry delay in milliseconds, doubled for each retry and capped at 30000 (default: 1000)
   - `description` (string): Repository description
   - `verbose` (boolean): Enable verbose logging (default: false)
   - `logger` (object): Custom logging target (default: console)
@@ -397,8 +434,8 @@ legacy dedicated-repository mode still names the repository `log-home-user-app`
    - The threshold can be raised with `--gist-limit` (up to GitHub's documented 100MB gist limit)
 
 3. **Files >100MB**: Uploaded as a chunked GitHub Repository folder
-   - File is split into 100MB chunks
-   - Each chunk is committed into the shared or dedicated repository target
+   - File is split into chunks of at most 100MB (configurable with `--chunk-size`)
+   - Each chunk is committed and pushed separately to the shared repository target
    - Original file structure is preserved inside the repository folder
 
 ### Privacy
@@ -425,7 +462,7 @@ after the upload.
 - **github.com gist upload form limit**: 25 MB
 - **Repository-mode threshold**: Files larger than the gist threshold switch to repository uploads
 - **Repository size**: No strict limit, but large repos may have performance issues
-- **Chunk size**: Files are split into 100 MB chunks for repositories
+- **Chunk size**: Repository chunks default to at most 100 MB; configure a smaller limit with `--chunk-size`
 
 ## Testing
 

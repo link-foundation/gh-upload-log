@@ -569,52 +569,90 @@ export function parseFileSize(value) {
   return Math.round(amount * multipliers[match[2] || 'mb']);
 }
 
+/** Validate a repository chunk limit in bytes (large enough for any UTF-8 character). */
+export function resolveChunkSize(chunkSize = GITHUB_REPO_CHUNK_SIZE) {
+  if (
+    !Number.isSafeInteger(chunkSize) ||
+    chunkSize < 4 ||
+    chunkSize > GITHUB_REPO_CHUNK_SIZE
+  ) {
+    throw new Error('chunkSize must be an integer between 4 bytes and 100MB');
+  }
+  return chunkSize;
+}
+
 /**
- * Split a file into chunks
- *
- * @param {string} inputPath - Path to input file
- * @param {string} outputDir - Directory to write chunks to
- * @param {number} chunkSize - Size of each chunk in bytes
- * @returns {Promise<string[]>} Array of chunk file paths
+ * Split at the last complete line within the byte limit. Oversized lines are
+ * split between UTF-8 characters. Memory is bounded by one chunk plus 4 bytes.
+ * The source bytes, including CRLF and a missing final newline, are preserved.
  */
 export async function splitFileIntoChunks(
   inputPath,
   outputDir,
   chunkSize = GITHUB_REPO_CHUNK_SIZE
 ) {
-  const { $ } = await import('command-stream');
-
+  resolveChunkSize(chunkSize);
   const inputFileName = inputPath.split(/[\\/]/).pop();
-  const uploadedFileName = ensureLogTextExtension(
-    normalizeFileName(inputFileName)
+  const prefix = buildChunkFileNamePrefix(
+    ensureLogTextExtension(normalizeFileName(inputFileName))
   );
-  const chunkPrefix = buildChunkFileNamePrefix(uploadedFileName);
-
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
-  const chunkSizeMB = Math.ceil(chunkSize / (1024 * 1024));
-  const splitResult =
-    await $`split -b ${chunkSizeMB}m -d -a 2 ${inputPath} ${path.join(outputDir, chunkPrefix)}`;
-  ensureCommandSucceeded(splitResult, 'split log file into repository chunks');
-
-  const splitFiles = fs
-    .readdirSync(outputDir)
-    .filter((file) => file.startsWith(chunkPrefix))
-    .sort()
-    .map((file) => {
-      const currentPath = path.join(outputDir, file);
-      const finalPath = currentPath.endsWith(LOG_TEXT_EXTENSION)
-        ? currentPath
-        : `${currentPath}${LOG_TEXT_EXTENSION}`;
-
-      if (currentPath !== finalPath) {
-        fs.renameSync(currentPath, finalPath);
+  fs.mkdirSync(outputDir, { recursive: true });
+  const fileSize = getFileSize(inputPath);
+  const buffer = Buffer.allocUnsafe(Math.min(fileSize, chunkSize + 4));
+  const files = [];
+  const descriptor = await fs.promises.open(inputPath, 'r');
+  let offset = 0;
+  try {
+    while (offset < fileSize) {
+      const requested = Math.min(buffer.length, fileSize - offset);
+      let read = 0;
+      while (read < requested) {
+        const { bytesRead: count } = await descriptor.read(
+          buffer,
+          read,
+          requested - read,
+          offset + read
+        );
+        if (count === 0) {
+          throw new Error('Log file changed while splitting');
+        }
+        read += count;
       }
-
-      return finalPath;
-    });
-
-  return splitFiles.sort();
+      let length = read;
+      if (read > chunkSize) {
+        const newline = buffer.subarray(0, chunkSize).lastIndexOf(10);
+        length = newline >= 0 ? newline + 1 : chunkSize;
+        if (newline < 0) {
+          while (length > 0 && (buffer[length] & 0xc0) === 0x80) {
+            length -= 1;
+          }
+          // Invalid UTF-8 input still needs byte-preserving forward progress.
+          if (length === 0) {
+            length = chunkSize;
+          }
+        }
+      }
+      const file = path.join(
+        outputDir,
+        `${prefix}${String(files.length).padStart(2, '0')}${LOG_TEXT_EXTENSION}`
+      );
+      await fs.promises.writeFile(file, buffer.subarray(0, length));
+      files.push(file);
+      offset += length;
+    }
+  } finally {
+    await descriptor.close();
+  }
+  // Widen all suffixes together so lexical ordering works beyond 100 parts.
+  const width = Math.max(2, String(files.length - 1).length);
+  return files.map((file, index) => {
+    const finalPath = path.join(
+      outputDir,
+      `${prefix}${String(index).padStart(width, '0')}${LOG_TEXT_EXTENSION}`
+    );
+    if (file !== finalPath) {
+      fs.renameSync(file, finalPath);
+    }
+    return finalPath;
+  });
 }

@@ -30,3 +30,6 @@
 
 # Enable verbose output by default (default: false)
 # GH_UPLOAD_LOG_VERBOSE: false
+
+# Maximum repository chunk size (4B through 100MB)
+# GH_UPLOAD_LOG_CHUNK_SIZE: 50MB
