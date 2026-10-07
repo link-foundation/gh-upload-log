@@ -59,7 +59,11 @@ function buildCommand(strings, values) {
 function createFakeCommandStream(handler) {
   const commandStream = (optionsOrStrings, ...values) => {
     if (Array.isArray(optionsOrStrings?.raw)) {
-      return Promise.resolve(handler(buildCommand(optionsOrStrings, values)));
+      const command = buildCommand(optionsOrStrings, values);
+      if (command === 'git diff --cached --quiet') {
+        return Promise.resolve(createCommandResult({ code: 1 }));
+      }
+      return Promise.resolve(handler(command));
     }
 
     return commandStream;

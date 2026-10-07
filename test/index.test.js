@@ -87,7 +87,11 @@ function buildCommand(strings, values) {
 function createFakeCommandStream(handler) {
   const commandStream = (optionsOrStrings, ...values) => {
     if (Array.isArray(optionsOrStrings?.raw)) {
-      return Promise.resolve(handler(buildCommand(optionsOrStrings, values)));
+      const command = buildCommand(optionsOrStrings, values);
+      if (command === 'git diff --cached --quiet') {
+        return Promise.resolve(createCommandResult({ code: 1 }));
+      }
+      return Promise.resolve(handler(command));
     }
 
     return commandStream;
@@ -569,7 +573,7 @@ test('uploadLog - stores large files in the shared visibility repository by defa
     }
     if (
       command ===
-      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, size: .size, download_url: .download_url})`
     ) {
       folderLookupCalls += 1;
 
@@ -702,7 +706,7 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
     }
     if (
       command ===
-      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+      `gh api repos/test-user/private-logs/contents/${sharedFolder} --jq map({name: .name, size: .size, download_url: .download_url})`
     ) {
       return createCommandResult({
         stdout: JSON.stringify([
@@ -866,7 +870,7 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
     }
     if (
       command ===
-      `gh api repos/test-user/public-logs/contents/${sharedFolder} --jq map({name: .name, download_url: .download_url})`
+      `gh api repos/test-user/public-logs/contents/${sharedFolder} --jq map({name: .name, size: .size, download_url: .download_url})`
     ) {
       folderLookupCalls += 1;
 

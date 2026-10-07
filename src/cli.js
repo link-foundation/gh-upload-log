@@ -16,6 +16,7 @@ import {
   resolveLogFilePath,
   isENOSPC,
   parseFileSize,
+  resolveChunkSize,
 } from './index.js';
 
 // Parse command-line arguments with environment variable and .lenv support
@@ -82,6 +83,12 @@ const config = makeConfig({
           'Maximum file size uploaded as a gist (e.g. 25MB, 100MB). Larger files use repository mode',
         default: getenv('GH_UPLOAD_LOG_GIST_LIMIT', ''),
       })
+      .option('chunk-size', {
+        type: 'string',
+        description:
+          'Maximum repository chunk size (e.g. 50MB; default: 100MB)',
+        default: getenv('GH_UPLOAD_LOG_CHUNK_SIZE', ''),
+      })
       .option('check-raw-url', {
         type: 'boolean',
         description:
@@ -122,6 +129,15 @@ const config = makeConfig({
           throw new Error(
             `Invalid --gist-limit value: ${argv.gistLimit} (expected something like 25MB, 100MB or 1GB)`
           );
+        }
+        if (argv.chunkSize !== '') {
+          try {
+            resolveChunkSize(parseFileSize(argv.chunkSize));
+          } catch {
+            throw new Error(
+              `Invalid --chunk-size value: ${argv.chunkSize} (expected 4B through 100MB)`
+            );
+          }
         }
         return true;
       })
@@ -201,6 +217,10 @@ async function main() {
 
     if (config.gistLimit) {
       options.gistFileLimit = parseFileSize(config.gistLimit);
+    }
+
+    if (config.chunkSize !== '') {
+      options.chunkSize = parseFileSize(config.chunkSize);
     }
 
     if (options.verbose) {

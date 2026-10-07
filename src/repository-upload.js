@@ -18,18 +18,19 @@ import {
   getCommandExitCode,
   getCommandStream,
   getFileSize,
-  GITHUB_REPO_CHUNK_SIZE,
   isENOSPC,
   isRepositoryNameConflict,
   isStoredLogFileName,
+  resolveChunkSize,
   resolveLogFilePath,
   splitFileIntoChunks,
 } from './common.js';
+import { pushWithRetry } from './git-push.js';
 
 const REPOSITORY_METADATA_QUERY =
   '{"defaultBranch": .default_branch, "visibility": .visibility}';
 const REPOSITORY_FOLDER_CONTENTS_QUERY =
-  'map({name: .name, download_url: .download_url})';
+  'map({name: .name, size: .size, download_url: .download_url})';
 
 /**
  * Create a command runner bound to a working directory
@@ -271,32 +272,21 @@ async function ensureSharedRepositoryExists(
   };
 }
 
-async function stageRepositoryFiles(filePath, outputDir, log) {
-  const stagedFilePath = path.join(
-    outputDir,
-    generateStoredLogFileName(filePath)
-  );
-
+async function stageRepositoryFiles(filePath, outputDir, log, chunkSize) {
+  resolveChunkSize(chunkSize);
   fs.mkdirSync(outputDir, { recursive: true });
-  log.debug(() => `→ Copying file into ${outputDir}...`);
-  fs.copyFileSync(filePath, stagedFilePath);
-
-  const fileSize = getFileSize(filePath);
-  if (fileSize > GITHUB_REPO_CHUNK_SIZE) {
-    log.debug(() => '→ Splitting file into 100MB chunks...');
+  if (getFileSize(filePath) > chunkSize) {
     log.debug(
-      () =>
-        `File size: ${fileSize} bytes, chunk size: ${GITHUB_REPO_CHUNK_SIZE} bytes`
+      () => `→ Splitting file into chunks of at most ${chunkSize} bytes...`
     );
-    await splitFileIntoChunks(
-      stagedFilePath,
-      outputDir,
-      GITHUB_REPO_CHUNK_SIZE
+    await splitFileIntoChunks(filePath, outputDir, chunkSize);
+  } else {
+    log.debug(() => `→ Copying file into ${outputDir}...`);
+    fs.copyFileSync(
+      filePath,
+      path.join(outputDir, generateStoredLogFileName(filePath))
     );
-    log.debug(() => '→ Removing original large file...');
-    fs.unlinkSync(stagedFilePath);
   }
-
   return listUploadedFiles(outputDir);
 }
 
@@ -344,6 +334,7 @@ async function uploadAsDedicatedRepo(options = {}) {
   }
 
   const filePath = resolveLogFilePath(options.filePath);
+  const chunkSize = resolveChunkSize(options.chunkSize);
   const log = createDefaultLogger({ verbose, logger });
   const baseRepositoryName = generateRepoName(filePath);
   const workDir = createWorkDirPath(baseRepositoryName);
@@ -359,7 +350,7 @@ async function uploadAsDedicatedRepo(options = {}) {
     log.debug(() => `→ Creating work directory: ${workDir}`);
     fs.mkdirSync(workDir, { recursive: true });
     const outputDir = path.join(workDir, repositoryPath);
-    await stageRepositoryFiles(filePath, outputDir, log);
+    await stageRepositoryFiles(filePath, outputDir, log, chunkSize);
 
     log.debug(() => '→ Initializing git repository...');
     await initializeGitRepository($workDir, 'main');
@@ -480,6 +471,7 @@ async function uploadAsSharedRepo(options = {}) {
   }
 
   const filePath = resolveLogFilePath(options.filePath);
+  const chunkSize = resolveChunkSize(options.chunkSize);
   const log = createDefaultLogger({ verbose, logger });
   const repositoryName = getSharedRepositoryName(isPublic);
   const storedFileName = generateStoredLogFileName(filePath);
@@ -522,7 +514,28 @@ async function uploadAsSharedRepo(options = {}) {
       isStoredLogFileName(entry.name, storedFileName)
     );
 
-    if (existingLogFiles.length > 0) {
+    const completionFileName = `.${storedFileName}.complete`;
+    const pendingFileName = `.${storedFileName}.pending`;
+    const hasPendingUpload = (existingContents || []).some(
+      (entry) => entry.name === pendingFileName
+    );
+    // Single-file uploads were atomic before chunk pushes were introduced.
+    // Chunk uploads only become complete when their final commit adds a marker.
+    // Size totals recognize legacy uploads only when no pending marker exists:
+    // resuming with another chunk size can leave mixed parts with the same total.
+    const isComplete =
+      existingLogFiles.some((entry) => entry.name === storedFileName) ||
+      (existingLogFiles.length > 0 &&
+        !hasPendingUpload &&
+        ((existingContents || []).some(
+          (entry) => entry.name === completionFileName
+        ) ||
+          (existingLogFiles.every((entry) =>
+            Number.isSafeInteger(entry.size)
+          ) &&
+            existingLogFiles.reduce((total, entry) => total + entry.size, 0) ===
+              getFileSize(filePath))));
+    if (isComplete) {
       log.debug(
         () =>
           `Identical content already uploaded to ${repositoryName}/${repositoryPath}; reusing it`
@@ -545,7 +558,7 @@ async function uploadAsSharedRepo(options = {}) {
     if (existingContents !== null) {
       log.debug(
         () =>
-          `Folder ${repositoryPath} exists in ${repositoryName} but does not contain ${storedFileName}; uploading it`
+          `Folder ${repositoryPath} exists in ${repositoryName} but does not contain a complete ${storedFileName}; uploading it`
       );
     }
 
@@ -567,6 +580,7 @@ async function uploadAsSharedRepo(options = {}) {
       `prepare sparse checkout path ${repositoryPath}`
     );
 
+    let newBranch = false;
     const fetchResult =
       await $workDir`git fetch -q --depth 1 --filter=blob:none origin ${defaultBranch}`;
     if (getCommandExitCode(fetchResult) === 0) {
@@ -577,6 +591,7 @@ async function uploadAsSharedRepo(options = {}) {
     } else if (
       isMissingRemoteRefError(fetchResult.stderr || fetchResult.stdout)
     ) {
+      newBranch = true;
       log.debug(
         () =>
           `Shared repository ${repositoryName} does not have ${defaultBranch} yet; continuing with a fresh branch`
@@ -589,40 +604,105 @@ async function uploadAsSharedRepo(options = {}) {
     }
 
     const outputDir = path.join(workDir, repositoryPath);
-    await stageRepositoryFiles(filePath, outputDir, log);
-
-    log.debug(() => '→ Adding and committing files...');
-    ensureCommandSucceeded(
-      await $workDir`git add .`,
-      'stage shared repository upload files'
+    // Keep future chunks outside the working tree while fetch/rebase runs.
+    const stagingDir = path.join(workDir, '.git', 'upload-staging');
+    const files = await stageRepositoryFiles(
+      filePath,
+      stagingDir,
+      log,
+      chunkSize
     );
-    ensureCommandSucceeded(
-      await $workDir`git commit -q -m "Add log file"`,
-      'commit shared repository upload files'
-    );
-    ensureCommandSucceeded(
-      await $workDir`git push -q -u origin ${defaultBranch}`,
-      `push shared repository upload to ${repositoryName}`
-    );
-
-    const uploadedContents =
-      (await getRepositoryFolderContents(
-        $quiet,
-        githubUser,
+    fs.mkdirSync(outputDir, { recursive: true });
+    for (const [index, name] of files.entries()) {
+      log.debug(
+        () =>
+          `→ Committing and pushing chunk ${index + 1}/${files.length}: ${name}`
+      );
+      fs.renameSync(path.join(stagingDir, name), path.join(outputDir, name));
+      if (files.length > 1 && index === 0) {
+        fs.writeFileSync(
+          path.join(outputDir, pendingFileName),
+          `${contentHash}\n`
+        );
+        ensureCommandSucceeded(
+          await $workDir`git add -- ${`${repositoryPath}/${pendingFileName}`}`,
+          'mark shared repository upload as pending'
+        );
+      }
+      const relativeFilePath = `${repositoryPath}/${name}`;
+      ensureCommandSucceeded(
+        await $workDir`git add -- ${relativeFilePath}`,
+        'stage shared repository upload chunk'
+      );
+      if (index === files.length - 1) {
+        fs.rmSync(path.join(outputDir, pendingFileName), { force: true });
+        // A resumed upload may use a different chunk size. Remove obsolete
+        // parts only when all replacement chunks have reached the remote.
+        for (const oldName of listUploadedFiles(outputDir)) {
+          if (
+            isStoredLogFileName(oldName, storedFileName) &&
+            !files.includes(oldName)
+          ) {
+            fs.unlinkSync(path.join(outputDir, oldName));
+          }
+        }
+        if (files.length > 1) {
+          fs.writeFileSync(
+            path.join(outputDir, completionFileName),
+            `${contentHash}\n`
+          );
+        } else {
+          fs.rmSync(path.join(outputDir, completionFileName), { force: true });
+        }
+        ensureCommandSucceeded(
+          await $workDir`git add -A -- ${repositoryPath}`,
+          'stage completed shared repository upload'
+        );
+      }
+      const diff = await $workDir`git diff --cached --quiet`;
+      if (getCommandExitCode(diff) === 0) {
+        log.debug(
+          () => `Chunk ${name} already matches the remote; skipping it`
+        );
+        continue;
+      }
+      if (getCommandExitCode(diff) !== 1) {
+        ensureCommandSucceeded(diff, 'check staged shared repository upload');
+      }
+      ensureCommandSucceeded(
+        await $workDir`git commit -q -m "Add log file"`,
+        'commit shared repository upload chunk'
+      );
+      await pushWithRetry($workDir, {
+        ...options,
+        defaultBranch,
         repositoryName,
-        repositoryPath
-      )) ||
-      listUploadedFiles(outputDir).map((name) => ({
-        name,
-        download_url: null,
-      }));
+        log,
+        newBranch,
+      });
+      newBranch = false;
+    }
+
+    const uploadedContents = await getRepositoryFolderContents(
+      $quiet,
+      githubUser,
+      repositoryName,
+      repositoryPath
+    );
+    const uploadedFiles = files.map(
+      (name) =>
+        (uploadedContents || []).find((entry) => entry.name === name) || {
+          name,
+          download_url: null,
+        }
+    );
 
     return buildSharedRepositoryResult({
       githubUser,
       repositoryName,
       defaultBranch,
       repositoryPath,
-      contents: uploadedContents,
+      contents: uploadedFiles,
       contentHash,
       fileName: storedFileName,
       isPublic,
@@ -653,6 +733,9 @@ async function uploadAsSharedRepo(options = {}) {
  *
  * @param {Object} options - Upload options
  * @param {string} options.filePath - Path to the file to upload
+ * @param {number} options.chunkSize - Maximum chunk size in bytes (default: 100MB)
+ * @param {number} options.pushRetries - Extra transient shared-repository push attempts (default: 2)
+ * @param {number} options.pushRetryDelayMs - Initial backoff in milliseconds (default: 1000)
  * @param {boolean} options.useSharedRepository - Use shared log repositories for repository-mode uploads (default: true)
  * @returns {Promise<Object>} Repository information including URL
  */
