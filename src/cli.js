@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
 /**
- * gh-upload-log CLI
+ * gh-upload CLI
  *
- * Command-line interface for uploading log files to GitHub
+ * Command-line interface for uploading files to GitHub
  */
 
 import { makeConfig } from 'lino-arguments';
@@ -20,14 +20,24 @@ import {
   resolveChunkSize,
 } from './index.js';
 
+// An omitted private flag must stay undefined; explicit false means public.
+function privateDefault(getenv) {
+  if (getenv('GH_UPLOAD_PRIVATE', '') !== '') {
+    return getenv('GH_UPLOAD_PRIVATE', false);
+  }
+  return getenv('GH_UPLOAD_LOG_PRIVATE', '') === ''
+    ? undefined
+    : getenv('GH_UPLOAD_LOG_PRIVATE', false);
+}
+
 // Parse command-line arguments with environment variable and .lenv support
 const config = makeConfig({
   yargs: ({ yargs, getenv }) =>
     yargs
-      .usage('Usage: $0 <log-file> [options]')
-      .command('$0 [logFile]', 'Upload a log file to GitHub', (yargs) => {
+      .usage('Usage: $0 <file> [options]')
+      .command('$0 [logFile]', 'Upload a file to GitHub', (yargs) => {
         yargs.positional('logFile', {
-          describe: 'Path to the log file to upload',
+          describe: 'Path to the file to upload',
           type: 'string',
         });
       })
@@ -35,78 +45,118 @@ const config = makeConfig({
         alias: 'p',
         type: 'boolean',
         description: 'Make the upload public (default: private)',
+        default: getenv(
+          'GH_UPLOAD_PUBLIC',
+          getenv('GH_UPLOAD_LOG_PUBLIC', false)
+        ),
       })
       .option('private', {
         type: 'boolean',
         description: 'Make the upload private (default)',
+        default: privateDefault(getenv),
       })
       .option('auto', {
         type: 'boolean',
         description:
-          'Automatically choose upload strategy based on file size (default)',
-        default: getenv('GH_UPLOAD_LOG_AUTO', true),
+          'Automatically choose upload strategy based on content and file size (default)',
+        default: getenv('GH_UPLOAD_AUTO', getenv('GH_UPLOAD_LOG_AUTO', true)),
       })
       .option('only-gist', {
         type: 'boolean',
         description: 'Upload only as GitHub Gist (disables auto mode)',
+        default: getenv(
+          'GH_UPLOAD_ONLY_GIST',
+          getenv('GH_UPLOAD_LOG_ONLY_GIST', false)
+        ),
       })
       .option('only-repository', {
         type: 'boolean',
         description: 'Upload only as GitHub Repository (disables auto mode)',
+        default: getenv(
+          'GH_UPLOAD_ONLY_REPOSITORY',
+          getenv('GH_UPLOAD_LOG_ONLY_REPOSITORY', false)
+        ),
       })
       .option('shared-repository', {
         type: 'boolean',
         description:
-          'Upload repository-mode logs into shared private-logs/public-logs repositories (default: true)',
-        default: getenv('GH_UPLOAD_LOG_SHARED_REPOSITORY', true),
+          'Upload repository-mode files into shared private-logs/public-logs repositories (default: true)',
+        default: getenv(
+          'GH_UPLOAD_SHARED_REPOSITORY',
+          getenv('GH_UPLOAD_LOG_SHARED_REPOSITORY', true)
+        ),
       })
       .option('repository', {
         type: 'string',
         description:
           'Existing repository target (OWNER/REPO) for repository uploads',
-        default: getenv('GH_UPLOAD_LOG_REPOSITORY', '') || undefined,
+        default:
+          getenv(
+            'GH_UPLOAD_REPOSITORY',
+            getenv('GH_UPLOAD_LOG_REPOSITORY', '')
+          ) || undefined,
       })
       .option('branch', {
         type: 'string',
         description:
           'Existing target branch (default: repository default branch); requires --repository',
-        default: getenv('GH_UPLOAD_LOG_BRANCH', '') || undefined,
+        default:
+          getenv('GH_UPLOAD_BRANCH', getenv('GH_UPLOAD_LOG_BRANCH', '')) ||
+          undefined,
       })
       .option('dry-mode', {
         alias: 'dry',
         type: 'boolean',
         description: 'Dry run mode - show what would be done without uploading',
-        default: getenv('GH_UPLOAD_LOG_DRY_MODE', false),
+        default: getenv(
+          'GH_UPLOAD_DRY_MODE',
+          getenv('GH_UPLOAD_LOG_DRY_MODE', false)
+        ),
       })
       .option('description', {
         alias: 'd',
         type: 'string',
         description: 'Description for the upload',
-        default: getenv('GH_UPLOAD_LOG_DESCRIPTION', ''),
+        default: getenv(
+          'GH_UPLOAD_DESCRIPTION',
+          getenv('GH_UPLOAD_LOG_DESCRIPTION', '')
+        ),
       })
       .option('verbose', {
         alias: 'v',
         type: 'boolean',
         description: 'Enable verbose output',
-        default: getenv('GH_UPLOAD_LOG_VERBOSE', false),
+        default: getenv(
+          'GH_UPLOAD_VERBOSE',
+          getenv('GH_UPLOAD_LOG_VERBOSE', false)
+        ),
       })
       .option('gist-limit', {
         type: 'string',
         description:
           'Maximum file size uploaded as a gist (e.g. 25MB, 100MB). Larger files use repository mode',
-        default: getenv('GH_UPLOAD_LOG_GIST_LIMIT', ''),
+        default: getenv(
+          'GH_UPLOAD_GIST_LIMIT',
+          getenv('GH_UPLOAD_LOG_GIST_LIMIT', '')
+        ),
       })
       .option('chunk-size', {
         type: 'string',
         description:
           'Maximum repository chunk size (e.g. 50MB; default: 100MB)',
-        default: getenv('GH_UPLOAD_LOG_CHUNK_SIZE', ''),
+        default: getenv(
+          'GH_UPLOAD_CHUNK_SIZE',
+          getenv('GH_UPLOAD_LOG_CHUNK_SIZE', '')
+        ),
       })
       .option('check-raw-url', {
         type: 'boolean',
         description:
           'Verify that the resulting raw URL is reachable before reporting success',
-        default: getenv('GH_UPLOAD_LOG_CHECK_RAW_URL', false),
+        default: getenv(
+          'GH_UPLOAD_CHECK_RAW_URL',
+          getenv('GH_UPLOAD_LOG_CHECK_RAW_URL', false)
+        ),
       })
       .option('test', {
         alias: 't',
@@ -120,9 +170,17 @@ const config = makeConfig({
         description: 'Run quick self-test (only 1MB file)',
         default: false,
       })
-      .conflicts('public', 'private')
-      .conflicts('only-gist', 'only-repository')
       .check((argv) => {
+        if (argv.public && argv.private) {
+          throw new Error(
+            'Arguments public and private are mutually exclusive'
+          );
+        }
+        if (argv.onlyGist && argv.onlyRepository) {
+          throw new Error(
+            'Arguments only-gist and only-repository are mutually exclusive'
+          );
+        }
         // Skip validation if running self-test
         if (argv.test || argv.quick) {
           return true;
@@ -282,7 +340,7 @@ async function main() {
         : '✅';
     const actionLabel = result.dryMode
       ? result.type === 'repo' && options.repository
-        ? 'would receive logs'
+        ? 'would receive files'
         : 'would be created'
       : result.deduplicated
         ? 'already contains this exact file'
@@ -342,7 +400,13 @@ async function main() {
       console.log(
         `  Visibility: ${result.isPublic === null ? 'existing repository (not queried in dry mode)' : result.isPublic ? 'public' : 'private'}`
       );
-      console.log(`  File count: ${result.fileCount || 1}`);
+      console.log(
+        `  File count: ${result.fileCount || 1}${result.fileCountIsEstimate ? (result.archiveFormat ? ' (estimate before compression)' : ' (minimum estimate before splitting)') : ''}`
+      );
+      if (result.archiveFormat) {
+        console.log(`  Archive: ${result.archiveFormat}`);
+        console.log(`  Original file: ${result.originalFileName}`);
+      }
       if (result.type === 'gist') {
         console.log(`  File name: ${result.fileName}`);
       } else if (result.type === 'repo') {

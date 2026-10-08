@@ -592,10 +592,7 @@ export async function splitFileIntoChunks(
   chunkSize = GITHUB_REPO_CHUNK_SIZE
 ) {
   resolveChunkSize(chunkSize);
-  const inputFileName = inputPath.split(/[\\/]/).pop();
-  const prefix = buildChunkFileNamePrefix(
-    ensureLogTextExtension(normalizeFileName(inputFileName))
-  );
+  const prefix = buildChunkFileNamePrefix(generateStoredLogFileName(inputPath));
   fs.mkdirSync(outputDir, { recursive: true });
   const fileSize = getFileSize(inputPath);
   const buffer = Buffer.allocUnsafe(Math.min(fileSize, chunkSize + 4));

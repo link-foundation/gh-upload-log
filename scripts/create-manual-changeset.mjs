@@ -4,19 +4,16 @@
  * Create a changeset file for manual releases
  * Usage: node scripts/create-manual-changeset.mjs --bump-type <major|minor|patch> [--description <description>]
  *
- * IMPORTANT: Update the PACKAGE_NAME constant below to match your package.json
- *
  * Uses link-foundation libraries:
  * - use-m: Dynamic package loading without package.json dependencies
  * - command-stream: Modern shell command execution with streaming support
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import { randomBytes } from 'crypto';
 
-// TODO: Update this to match your package name in package.json
-const PACKAGE_NAME = 'gh-upload-log';
+const PACKAGE_NAME = JSON.parse(readFileSync('package.json', 'utf8')).name;
 
 // Load use-m dynamically
 const { use } = eval(

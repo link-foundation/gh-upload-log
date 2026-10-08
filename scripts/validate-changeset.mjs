@@ -8,15 +8,13 @@
  * - Uses git diff to compare PR head against base branch
  * - Validates that the PR adds exactly one changeset with proper format
  * - Falls back to checking all changesets for local development
- *
- * IMPORTANT: Update the package name below to match your package.json
  */
 
 import { execSync } from 'child_process';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const PACKAGE_NAME = 'gh-upload-log';
+const PACKAGE_NAME = JSON.parse(readFileSync('package.json', 'utf8')).name;
 const CHANGESET_DIR = '.changeset';
 
 /**

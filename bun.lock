@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "gh-upload-log",
+      "name": "gh-upload",
       "dependencies": {
         "command-stream": "^0.7.1",
         "lino-arguments": "^0.3.0",

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "gh-upload",
+    "version": "0.11.0",
+    "packedFiles": 13,
+    "unpackedSize": 140138,
+    "bins": ["gh-upload", "gh-upload-log"],
+    "importPassed": true,
+    "dryPublishPassed": true
+  },
+  {
+    "name": "gh-upload-log",
+    "version": "0.11.0",
+    "packedFiles": 13,
+    "unpackedSize": 140142,
+    "bins": ["gh-upload", "gh-upload-log"],
+    "importPassed": true,
+    "dryPublishPassed": true
+  }
+]

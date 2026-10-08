@@ -1,10 +1,11 @@
 {
-  "name": "gh-upload-log",
+  "name": "gh-upload",
   "version": "0.10.1",
-  "description": "A tool to upload log files to GitHub as Gists or repositories",
+  "description": "Upload text and binary files to GitHub as Gists or chunked repository archives",
   "type": "module",
   "main": "src/index.js",
   "bin": {
+    "gh-upload": "src/cli.js",
     "gh-upload-log": "src/cli.js"
   },
   "scripts": {
@@ -18,7 +19,7 @@
     "prepare": "husky || true",
     "changeset": "changeset",
     "changeset:version": "bun scripts/changeset-version.mjs",
-    "changeset:publish": "changeset publish",
+    "changeset:publish": "bun scripts/publish-to-npm.mjs",
     "changeset:status": "changeset status --since=origin/main"
   },
   "keywords": [
@@ -26,7 +27,10 @@
     "gist",
     "log",
     "upload",
-    "cli"
+    "cli",
+    "file",
+    "binary",
+    "archive"
   ],
   "author": "Link Foundation",
   "license": "Unlicense",
@@ -65,5 +69,14 @@
       "prettier --write",
       "prettier --check"
     ]
-  }
+  },
+  "publishAliases": [
+    "gh-upload-log"
+  ],
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
 }

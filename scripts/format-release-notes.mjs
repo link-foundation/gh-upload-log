@@ -7,8 +7,6 @@
  * - Add shields.io NPM version badge
  * - Format nicely with proper markdown
  *
- * IMPORTANT: Update the PACKAGE_NAME constant below to match your package.json
- *
  * PR Detection Logic:
  * 1. Extract commit hash from changelog entry (if present)
  * 2. Fall back to --commit-sha argument (passed from workflow)
@@ -24,13 +22,16 @@
 
 import { $ } from 'command-stream';
 import { makeConfig } from 'lino-arguments';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { URL } from 'node:url';
 import { ensureCommandSucceeded } from '../src/common.js';
 
-// TODO: Update this to match your package name in package.json
-const PACKAGE_NAME = 'gh-upload-log';
+const packageJson = JSON.parse(
+  await readFile(new URL('../package.json', import.meta.url), 'utf8')
+);
+const packageNames = [packageJson.name, ...(packageJson.publishAliases || [])];
 
 if (typeof $ !== 'function') {
   throw new TypeError('command-stream did not export a callable `$` function');
@@ -203,7 +204,12 @@ try {
 
   // Build formatted release notes
   const versionWithoutV = version.replace(/^v/, '');
-  const npmBadge = `[![npm version](https://img.shields.io/badge/npm-${versionWithoutV}-blue.svg)](https://www.npmjs.com/package/${PACKAGE_NAME}/v/${versionWithoutV})`;
+  const npmBadge = packageNames
+    .map(
+      (name) =>
+        `[![${name} npm version](https://img.shields.io/badge/${name}-${versionWithoutV}-blue.svg)](https://www.npmjs.com/package/${name}/v/${versionWithoutV})`
+    )
+    .join(' ');
 
   let formattedBody = `${cleanDescription}`;
 
