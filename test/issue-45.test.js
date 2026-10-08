@@ -3,12 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath, URL } from 'node:url';
-
-const gitScenarioPath = fileURLToPath(
-  new URL('../experiments/issue-45-git-scenarios.mjs', import.meta.url)
-);
+import {
+  testWithTimeout,
+  runGitScenario,
+} from '../experiments/real-git-test-utils.mjs';
 import { splitFileIntoChunks, uploadLog } from '../src/index.js';
 
 const quietLogger = { log() {}, warn() {}, error() {} };
@@ -217,44 +215,20 @@ test('issue #45 - an oversized line keeps UTF-8 characters intact', async () => 
   });
 });
 
-test('issue #45 - real Git rebases onto a concurrent shallow-clone update', () => {
-  // Isolate synchronous Git probes from Bun's subprocess bookkeeping: a large
-  // number of spawnSync calls can interfere with later CLI process completion.
-  const result = spawnSync('node', [gitScenarioPath, '0'], {
-    encoding: 'utf8',
-    timeout: 5000,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-  assert.equal(result.status, 0, result.stderr);
-});
+testWithTimeout(
+  'issue #45 - real Git rebases onto a concurrent shallow-clone update',
+  () => runGitScenario('0')
+);
 
-test('issue #45 - real Git resumes only the missing chunk after exhaustion', () => {
-  // Isolate synchronous Git probes from Bun's subprocess bookkeeping: a large
-  // number of spawnSync calls can interfere with later CLI process completion.
-  const result = spawnSync('node', [gitScenarioPath, '1'], {
-    encoding: 'utf8',
-    timeout: 5000,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-  assert.equal(result.status, 0, result.stderr);
-});
+testWithTimeout(
+  'issue #45 - real Git resumes only the missing chunk after exhaustion',
+  () => runGitScenario('1')
+);
 
-test('issue #45 - real Git handles a lost acknowledgement and a new-branch race', () => {
-  // Isolate synchronous Git probes from Bun's subprocess bookkeeping: a large
-  // number of spawnSync calls can interfere with later CLI process completion.
-  const result = spawnSync('node', [gitScenarioPath, '2'], {
-    encoding: 'utf8',
-    timeout: 5000,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-  assert.equal(result.status, 0, result.stderr);
-});
+testWithTimeout(
+  'issue #45 - real Git handles a lost acknowledgement and a new-branch race',
+  () => runGitScenario('2')
+);
 
 test('issue #45 - retry delays increase exponentially and can be disabled', async () => {
   const { pushWithRetry, isRetryablePushError } =
@@ -373,15 +347,7 @@ test('issue #45 - pending chunks cannot deduplicate just because sizes add up', 
   });
 });
 
-test('issue #45 - real Git resumes mixed chunks after changing chunk size', () => {
-  // Isolate synchronous Git probes from Bun's subprocess bookkeeping: a large
-  // number of spawnSync calls can interfere with later CLI process completion.
-  const result = spawnSync('node', [gitScenarioPath, '3'], {
-    encoding: 'utf8',
-    timeout: 5000,
-  });
-  if (result.error) {
-    throw result.error;
-  }
-  assert.equal(result.status, 0, result.stderr);
-});
+testWithTimeout(
+  'issue #45 - real Git resumes mixed chunks after changing chunk size',
+  () => runGitScenario('3')
+);
