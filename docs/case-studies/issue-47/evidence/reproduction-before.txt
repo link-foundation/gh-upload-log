@@ -1,0 +1,34 @@
+bun test v1.4.2 (744846f84)
+
+test/issue-47.test.js:
+130 |   }
+131 | 
+132 |   const stderr = result?.stderr?.trim();
+133 |   const stdout = result?.stdout?.trim();
+134 |   const detail = stderr || stdout || `Command exited with code ${exitCode}`;
+135 |   const error = new Error(`Failed to ${operation}: ${detail}`);
+                          ^
+error: Failed to fetch authenticated GitHub username: Resource not accessible by integration (HTTP 403)
+       code: 1,
+     stdout: "",
+     stderr: "Resource not accessible by integration (HTTP 403)",
+ commandResult: {
+  code: 1,
+  stdout: "",
+  stderr: "Resource not accessible by integration (HTTP 403)",
+},
+
+      at ensureCommandSucceeded (/tmp/gh-issue-solver-1791438834987/src/common.js:135:21)
+      at getGitHubUsername (/tmp/gh-issue-solver-1791438834987/src/repository-upload.js:153:24)
+      at async uploadAsSharedRepo (/tmp/gh-issue-solver-1791438834987/src/repository-upload.js:490:30)
+      at async uploadLog (/tmp/gh-issue-solver-1791438834987/src/index.js:453:36)
+      at async upload (/tmp/gh-issue-solver-1791438834987/test/issue-47.test.js:96:49)
+      at async <anonymous> (/tmp/gh-issue-solver-1791438834987/test/issue-47.test.js:113:40)
+      at async withLog (/tmp/gh-issue-solver-1791438834987/test/issue-47.test.js:20:18)
+      at async <anonymous> (/tmp/gh-issue-solver-1791438834987/test/issue-47.test.js:112:9)
+(fail) issue #47 - Gist 403 falls back to the explicit repository without GET /user or creation [136.64ms]
+[remaining failures omitted; full log saved locally in ci-logs/issue47-before.log]
+
+ 0 pass
+ 20 fail
+Ran 20 tests across 1 file. [370.00ms]
