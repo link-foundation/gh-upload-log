@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.10.0
+
+### Minor Changes
+
+- 722cc83: Add explicit existing repository and branch targets for installation-token uploads without querying the authenticated user or creating repositories. Keep repository reads scoped to the selected branch and distinguish permanent Gist permission failures from retryable rate limits.
+
 ## 0.9.3
 
 ### Patch Changes
