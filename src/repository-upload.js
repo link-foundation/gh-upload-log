@@ -26,6 +26,10 @@ import {
   splitFileIntoChunks,
 } from './common.js';
 import { pushWithRetry } from './git-push.js';
+import {
+  resolveRepositoryTarget,
+  validateRepositoryBranch,
+} from './repository-target.js';
 
 const REPOSITORY_METADATA_QUERY =
   '{"defaultBranch": .default_branch, "visibility": .visibility}';
@@ -110,7 +114,8 @@ function buildGitHubRepositoryTreeUrl(
   branchName,
   repositoryPath
 ) {
-  return `${buildGitHubRepositoryUrl(githubUser, repositoryName)}/tree/${branchName}/${repositoryPath}`;
+  const encodedBranch = branchName.split('/').map(encodeURIComponent).join('/');
+  return `${buildGitHubRepositoryUrl(githubUser, repositoryName)}/tree/${encodedBranch}/${repositoryPath}`;
 }
 
 /**
@@ -179,10 +184,12 @@ async function getRepositoryFolderContents(
   $quiet,
   githubUser,
   repositoryName,
-  repositoryPath
+  repositoryPath,
+  branch
 ) {
-  const result =
-    await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
+  const result = branch
+    ? await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --method GET -f ref=${branch} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`
+    : await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
 
   if (getCommandExitCode(result) !== 0) {
     if (isGitHubNotFoundError(result.stderr || result.stdout)) {
@@ -315,6 +322,8 @@ function buildSharedRepositoryResult({
     ),
     rawUrl,
     repositoryName,
+    repositoryFullName: `${githubUser}/${repositoryName}`,
+    branch: defaultBranch,
     repositoryPath,
     contentHash,
     fileName,
@@ -473,7 +482,9 @@ async function uploadAsSharedRepo(options = {}) {
   const filePath = resolveLogFilePath(options.filePath);
   const chunkSize = resolveChunkSize(options.chunkSize);
   const log = createDefaultLogger({ verbose, logger });
-  const repositoryName = getSharedRepositoryName(isPublic);
+  const target = resolveRepositoryTarget(options);
+  const repositoryName =
+    target?.repositoryName || getSharedRepositoryName(isPublic);
   const storedFileName = generateStoredLogFileName(filePath);
   const workDir = createWorkDirPath(generateRepoName(filePath));
   const $workDir = createWorkDirRunner($, workDir, verbose);
@@ -487,23 +498,43 @@ async function uploadAsSharedRepo(options = {}) {
     log.debug(() => `Repository path: ${repositoryPath}`);
     log.debug(() => `Stored file name: ${storedFileName}`);
 
-    const githubUser = await getGitHubUsername($quiet);
-    log.debug(() => `GitHub user: ${githubUser}`);
-
-    const sharedRepository = await ensureSharedRepositoryExists(
-      $quiet,
-      githubUser,
-      repositoryName,
-      isPublic,
-      log
+    const githubUser = target?.owner || (await getGitHubUsername($quiet));
+    log.debug(
+      () =>
+        `Repository owner: ${githubUser}${target ? ' (explicit target; skipping user lookup)' : ''}`
     );
-    const defaultBranch = sharedRepository.defaultBranch || 'main';
+
+    const sharedRepository = target
+      ? await getRepositoryMetadata($quiet, githubUser, repositoryName)
+      : await ensureSharedRepositoryExists(
+          $quiet,
+          githubUser,
+          repositoryName,
+          isPublic,
+          log
+        );
+    if (!sharedRepository) {
+      throw new Error(
+        `Existing GitHub repository ${githubUser}/${repositoryName} was not found or is inaccessible`
+      );
+    }
+    const defaultBranch = validateRepositoryBranch(
+      target?.branch || sharedRepository.defaultBranch || 'main'
+    );
+    const repositoryIsPublic = target
+      ? sharedRepository.visibility === 'public'
+      : isPublic;
+    log.debug(
+      () =>
+        `Upload target: ${githubUser}/${repositoryName}, branch: ${defaultBranch}, visibility: ${sharedRepository.visibility}`
+    );
 
     const existingContents = await getRepositoryFolderContents(
       $quiet,
       githubUser,
       repositoryName,
-      repositoryPath
+      repositoryPath,
+      target ? defaultBranch : undefined
     );
 
     // The folder is keyed by content hash, so an existing folder means the very
@@ -549,7 +580,7 @@ async function uploadAsSharedRepo(options = {}) {
         contents: existingLogFiles,
         contentHash,
         fileName: storedFileName,
-        isPublic,
+        isPublic: repositoryIsPublic,
         workDir: null,
         deduplicated: true,
       });
@@ -567,6 +598,21 @@ async function uploadAsSharedRepo(options = {}) {
 
     log.debug(() => '→ Initializing git repository...');
     await initializeGitRepository($workDir, defaultBranch);
+    if (target) {
+      // Keep token-based authentication and commit identity local to the
+      // disposable checkout; installation tokens have no user identity.
+      for (const [key, value] of [
+        ['credential.https://github.com.helper', ''],
+        ['credential.https://github.com.helper', '!gh auth git-credential'],
+        ['user.name', 'gh-upload-log'],
+        ['user.email', 'gh-upload-log@users.noreply.github.com'],
+      ]) {
+        ensureCommandSucceeded(
+          await $workDir`git config --local --add ${key} ${value}`,
+          `configure repository upload ${key}`
+        );
+      }
+    }
     ensureCommandSucceeded(
       await $workDir`git remote add origin https://github.com/${githubUser}/${repositoryName}.git`,
       `add remote for shared GitHub repo ${repositoryName}`
@@ -581,8 +627,9 @@ async function uploadAsSharedRepo(options = {}) {
     );
 
     let newBranch = false;
+    const remoteBranch = target ? `refs/heads/${defaultBranch}` : defaultBranch;
     const fetchResult =
-      await $workDir`git fetch -q --depth 1 --filter=blob:none origin ${defaultBranch}`;
+      await $workDir`git fetch -q --depth 1 --filter=blob:none origin ${remoteBranch}`;
     if (getCommandExitCode(fetchResult) === 0) {
       ensureCommandSucceeded(
         await $workDir`git checkout -q -B ${defaultBranch} FETCH_HEAD`,
@@ -591,6 +638,11 @@ async function uploadAsSharedRepo(options = {}) {
     } else if (
       isMissingRemoteRefError(fetchResult.stderr || fetchResult.stdout)
     ) {
+      if (target) {
+        throw new Error(
+          `Existing branch ${defaultBranch} was not found in ${githubUser}/${repositoryName}`
+        );
+      }
       newBranch = true;
       log.debug(
         () =>
@@ -687,7 +739,8 @@ async function uploadAsSharedRepo(options = {}) {
       $quiet,
       githubUser,
       repositoryName,
-      repositoryPath
+      repositoryPath,
+      target ? defaultBranch : undefined
     );
     const uploadedFiles = files.map(
       (name) =>
@@ -705,7 +758,7 @@ async function uploadAsSharedRepo(options = {}) {
       contents: uploadedFiles,
       contentHash,
       fileName: storedFileName,
-      isPublic,
+      isPublic: repositoryIsPublic,
       workDir,
       deduplicated: false,
     });
@@ -737,6 +790,8 @@ async function uploadAsSharedRepo(options = {}) {
  * @param {number} options.pushRetries - Extra transient shared-repository push attempts (default: 2)
  * @param {number} options.pushRetryDelayMs - Initial backoff in milliseconds (default: 1000)
  * @param {boolean} options.useSharedRepository - Use shared log repositories for repository-mode uploads (default: true)
+ * @param {string} options.repository - Existing repository (OWNER/REPO), overriding useSharedRepository
+ * @param {string} options.branch - Existing branch in the target repository (default: its default branch)
  * @returns {Promise<Object>} Repository information including URL
  */
 export function uploadAsRepo(options = {}) {
@@ -746,7 +801,8 @@ export function uploadAsRepo(options = {}) {
     throw new Error('filePath is required in options');
   }
 
-  if (shouldUseSharedRepositoryMode(filePath, useSharedRepository)) {
+  const target = resolveRepositoryTarget(options);
+  if (target || shouldUseSharedRepositoryMode(filePath, useSharedRepository)) {
     return uploadAsSharedRepo(options);
   }
 

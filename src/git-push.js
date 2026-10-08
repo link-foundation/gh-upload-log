@@ -27,6 +27,9 @@ export async function pushWithRetry($workDir, options) {
     pushRetryDelayMs = 1000,
     sleepFn = sleep,
   } = options;
+  const remoteBranch = options.repository
+    ? `refs/heads/${defaultBranch}`
+    : defaultBranch;
   if (!Number.isInteger(pushRetries) || pushRetries < 0 || pushRetries > 10) {
     throw new Error('pushRetries must be an integer between 0 and 10');
   }
@@ -45,7 +48,7 @@ export async function pushWithRetry($workDir, options) {
         // Keep the shallow clone's original boundary: fetching new descendants
         // without --depth 1 preserves the common ancestor needed by rebase.
         const fetched =
-          await $workDir`git fetch -q --filter=blob:none origin ${defaultBranch}`;
+          await $workDir`git fetch -q --filter=blob:none origin ${remoteBranch}`;
         if (
           getCommandExitCode(fetched) !== 0 &&
           /couldn't find remote ref|could not find remote branch/i.test(
@@ -75,7 +78,7 @@ export async function pushWithRetry($workDir, options) {
         }
       }
       return ensureCommandSucceeded(
-        await $workDir`git push -q -u origin ${defaultBranch}`,
+        await $workDir`git push -q -u origin ${remoteBranch}`,
         `push shared repository upload to ${repositoryName}`
       );
     } catch (error) {
