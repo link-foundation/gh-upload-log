@@ -8,6 +8,7 @@
 
 import { makeConfig } from 'lino-arguments';
 import { PACKAGE_VERSION } from './package-version.js';
+import { resolveRepositoryTarget } from './repository-target.js';
 import {
   uploadLog,
   getFileSize,
@@ -58,6 +59,18 @@ const config = makeConfig({
         description:
           'Upload repository-mode logs into shared private-logs/public-logs repositories (default: true)',
         default: getenv('GH_UPLOAD_LOG_SHARED_REPOSITORY', true),
+      })
+      .option('repository', {
+        type: 'string',
+        description:
+          'Existing repository target (OWNER/REPO) for repository uploads',
+        default: getenv('GH_UPLOAD_LOG_REPOSITORY', '') || undefined,
+      })
+      .option('branch', {
+        type: 'string',
+        description:
+          'Existing target branch (default: repository default branch); requires --repository',
+        default: getenv('GH_UPLOAD_LOG_BRANCH', '') || undefined,
       })
       .option('dry-mode', {
         alias: 'dry',
@@ -114,6 +127,7 @@ const config = makeConfig({
         if (argv.test || argv.quick) {
           return true;
         }
+        resolveRepositoryTarget(argv);
         // If --no-auto is used, require either --only-gist or --only-repository
         if (argv.auto === false && !argv.onlyGist && !argv.onlyRepository) {
           throw new Error(
@@ -147,6 +161,10 @@ const config = makeConfig({
         'Upload log file (auto mode, public)'
       )
       .example('$0 ./error.log --only-gist', 'Upload only as gist')
+      .example(
+        '$0 ./session.log --only-repository --repository OWNER/REPO --branch feature/logs',
+        'Upload to an existing repository branch with an installation token'
+      )
       .example(
         '$0 ./large.log --only-repository --public',
         'Upload only as public repository'
@@ -209,6 +227,8 @@ async function main() {
       onlyGist: config.onlyGist,
       onlyRepository: config.onlyRepository,
       useSharedRepository: config.sharedRepository,
+      repository: config.repository,
+      branch: config.branch,
       dryMode: config.dryMode,
       description: config.description,
       verbose: config.verbose,
@@ -232,7 +252,12 @@ async function main() {
     const fileSize = getFileSize(logFile);
 
     // Show concise upload status
-    const visibility = isPublic ? '🌐 public' : '🔒 private';
+    const visibility =
+      options.repository && options.onlyRepository
+        ? 'existing repository visibility'
+        : isPublic
+          ? '🌐 public'
+          : '🔒 private';
     const dryModePrefix = options.dryMode ? '[DRY] ' : '';
 
     if (options.verbose) {
@@ -256,12 +281,24 @@ async function main() {
         ? 'ℹ️'
         : '✅';
     const actionLabel = result.dryMode
-      ? 'would be created'
+      ? result.type === 'repo' && options.repository
+        ? 'would receive logs'
+        : 'would be created'
       : result.deduplicated
         ? 'already contains this exact file'
-        : 'created';
+        : result.type === 'repo' && options.repository
+          ? 'uploaded'
+          : 'created';
 
-    console.log(`${successEmoji} ${typeLabel} ${actionLabel} (${visibility})`);
+    const resultVisibility =
+      result.isPublic === null
+        ? 'existing repository visibility'
+        : result.isPublic
+          ? '🌐 public'
+          : '🔒 private';
+    console.log(
+      `${successEmoji} ${typeLabel} ${actionLabel} (${resultVisibility})`
+    );
 
     if (result.url && !result.dryMode) {
       console.log(`🔗 ${result.url}`);
@@ -302,12 +339,20 @@ async function main() {
       console.log('');
       console.log('Details:');
       console.log(`  Type: ${typeEmoji} ${typeLabel}`);
-      console.log(`  Visibility: ${result.isPublic ? 'public' : 'private'}`);
+      console.log(
+        `  Visibility: ${result.isPublic === null ? 'existing repository (not queried in dry mode)' : result.isPublic ? 'public' : 'private'}`
+      );
       console.log(`  File count: ${result.fileCount || 1}`);
       if (result.type === 'gist') {
         console.log(`  File name: ${result.fileName}`);
       } else if (result.type === 'repo') {
         console.log(`  Repository: ${result.repositoryName}`);
+        if (result.repositoryFullName) {
+          console.log(`  Target: ${result.repositoryFullName}`);
+          console.log(
+            `  Branch: ${result.branch || 'repository default branch'}`
+          );
+        }
         if (result.repositoryPath) {
           console.log(`  Path: ${result.repositoryPath}`);
         }

@@ -934,6 +934,7 @@ test('uploadLog - gist fallback uses shared repositories for small files by defa
     filePath: fallbackFile,
     isPublic: true,
     description: 'fallback',
+    sleepFn: async () => {},
     commandStreamFactory: () => fakeCommandStream,
   });
 

@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 import {
   buildLogRepositoryPath,
   createDefaultLogger,
@@ -46,6 +47,7 @@ import {
   shouldUseSharedRepositoryMode,
   uploadAsRepo,
 } from './repository-upload.js';
+import { resolveRepositoryTarget } from './repository-target.js';
 
 export {
   buildLogRepositoryPath,
@@ -149,7 +151,7 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
 export const DEFAULT_GIST_RETRIES = 2;
 
 /**
- * Detect gateway errors that GitHub returns intermittently for large gists
+ * Detect transient gateway errors and rate limits, excluding token permissions
  *
  * The size probes recorded in docs/case-studies/issue-38 show the same payload
  * failing with HTTP 502/504 and succeeding on the next attempt, so these are
@@ -159,7 +161,14 @@ export const DEFAULT_GIST_RETRIES = 2;
  * @returns {boolean} True when the failure looks transient
  */
 export function isTransientGistError(errorText = '') {
-  return /http (502|503|504)|bad gateway|gateway time-?out|server error|couldn't respond to your request in time/i.test(
+  if (
+    /resource not accessible by integration|bad credentials|authentication failed|permission denied/i.test(
+      errorText
+    )
+  ) {
+    return false;
+  }
+  return /rate[- ]?limit|http (429|502|503|504)|bad gateway|gateway time-?out|server error|couldn't respond to your request in time/i.test(
     errorText
   );
 }
@@ -172,6 +181,7 @@ export function isTransientGistError(errorText = '') {
  * @param {boolean} options.isPublic - Whether the gist should be public (default: false)
  * @param {string} options.description - Description for the gist
  * @param {number} options.gistRetries - Retries for transient gateway errors (default: 2)
+ * @param {Function} options.sleepFn - Optional retry-wait override for offline tests
  * @param {boolean} options.verbose - Enable verbose logging (default: false)
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Gist information including URL
@@ -230,6 +240,13 @@ export async function uploadAsGist(options = {}) {
         () =>
           `Gist upload attempt ${attempt}/${maxAttempts} hit a transient GitHub error; retrying...`
       );
+      if (/rate[- ]?limit|http 429/i.test(failureText)) {
+        // gh gist create does not expose response headers. GitHub recommends
+        // waiting at least a minute on secondary rate limits without headers.
+        await (options.sleepFn || sleep)(
+          Math.min(60000 * 2 ** (attempt - 1), 300000)
+        );
+      }
     }
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });
@@ -292,6 +309,8 @@ export async function uploadAsGist(options = {}) {
  * @param {boolean} options.onlyGist - Upload only as gist (disables auto mode)
  * @param {boolean} options.onlyRepository - Upload only as repository (disables auto mode)
  * @param {boolean} options.useSharedRepository - Use shared log repositories for repository-mode uploads (default: true)
+ * @param {string} options.repository - Existing repository target (OWNER/REPO); bypasses user lookup and repository creation
+ * @param {string} options.branch - Existing target branch (default: repository default branch); requires repository
  * @param {boolean} options.dryMode - Dry run mode - don't actually upload
  * @param {string} options.description - Description for the upload
  * @param {number} options.gistFileLimit - Maximum size uploaded as a gist (bytes, default: 25MB)
@@ -326,6 +345,7 @@ export async function uploadLog(options = {}) {
   // relative paths (`app.log`, `./app.log`, `~/app.log`) are fully supported.
   const filePath = resolveLogFilePath(options.filePath);
   const resolvedOptions = { ...options, filePath };
+  const repositoryTarget = resolveRepositoryTarget(options);
 
   if (!fileExists(filePath)) {
     throw new Error(`File does not exist: ${filePath}`);
@@ -363,9 +383,11 @@ export async function uploadLog(options = {}) {
     const repositoryName =
       uploadType !== 'repo'
         ? undefined
-        : sharedRepositoryMode
-          ? getSharedRepositoryName(isPublic)
-          : generateRepoName(filePath);
+        : repositoryTarget
+          ? repositoryTarget.repositoryName
+          : sharedRepositoryMode
+            ? getSharedRepositoryName(isPublic)
+            : generateRepoName(filePath);
     // Hashing the file is the only way to know the target folder up front, and
     // dry mode is expected to print the exact path a real upload would use.
     const contentHash =
@@ -382,13 +404,21 @@ export async function uploadLog(options = {}) {
       url:
         uploadType === 'gist'
           ? '[DRY MODE] Would create gist'
-          : `[DRY MODE] Would upload to ${repositoryName}/${repositoryPath}`,
+          : repositoryTarget
+            ? `[DRY MODE] Would upload to ${repositoryTarget.owner}/${repositoryName}/tree/${repositoryTarget.branch || '[default branch]'}/${repositoryPath}`
+            : `[DRY MODE] Would upload to ${repositoryName}/${repositoryPath}`,
       rawUrl: null,
       fileName:
         uploadType === 'gist'
           ? generateGistFileName(filePath)
           : generateStoredLogFileName(filePath),
       repositoryName,
+      ...(uploadType === 'repo' && repositoryTarget
+        ? {
+            repositoryFullName: options.repository,
+            branch: repositoryTarget.branch || null,
+          }
+        : {}),
       repositoryPath,
       contentHash,
       fileCount:
@@ -398,7 +428,8 @@ export async function uploadLog(options = {}) {
               Math.ceil(strategy.fileSize / resolveChunkSize(chunkSize))
             )
           : 1,
-      isPublic: isPublic || false,
+      isPublic:
+        uploadType === 'repo' && repositoryTarget ? null : isPublic || false,
       dryMode: true,
       deduplicated: false,
     };

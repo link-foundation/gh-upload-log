@@ -110,6 +110,8 @@ gh-upload-log /var/log/app.log
 - `GH_UPLOAD_LOG_ONLY_GIST` - Force gist uploads only (default: false)
 - `GH_UPLOAD_LOG_ONLY_REPOSITORY` - Force repository uploads only (default: false)
 - `GH_UPLOAD_LOG_SHARED_REPOSITORY` - Use shared `private-logs` / `public-logs` repositories for repository-mode uploads (default: true)
+- `GH_UPLOAD_LOG_REPOSITORY` - Explicit existing repository target in `OWNER/REPO` format for repository-mode uploads
+- `GH_UPLOAD_LOG_BRANCH` - Existing branch in that target (default: its default branch; requires `GH_UPLOAD_LOG_REPOSITORY` or `--repository`)
 - `GH_UPLOAD_LOG_DRY_MODE` - Enable dry run mode (default: false)
 - `GH_UPLOAD_LOG_DESCRIPTION` - Default description for uploads
 - `GH_UPLOAD_LOG_VERBOSE` - Enable verbose output (default: false)
@@ -147,6 +149,9 @@ Options:
   --only-repository    Upload only as GitHub Repository (disables auto mode)
   --shared-repository  Upload repository-mode logs into shared
                        private-logs/public-logs repositories (default: true)
+  --repository         Existing repository target in OWNER/REPO format
+  --branch             Existing target branch (default: its default branch);
+                       requires --repository
   --dry-mode, --dry    Dry run - show what would be done without uploading
   --description, -d    Description for the upload
   --verbose, -v        Enable verbose output
@@ -175,6 +180,9 @@ gh-upload-log ./large.log --only-repository --public
 
 # Use the legacy dedicated repository mode
 gh-upload-log ./large.log --only-repository --no-shared-repository
+
+# Upload directly to an existing repository branch
+gh-upload-log ./session.log --only-repository --repository OWNER/REPO --branch feature/logs
 
 # Dry run mode - see what would happen
 gh-upload-log ./app.log --dry-mode
@@ -223,6 +231,48 @@ can produce additional chunks. Smaller chunks do not change the gist threshold.
 
 The legacy dedicated-repository mode supports the chunk size and readable
 splitting options, but still creates its repository with a single initial push.
+
+### Existing repositories and GitHub App installation tokens
+
+Select an existing repository and branch when your token can write to that
+repository but cannot access Gists or `GET /user`:
+
+```bash
+# Explicitly select the current Actions repository and an existing branch
+gh-upload-log ./session.log --only-repository \
+  --repository "$GITHUB_REPOSITORY" --branch "$LOG_UPLOAD_BRANCH"
+
+# Auto mode tries Gists first and falls back to the selected repository
+gh-upload-log ./session.log --auto --repository OWNER/REPO --branch feature/logs
+```
+
+Authenticate `gh` with your installation token (for example, through `GH_TOKEN`).
+The token needs access to the repository and `Contents: write`; branch rules still
+apply. Repository mode checks `GET /repos/OWNER/REPO`, derives the owner from the
+target, and skips both the authenticated-user lookup and repository creation.
+The temporary checkout uses `gh` for Git credentials and a local `gh-upload-log`
+commit identity, without changing your checkout or global Git configuration.
+
+Both the repository and branch must already exist. Omit `--branch` to use the
+repository's default branch. Reads for deduplication and raw URLs, fetches, and
+pushes all use the selected branch. Logs keep the same content-addressed layout
+and chunk retry/resume behavior as shared-repository uploads.
+
+`--repository` overrides `--shared-repository` for repository-mode uploads.
+The existing target's visibility determines the repository result;
+`--public`/`--private` still control Gists and newly created personal repositories.
+Dry mode makes no GitHub requests, so the target's visibility and an omitted
+branch remain unknown (`isPublic: null`, `branch: null`).
+
+`GITHUB_REPOSITORY` is used only when explicitly passed as shown above.
+You can also configure `GH_UPLOAD_LOG_REPOSITORY` and `GH_UPLOAD_LOG_BRANCH` in
+your environment or `.lenv`. Without an explicit target, personal shared and
+dedicated repository uploads retain their authenticated-user behavior.
+
+Gist permission errors such as `Resource not accessible by integration` stop
+without retrying and trigger repository fallback in auto mode. Rate-limit
+errors remain retryable, with waits of 60 and 120 seconds by default before
+fallback; `--only-gist` reports the failure instead of falling back.
 
 ## Library Usage
 
@@ -273,6 +323,8 @@ Main function to upload a log file. Automatically determines the best strategy.
   - `onlyGist` (boolean): Upload only as gist (disables auto mode)
   - `onlyRepository` (boolean): Upload only as repository (disables auto mode)
   - `useSharedRepository` (boolean): Use shared `private-logs` / `public-logs` repositories for repository-mode uploads (default: true)
+  - `repository` (string): Explicit existing repository in `OWNER/REPO` format for repository mode and Gist fallback; overrides `useSharedRepository`
+  - `branch` (string): Existing target branch (default: repository default branch); requires `repository`
   - `dryMode` (boolean): Dry run mode - don't actually upload
   - `description` (string): Description for the upload
   - `verbose` (boolean): Enable verbose logging (default: false)
@@ -285,10 +337,12 @@ Main function to upload a log file. Automatically determines the best strategy.
   type: 'gist' | 'repo',
   url: string,
   rawUrl?: string | null,
-  isPublic: boolean,
+  isPublic: boolean | null,   // null for an explicit repository target in dry mode
   fileCount?: number,
   fileName?: string,           // For gists
   repositoryName?: string,     // For repos
+  repositoryFullName?: string, // OWNER/REPO for shared/explicit targets
+  branch?: string | null,      // Shared/explicit target branch; null if unknown in dry mode
   repositoryPath?: string,     // Shared repository folder for repository-mode uploads
   deduplicated?: boolean,      // True when an existing shared-repo upload was reused
   dryMode?: boolean            // Set to true in dry mode
@@ -322,6 +376,8 @@ Upload a file as a GitHub Repository. Repository-mode uploads use the shared
   - `filePath` (string, **required**): Path to the file
   - `isPublic` (boolean): Make repo public (default: false)
   - `useSharedRepository` (boolean): Use shared repositories for repository-mode uploads (default: true)
+  - `repository` (string): Explicit existing `OWNER/REPO` target; bypasses user lookup and repository creation
+  - `branch` (string): Existing branch in that repository (default: its default branch); requires `repository`
   - `chunkSize` (number): Maximum chunk size in bytes (default: `100 * 1024 * 1024`; accepts 4 bytes through 100MB)
   - `pushRetries` (number): Extra shared-repository push attempts (default: 2; accepts 0 through 10)
   - `pushRetryDelayMs` (number): Initial retry delay in milliseconds, doubled for each retry and capped at 30000 (default: 1000)
