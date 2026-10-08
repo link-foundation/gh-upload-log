@@ -1,8 +1,8 @@
 // Offline integration probe: tiny logs and a temporary bare Git remote only.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { spawnGitSync } from './real-git-test-utils.mjs';
 
 export function createLocalRepositoryStream(
   directory,
@@ -19,7 +19,7 @@ export function createLocalRepositoryStream(
     GIT_TERMINAL_PROMPT: '0',
   };
   const runGit = (args, cwd = directory) => {
-    const result = spawnSync('git', args, { cwd, env, encoding: 'utf8' });
+    const result = spawnGitSync(args, { cwd, env });
     if (result.status !== 0) {
       throw new Error(`git ${args.join(' ')}: ${result.stderr}`);
     }
@@ -136,14 +136,10 @@ export function createLocalRepositoryStream(
             (_placeholder, index) => String(values[Number(index)])
           )
       );
-      const result = spawnSync(args[0], args.slice(1), {
+      const result = spawnGitSync(args.slice(1), {
         cwd: options.cwd,
         env,
-        encoding: 'utf8',
       });
-      if (result.error) {
-        throw result.error;
-      }
       return {
         code: result.status,
         stdout: result.stdout,

@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { cwd } from 'node:process';
+import { testWithTimeout } from '../experiments/real-git-test-utils.mjs';
 import {
   MAX_LOG_FOLDER_SEGMENT_LENGTH,
   MAX_REPOSITORY_NAME_LENGTH,
@@ -351,33 +352,38 @@ test('uploadLog - initializes git without the master branch hint', async () => {
   );
 });
 
-test('git init command produces no master branch hint when executed for real', async () => {
-  const { $ } = await import('command-stream');
-  const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-upload-log-init-'));
-
-  try {
-    const $gitDir = $({ cwd: gitDir, mirror: false, capture: true });
-    const initResult = await $gitDir`git -c init.defaultBranch=main init -q`;
-    const output = `${initResult.stdout}${initResult.stderr}`;
-
-    assert.equal(initResult.code, 0, `git init failed: ${output}`);
-    assert.ok(
-      !output.includes('hint:'),
-      `git init should not print hints, got: ${output}`
-    );
-    assert.ok(
-      !output.toLowerCase().includes('master'),
-      `git init should not mention master, got: ${output}`
+testWithTimeout(
+  'git init command produces no master branch hint when executed for real',
+  async () => {
+    const { $ } = await import('command-stream');
+    const gitDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'gh-upload-log-init-')
     );
 
-    const branchResult = await $gitDir`git branch --show-current`;
-    assert.equal(branchResult.stdout.trim(), 'main');
-    assert.equal(
-      cwd(),
-      path.resolve(cwd()),
-      'Running commands with the cwd option must not change the process directory'
-    );
-  } finally {
-    fs.rmSync(gitDir, { recursive: true, force: true });
+    try {
+      const $gitDir = $({ cwd: gitDir, mirror: false, capture: true });
+      const initResult = await $gitDir`git -c init.defaultBranch=main init -q`;
+      const output = `${initResult.stdout}${initResult.stderr}`;
+
+      assert.equal(initResult.code, 0, `git init failed: ${output}`);
+      assert.ok(
+        !output.includes('hint:'),
+        `git init should not print hints, got: ${output}`
+      );
+      assert.ok(
+        !output.toLowerCase().includes('master'),
+        `git init should not mention master, got: ${output}`
+      );
+
+      const branchResult = await $gitDir`git branch --show-current`;
+      assert.equal(branchResult.stdout.trim(), 'main');
+      assert.equal(
+        cwd(),
+        path.resolve(cwd()),
+        'Running commands with the cwd option must not change the process directory'
+      );
+    } finally {
+      fs.rmSync(gitDir, { recursive: true, force: true });
+    }
   }
-});
+);

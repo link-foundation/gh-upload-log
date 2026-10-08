@@ -1,0 +1,43 @@
+bun test v1.4.2 (744846f84)
+
+test/issue-49.test.js:
+26 |           NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --import=${slowGit}`,
+27 |         },
+28 |       }
+29 |     );
+30 |     assert.ifError(result.error);
+31 |     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+                ^
+AssertionError: bun test v1.4.2 (744846f84)
+
+
+test/issue-45.test.js:
+killed 1 dangling process
+379 |   const result = spawnSync('node', [gitScenarioPath, '3'], {
+380 |     encoding: 'utf8',
+381 |     timeout: 5000,
+382 |   });
+383 |   if (result.error) {
+384 |     throw result.error;
+                       ^
+error: spawnSync node ETIMEDOUT
+      at <anonymous> (/tmp/gh-issue-solver-1791455833200/test/issue-45.test.js:384:18)
+(fail) issue #45 - real Git resumes mixed chunks after changing chunk size [5018.59ms]
+  ^ this test timed out after 5000ms.
+
+ 0 pass
+ 19 filtered out
+ 1 fail
+Ran 1 test across 1 file. [5.05s]
+
+
+1 !== 0
+
+      at innerFail (node:assert:50:32)
+      at strictEqual (node:assert:181:14)
+      at <anonymous> (/tmp/gh-issue-solver-1791455833200/test/issue-49.test.js:31:12)
+(fail) issue #49 - real Git test tolerates startup longer than Bun default [5098.80ms]
+
+ 0 pass
+ 1 fail
+Ran 1 test across 1 file. [5.13s]

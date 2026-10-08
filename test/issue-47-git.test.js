@@ -1,4 +1,4 @@
-import { test } from 'test-anywhere';
+import { testWithTimeout as test } from '../experiments/real-git-test-utils.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
