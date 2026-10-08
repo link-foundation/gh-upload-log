@@ -1,41 +1,42 @@
-# gh-upload-log Configuration File (.lenv)
+# gh-upload Configuration File (.lenv)
 # This file uses Links Notation format (key: value)
 #
+# The legacy GH_UPLOAD_LOG_* names also work; GH_UPLOAD_* takes precedence.
 # Copy this file to .lenv and customize the values
 # Priority: CLI arguments > Environment variables > .lenv file
 
 # Make uploads public by default (default: false)
-# GH_UPLOAD_LOG_PUBLIC: false
+# GH_UPLOAD_PUBLIC: false
 
 # Make uploads private by default (default: true)
-# GH_UPLOAD_LOG_PRIVATE: true
+# GH_UPLOAD_PRIVATE: true
 
-# Enable automatic strategy selection (gist vs repository) based on file size (default: true)
-# GH_UPLOAD_LOG_AUTO: true
+# Enable automatic strategy selection (gist vs repository) based on content and file size (default: true)
+# GH_UPLOAD_AUTO: true
 
 # Force upload only as GitHub Gist (default: false)
-# GH_UPLOAD_LOG_ONLY_GIST: false
+# GH_UPLOAD_ONLY_GIST: false
 
 # Force upload only as GitHub Repository (default: false)
-# GH_UPLOAD_LOG_ONLY_REPOSITORY: false
+# GH_UPLOAD_ONLY_REPOSITORY: false
 
 # Use shared private-logs/public-logs repositories for repository-mode uploads (default: true)
-# GH_UPLOAD_LOG_SHARED_REPOSITORY: true
+# GH_UPLOAD_SHARED_REPOSITORY: true
 
 # Explicit existing repository target (OWNER/REPO), overriding shared repository selection
-# GH_UPLOAD_LOG_REPOSITORY: example-org/current-repo
+# GH_UPLOAD_REPOSITORY: example-org/current-repo
 
 # Existing target branch (default: repository default branch; requires repository)
-# GH_UPLOAD_LOG_BRANCH: feature/logs
+# GH_UPLOAD_BRANCH: feature/logs
 
 # Enable dry run mode by default (default: false)
-# GH_UPLOAD_LOG_DRY_MODE: false
+# GH_UPLOAD_DRY_MODE: false
 
 # Default description for uploads
-# GH_UPLOAD_LOG_DESCRIPTION: My application logs
+# GH_UPLOAD_DESCRIPTION: My application logs
 
 # Enable verbose output by default (default: false)
-# GH_UPLOAD_LOG_VERBOSE: false
+# GH_UPLOAD_VERBOSE: false
 
 # Maximum repository chunk size (4B through 100MB)
-# GH_UPLOAD_LOG_CHUNK_SIZE: 50MB
+# GH_UPLOAD_CHUNK_SIZE: 50MB

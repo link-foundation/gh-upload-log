@@ -1,0 +1,42 @@
+[
+  {
+    "name": "gh-upload",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:57.069Z"
+  },
+  {
+    "name": "ghupload",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:57.291Z"
+  },
+  {
+    "name": "gh_upload",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:57.516Z"
+  },
+  {
+    "name": "gh.upload",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:57.745Z"
+  },
+  {
+    "name": "gh-upload-file",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:57.963Z"
+  },
+  {
+    "name": "ghuploadfile",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:58.180Z"
+  },
+  {
+    "name": "gh_upload_file",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:58.418Z"
+  },
+  {
+    "name": "gh.upload.file",
+    "status": 404,
+    "checkedAt": "2026-10-08T11:02:58.638Z"
+  }
+]

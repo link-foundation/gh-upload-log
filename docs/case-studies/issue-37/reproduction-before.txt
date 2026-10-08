@@ -1,0 +1,311 @@
+bun test v1.4.2 (744846f84)
+
+test/issue-37.test.js:
+61 | }
+62 | 
+63 | test('issue #37 - a small binary file selects an archive in repository mode', async () => {
+64 |   await withFile(Buffer.from([0, 255, 128, 10]), async (filePath) => {
+65 |     const strategy = api.determineUploadStrategy(filePath);
+66 |     assert.equal(strategy.type, 'repo');
+                ^
+AssertionError: Expected values to be strictly equal:
+
+'gist' !== 'repo'
+
+ generatedMessage: true,
+     actual: "gist",
+   expected: "repo",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:66:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:64:9
+(fail) issue #37 - a small binary file selects an archive in repository mode [18.15ms]
+74 | });
+75 | 
+76 | test('issue #37 - binary gist requests fail before running GitHub commands, including dry mode', async () => {
+77 |   await withFile(Buffer.from([0, 255]), async (filePath) => {
+78 |     for (const upload of [api.uploadAsGist, (options) => api.uploadLog({ ...options, onlyGist: true }), (options) => api.uploadLog({ ...options, onlyGist: true, dryMode: true })]) {
+79 |       await assert.rejects(upload({ filePath, logger, commandStreamFactory: () => { throw new Error('No GitHub command should run'); } }), /binary.*repository/i);
+                        ^
+AssertionError: The input did not match the regular expression /binary.*repository/i. Input:
+
+'Error: No GitHub command should run'
+
+ generatedMessage: true,
+   expected: /binary.*repository/i,
+   operator: "rejects",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at expectedException (node:assert:327:33)
+      at expectsError (node:assert:395:20)
+      at assert.rejects (node:assert:434:17)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:79:20
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:77:9
+
+74 | });
+75 | 
+76 | test('issue #37 - binary gist requests fail before running GitHub commands, including dry mode', async () => {
+77 |   await withFile(Buffer.from([0, 255]), async (filePath) => {
+78 |     for (const upload of [api.uploadAsGist, (options) => api.uploadLog({ ...options, onlyGist: true }), (options) => api.uploadLog({ ...options, onlyGist: true, dryMode: true })]) {
+79 |       await assert.rejects(upload({ filePath, logger, commandStreamFactory: () => { throw new Error('No GitHub command should run'); } }), /binary.*repository/i);
+                                                                                                   ^
+error: No GitHub command should run
+      at commandStreamFactory (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:79:95)
+      at uploadAsGist (/tmp/gh-issue-solver-1791457152598/src/index.js:190:19)
+      at <anonymous> (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:79:28)
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at <anonymous> (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:77:9)
+(fail) issue #37 - binary gist requests fail before running GitHub commands, including dry mode [5.28ms]
+83 | 
+84 | test('issue #37 - binary upload archives all bytes and exposes archive metadata', async () => {
+85 |   const bytes = Buffer.from(Array.from({ length: 256 }, (_, i) => i));
+86 |   await withFile(bytes, async (filePath) => {
+87 |     const { result, commits, commands } = await uploadBinary(filePath);
+88 |     assert.equal(result.fileName, 'data.bin.gz');
+                ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'data.bin.log.txt'
+- 'data.bin.gz'
+            ^
+
+ generatedMessage: true,
+     actual: "data.bin.log.txt",
+   expected: "data.bin.gz",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:88:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:86:9
+      at processTicksAndRejections (native:7:39)
+(fail) issue #37 - binary upload archives all bytes and exposes archive metadata [37.88ms]
+ 98 | 
+ 99 | test('issue #37 - archive overhead counts toward chunk limits and parts reconstruct exactly', async () => {
+100 |   const bytes = Buffer.from([0, 255, 128, 1]);
+101 |   await withFile(bytes, async (filePath) => {
+102 |     const { result, commits } = await uploadBinary(filePath, { chunkSize: 8 }, {}, true);
+103 |     assert.ok(result.fileCount > 1, 'Compressed header/trailer also count toward the limit');
+                 ^
+AssertionError: Compressed header/trailer also count toward the limit
+ generatedMessage: false,
+     actual: false,
+   expected: true,
+   operator: "==",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:103:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:101:9
+      at processTicksAndRejections (native:7:39)
+(fail) issue #37 - archive overhead counts toward chunk limits and parts reconstruct exactly [6.09ms]
+110 | });
+111 | 
+112 | test('issue #37 - identical archived files deduplicate and partial archives remain resumable', async () => {
+113 |   await withFile(Buffer.from([0, 255, 128, 1]), async (filePath) => {
+114 |     const complete = await uploadBinary(filePath, {}, { existing: [{ name: 'data.bin.gz', download_url: 'https://example.com/data.bin.gz' }] });
+115 |     assert.equal(complete.result.deduplicated, true);
+                 ^
+AssertionError: Expected values to be strictly equal:
+
+false !== true
+
+ generatedMessage: true,
+     actual: false,
+   expected: true,
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:115:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:113:9
+      at processTicksAndRejections (native:7:39)
+(fail) issue #37 - identical archived files deduplicate and partial archives remain resumable [9.50ms]
+122 | 
+123 | test('issue #37 - UTF-8 and ANSI text keep existing gist and line-splitting behavior', async () => {
+124 |   await withFile('\u001b[31mError é🙂\u001b[0m\r\nnext', async (filePath) => {
+125 |     const strategy = api.determineUploadStrategy(filePath);
+126 |     assert.equal(strategy.type, 'gist');
+127 |     assert.equal(strategy.fileType, 'text');
+                 ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- 'text'
+
+ generatedMessage: true,
+     actual: undefined,
+   expected: "text",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:127:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:124:9
+(fail) issue #37 - UTF-8 and ANSI text keep existing gist and line-splitting behavior [1.37ms]
+135 | 
+136 | test('issue #37 - classification checks bytes beyond the first buffer and honors UTF-8 boundaries', async () => {
+137 |   await withFile(Buffer.concat([Buffer.alloc(65535, 97), Buffer.from('🙂\n')]), async (filePath) => {
+138 |     assert.equal(api.determineUploadStrategy(filePath).type, 'gist');
+139 |     fs.appendFileSync(filePath, Buffer.from([255]));
+140 |     assert.equal(api.determineUploadStrategy(filePath).type, 'repo');
+                 ^
+AssertionError: Expected values to be strictly equal:
+
+'gist' !== 'repo'
+
+ generatedMessage: true,
+     actual: "gist",
+   expected: "repo",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:140:12
+      at withFile (/tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:15:18)
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37.test.js:137:9
+(fail) issue #37 - classification checks bytes beyond the first buffer and honors UTF-8 boundaries [1.38ms]
+
+test/issue-37-publish.test.js:
+ 7 | 
+ 8 | const logger = { log() {} };
+ 9 | 
+10 | test('issue #37 - both package names ship the universal and legacy bins', () => {
+11 |   const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+12 |   assert.equal(pkg.bin['gh-upload'], 'src/cli.js');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- 'src/cli.js'
+
+      at innerFail (node:assert:50:32)
+      at strictEqual (node:assert:181:14)
+      at <anonymous> (/tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:12:10)
+(fail) issue #37 - both package names ship the universal and legacy bins [3.83ms]
+13 |   assert.equal(pkg.bin['gh-upload-log'], 'src/cli.js');
+14 |   assert.deepEqual([pkg.name, ...pkg.publishAliases].sort(), ['gh-upload', 'gh-upload-log']);
+15 | });
+16 | 
+17 | test('issue #37 - npm checks bypass caches and distinguish absence from registry failure', async () => {
+18 |   assert.equal(typeof publishing.isVersionPublished, 'function');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'undefined'
+- 'function'
+
+ generatedMessage: true,
+     actual: "undefined",
+   expected: "function",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:18:10
+(fail) issue #37 - npm checks bypass caches and distinguish absence from registry failure [0.57ms]
+27 |   assert.ok(requests.every(({ url, options }) => url.startsWith('https://registry.npmjs.org/gh-upload/1.2.3?') && options.headers['Cache-Control'] === 'no-cache'));
+28 |   await assert.rejects(publishing.isVersionPublished('gh-upload', '1.2.3', { fetchFn: async () => ({ status: 503, ok: false }) }), /503/);
+29 | });
+30 | 
+31 | test('issue #37 - a partial dual publication retries only the missing package and gates release outputs', async () => {
+32 |   assert.equal(typeof publishing.publishPackages, 'function');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'undefined'
+- 'function'
+
+ generatedMessage: true,
+     actual: "undefined",
+   expected: "function",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:32:10
+(fail) issue #37 - a partial dual publication retries only the missing package and gates release outputs [2.45ms]
+44 |   assert.equal(outputs.published, 'true');
+45 |   assert.equal(outputs.published_version, '1.2.3');
+46 | });
+47 | 
+48 | test('issue #37 - release success requires every package to become visible on npm', async () => {
+49 |   assert.equal(typeof publishing.publishPackages, 'function');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'undefined'
+- 'function'
+
+ generatedMessage: true,
+     actual: "undefined",
+   expected: "function",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:49:10
+(fail) issue #37 - release success requires every package to become visible on npm [0.53ms]
+59 |   }), /not visible|not published/);
+60 |   assert.notEqual(outputs.published, 'true');
+61 | });
+62 | 
+63 | test('issue #37 - failed publish acknowledgement is recovered without republishing', async () => {
+64 |   assert.equal(typeof publishing.publishPackages, 'function');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'undefined'
+- 'function'
+
+ generatedMessage: true,
+     actual: "undefined",
+   expected: "function",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:64:10
+(fail) issue #37 - failed publish acknowledgement is recovered without republishing [0.30ms]
+73 |   });
+74 |   assert.equal(attempts, 1);
+75 | });
+76 | 
+77 | test('issue #37 - prepare manifests keeps source version and code identical for both names', async () => {
+78 |   assert.equal(typeof publishing.preparePackages, 'function');
+              ^
+AssertionError: Expected values to be strictly equal:
++ actual - expected
+
++ 'undefined'
+- 'function'
+
+ generatedMessage: true,
+     actual: "undefined",
+   expected: "function",
+   operator: "strictEqual",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /tmp/gh-issue-solver-1791457152598/test/issue-37-publish.test.js:78:10
+(fail) issue #37 - prepare manifests keeps source version and code identical for both names [0.38ms]
+
+ 0 pass
+ 13 fail
+Ran 13 tests across 2 files. [286.00ms]
