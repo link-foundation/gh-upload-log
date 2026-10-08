@@ -14,18 +14,20 @@ import {
   generateCollisionRepoName,
   generateFileContentHash,
   generateRepoName,
-  generateStoredLogFileName,
   getCommandExitCode,
   getCommandStream,
   getFileSize,
   isENOSPC,
   isRepositoryNameConflict,
-  isStoredLogFileName,
   resolveChunkSize,
   resolveLogFilePath,
-  splitFileIntoChunks,
 } from './common.js';
 import { pushWithRetry } from './git-push.js';
+import {
+  getFileUploadInfo,
+  isStoredFileName,
+  stageUploadFiles,
+} from './file-upload.js';
 import {
   resolveRepositoryTarget,
   validateRepositoryBranch,
@@ -279,22 +281,13 @@ async function ensureSharedRepositoryExists(
   };
 }
 
-async function stageRepositoryFiles(filePath, outputDir, log, chunkSize) {
-  resolveChunkSize(chunkSize);
-  fs.mkdirSync(outputDir, { recursive: true });
-  if (getFileSize(filePath) > chunkSize) {
-    log.debug(
-      () => `→ Splitting file into chunks of at most ${chunkSize} bytes...`
-    );
-    await splitFileIntoChunks(filePath, outputDir, chunkSize);
-  } else {
-    log.debug(() => `→ Copying file into ${outputDir}...`);
-    fs.copyFileSync(
-      filePath,
-      path.join(outputDir, generateStoredLogFileName(filePath))
-    );
-  }
-  return listUploadedFiles(outputDir);
+function stageRepositoryFiles(filePath, outputDir, log, chunkSize, info) {
+  log.debug(() =>
+    info.archiveFormat
+      ? `→ Creating ${info.archiveFormat} archive; stored parts are limited to ${chunkSize} bytes...`
+      : `→ Staging text with chunks of at most ${chunkSize} bytes...`
+  );
+  return stageUploadFiles(filePath, outputDir, chunkSize, info);
 }
 
 function buildSharedRepositoryResult({
@@ -308,12 +301,14 @@ function buildSharedRepositoryResult({
   isPublic,
   workDir,
   deduplicated = false,
+  info,
 }) {
   const fileCount = contents.length;
   const rawUrl = fileCount === 1 ? contents[0]?.download_url || null : null;
 
   return {
     type: 'repo',
+    ...info,
     url: buildGitHubRepositoryTreeUrl(
       githubUser,
       repositoryName,
@@ -344,6 +339,7 @@ async function uploadAsDedicatedRepo(options = {}) {
 
   const filePath = resolveLogFilePath(options.filePath);
   const chunkSize = resolveChunkSize(options.chunkSize);
+  const info = getFileUploadInfo(filePath);
   const log = createDefaultLogger({ verbose, logger });
   const baseRepositoryName = generateRepoName(filePath);
   const workDir = createWorkDirPath(baseRepositoryName);
@@ -359,7 +355,7 @@ async function uploadAsDedicatedRepo(options = {}) {
     log.debug(() => `→ Creating work directory: ${workDir}`);
     fs.mkdirSync(workDir, { recursive: true });
     const outputDir = path.join(workDir, repositoryPath);
-    await stageRepositoryFiles(filePath, outputDir, log, chunkSize);
+    await stageRepositoryFiles(filePath, outputDir, log, chunkSize, info);
 
     log.debug(() => '→ Initializing git repository...');
     await initializeGitRepository($workDir, 'main');
@@ -450,7 +446,7 @@ async function uploadAsDedicatedRepo(options = {}) {
       repositoryName,
       repositoryPath,
       contentHash,
-      fileName: generateStoredLogFileName(filePath),
+      ...info,
       fileCount,
       isPublic,
       workDir,
@@ -481,11 +477,12 @@ async function uploadAsSharedRepo(options = {}) {
 
   const filePath = resolveLogFilePath(options.filePath);
   const chunkSize = resolveChunkSize(options.chunkSize);
+  const info = getFileUploadInfo(filePath);
   const log = createDefaultLogger({ verbose, logger });
   const target = resolveRepositoryTarget(options);
   const repositoryName =
     target?.repositoryName || getSharedRepositoryName(isPublic);
-  const storedFileName = generateStoredLogFileName(filePath);
+  const storedFileName = info.fileName;
   const workDir = createWorkDirPath(generateRepoName(filePath));
   const $workDir = createWorkDirRunner($, workDir, verbose);
   const $quiet = $({ mirror: Boolean(verbose), capture: true });
@@ -542,7 +539,7 @@ async function uploadAsSharedRepo(options = {}) {
     // empty or partially written folder (for example an upload that died before
     // pushing) must not be reported as an existing log (issue #38).
     const existingLogFiles = (existingContents || []).filter((entry) =>
-      isStoredLogFileName(entry.name, storedFileName)
+      isStoredFileName(entry.name, info)
     );
 
     const completionFileName = `.${storedFileName}.complete`;
@@ -561,9 +558,10 @@ async function uploadAsSharedRepo(options = {}) {
         ((existingContents || []).some(
           (entry) => entry.name === completionFileName
         ) ||
-          (existingLogFiles.every((entry) =>
-            Number.isSafeInteger(entry.size)
-          ) &&
+          (info.fileType === 'text' &&
+            existingLogFiles.every((entry) =>
+              Number.isSafeInteger(entry.size)
+            ) &&
             existingLogFiles.reduce((total, entry) => total + entry.size, 0) ===
               getFileSize(filePath))));
     if (isComplete) {
@@ -583,6 +581,7 @@ async function uploadAsSharedRepo(options = {}) {
         isPublic: repositoryIsPublic,
         workDir: null,
         deduplicated: true,
+        info,
       });
     }
 
@@ -662,7 +661,8 @@ async function uploadAsSharedRepo(options = {}) {
       filePath,
       stagingDir,
       log,
-      chunkSize
+      chunkSize,
+      info
     );
     fs.mkdirSync(outputDir, { recursive: true });
     for (const [index, name] of files.entries()) {
@@ -691,10 +691,7 @@ async function uploadAsSharedRepo(options = {}) {
         // A resumed upload may use a different chunk size. Remove obsolete
         // parts only when all replacement chunks have reached the remote.
         for (const oldName of listUploadedFiles(outputDir)) {
-          if (
-            isStoredLogFileName(oldName, storedFileName) &&
-            !files.includes(oldName)
-          ) {
+          if (isStoredFileName(oldName, info) && !files.includes(oldName)) {
             fs.unlinkSync(path.join(outputDir, oldName));
           }
         }
@@ -761,6 +758,7 @@ async function uploadAsSharedRepo(options = {}) {
       isPublic: repositoryIsPublic,
       workDir,
       deduplicated: false,
+      info,
     });
   } catch (error) {
     log.error(() => `Error uploading as shared repository: ${error.message}`);

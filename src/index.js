@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 
 /**
- * gh-upload-log - Core library for uploading log files to GitHub
+ * gh-upload - Core library for uploading files to GitHub
  *
- * This library provides functionality to upload log files to GitHub either as:
- * - Gists (for files <= 25MB that fit in a gist)
- * - Repositories (for larger files that need repository storage)
+ * This library provides functionality to upload files to GitHub either as:
+ * - Gists (for UTF-8 text files <= 25MB that fit in a gist)
+ * - Repositories (for larger text files and gzip archives of binary files)
  */
 
 import fs from 'node:fs';
@@ -48,6 +48,8 @@ import {
   uploadAsRepo,
 } from './repository-upload.js';
 import { resolveRepositoryTarget } from './repository-target.js';
+import { detectFileType, getFileUploadInfo } from './file-upload.js';
+export { detectFileType } from './file-upload.js';
 
 export {
   buildLogRepositoryPath,
@@ -117,12 +119,14 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
   }
 
   const fileSize = getFileSize(filePath);
+  const info = getFileUploadInfo(filePath);
   const gistFileLimit = resolveGistFileLimit(options.gistFileLimit);
   const chunkSize = resolveChunkSize(options.chunkSize);
 
-  if (fileSize <= gistFileLimit) {
+  if (info.fileType === 'text' && fileSize <= gistFileLimit) {
     return {
       type: 'gist',
+      ...info,
       fileSize,
       gistFileLimit,
       needsSplit: false,
@@ -130,18 +134,23 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
     };
   }
 
-  const numChunks = Math.ceil(fileSize / chunkSize);
+  const numChunks = Math.max(1, Math.ceil(fileSize / chunkSize));
   const needsSplit = fileSize > chunkSize;
   return {
     type: 'repo',
+    ...info,
     fileSize,
     gistFileLimit,
     needsSplit,
     numChunks,
+    fileCountIsEstimate: true,
     chunkSize,
-    reason: needsSplit
-      ? `File exceeds Gist limit, will be split into at least ${numChunks} chunks`
-      : 'File exceeds Gist limit, will upload as repository',
+    reason:
+      info.fileType === 'binary'
+        ? 'Binary file will be stored as a gzip archive in a repository'
+        : needsSplit
+          ? `File exceeds Gist limit, will be split into at least ${numChunks} chunks`
+          : 'File exceeds Gist limit, will upload as repository',
   };
 }
 
@@ -187,7 +196,6 @@ export function isTransientGistError(errorText = '') {
  * @returns {Promise<Object>} Gist information including URL
  */
 export async function uploadAsGist(options = {}) {
-  const $ = await getCommandStream(options);
   const {
     isPublic = false,
     description,
@@ -203,6 +211,12 @@ export async function uploadAsGist(options = {}) {
   // Resolve to an absolute path so relative and home-relative paths keep
   // working even if the working directory changes during the upload.
   const filePath = resolveLogFilePath(options.filePath);
+  if (detectFileType(filePath) === 'binary') {
+    throw new Error(
+      'Binary files require repository mode; Gists only support text'
+    );
+  }
+  const $ = await getCommandStream(options);
   const log = createDefaultLogger({ verbose, logger });
   const gistFileName = generateGistFileName(filePath);
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-upload-log-gist-'));
@@ -293,6 +307,9 @@ export async function uploadAsGist(options = {}) {
     url: gistUrl,
     rawUrl,
     fileName: gistFileName,
+    fileType: 'text',
+    archiveFormat: null,
+    originalFileName: path.basename(filePath),
     fileCount,
     isPublic,
   };
@@ -363,6 +380,11 @@ export async function uploadLog(options = {}) {
   let uploadType = strategy.type;
 
   if (onlyGist) {
+    if (strategy.fileType === 'binary') {
+      throw new Error(
+        'Binary files require repository mode; Gists only support text'
+      );
+    }
     uploadType = 'gist';
     log.debug(() => 'Mode: Only Gist (forced)');
   } else if (onlyRepository) {
@@ -408,10 +430,14 @@ export async function uploadLog(options = {}) {
             ? `[DRY MODE] Would upload to ${repositoryTarget.owner}/${repositoryName}/tree/${repositoryTarget.branch || '[default branch]'}/${repositoryPath}`
             : `[DRY MODE] Would upload to ${repositoryName}/${repositoryPath}`,
       rawUrl: null,
+      fileType: strategy.fileType,
+      archiveFormat: strategy.archiveFormat,
+      originalFileName: strategy.originalFileName,
+      fileCountIsEstimate: uploadType === 'repo',
       fileName:
         uploadType === 'gist'
           ? generateGistFileName(filePath)
-          : generateStoredLogFileName(filePath),
+          : strategy.fileName,
       repositoryName,
       ...(uploadType === 'repo' && repositoryTarget
         ? {
@@ -490,7 +516,7 @@ export async function uploadLog(options = {}) {
   } catch (repoError) {
     if (isENOSPC(repoError)) {
       const fileSize = getFileSize(filePath);
-      if (fileSize <= GITHUB_GIST_FILE_LIMIT) {
+      if (strategy.fileType === 'text' && fileSize <= GITHUB_GIST_FILE_LIMIT) {
         const enhanced = createENOSPCError('repository upload', repoError);
         enhanced.message +=
           ` Hint: This file (${formatFileSize(fileSize)}) fits in a gist. ` +
@@ -503,8 +529,12 @@ export async function uploadLog(options = {}) {
   }
 }
 
+export const uploadFile = uploadLog;
+
 export default {
+  uploadFile,
   uploadLog,
+  detectFileType,
   uploadAsGist,
   uploadAsRepo,
   determineUploadStrategy,

@@ -16,6 +16,7 @@
 
 import { test, assert } from 'test-anywhere';
 import fs from 'node:fs';
+import { writeTextFixture } from '../experiments/text-fixture.mjs';
 import path from 'node:path';
 import { cwd } from 'node:process';
 import {
@@ -368,9 +369,7 @@ test('issue #38 - parseFileSize understands the sizes users type', () => {
 
 test('issue #38 - a raised gist limit keeps large files in gist mode', () => {
   const filePath = path.join(testDir, 'large-for-gist.log');
-  const fd = fs.openSync(filePath, 'w');
-  fs.ftruncateSync(fd, 31 * 1024 * 1024);
-  fs.closeSync(fd);
+  writeTextFixture(filePath, 31 * 1024 * 1024);
 
   assert.equal(determineUploadStrategy(filePath).type, 'repo');
   assert.equal(

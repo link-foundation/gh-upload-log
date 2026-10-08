@@ -6,6 +6,7 @@ import { test, assert } from 'test-anywhere';
 import fs from 'node:fs';
 import path from 'node:path';
 import { cwd } from 'node:process';
+import { writeTextFixture } from '../experiments/text-fixture.mjs';
 import {
   normalizeFileName,
   generateRepoName,
@@ -101,13 +102,7 @@ function createFakeCommandStream(handler) {
 }
 
 function ensureLargeTestFile(filePath, sizeBytes = 26 * 1024 * 1024) {
-  if (fs.existsSync(filePath) && fs.statSync(filePath).size === sizeBytes) {
-    return;
-  }
-
-  const fd = fs.openSync(filePath, 'w');
-  fs.ftruncateSync(fd, sizeBytes);
-  fs.closeSync(fd);
+  writeTextFixture(filePath, sizeBytes);
 }
 
 // Test: normalizeFileName

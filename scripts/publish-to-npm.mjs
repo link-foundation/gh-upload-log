@@ -5,20 +5,20 @@
  * Usage: node scripts/publish-to-npm.mjs [--should-pull]
  *   should_pull: Optional flag to pull latest changes before publishing (for release job)
  *
- * IMPORTANT: Update the PACKAGE_NAME constant below to match your package.json
- *
  * Uses command-stream for command execution and lino-arguments for configuration.
  */
 
-import { appendFileSync, readFileSync } from 'node:fs';
+import fs, { appendFileSync } from 'node:fs';
+import os from 'node:os';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { $ } from 'command-stream';
 import { makeConfig } from 'lino-arguments';
 import { ensureCommandSucceeded } from '../src/common.js';
 
-// TODO: Update this to match your package name in package.json
-const PACKAGE_NAME = 'gh-upload-log';
+import { preparePackages } from './prepare-npm-packages.mjs';
+export { preparePackages } from './prepare-npm-packages.mjs';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
@@ -91,6 +91,104 @@ function setOutput(key, value) {
   }
 }
 
+/** Check exact versions without npm/CDN metadata caches. Only a 404 means absent. */
+export async function isVersionPublished(
+  name,
+  version,
+  { fetchFn = fetch } = {}
+) {
+  const response = await fetchFn(
+    `https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}?check=${randomUUID()}`,
+    {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+      signal: globalThis.AbortSignal.timeout(30_000),
+    }
+  );
+  if (response.status === 404) {
+    await response.body?.cancel();
+    return false;
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error(
+      `npm registry check for ${name}@${version} failed (HTTP ${response.status})`
+    );
+  }
+  const metadata = await response.json();
+  if (metadata.name !== name || metadata.version !== version) {
+    throw new Error(`Unexpected npm registry metadata for ${name}@${version}`);
+  }
+  return true;
+}
+
+/**
+ * Resume partial publication and gate release outputs on every name. Each
+ * successful publish gets a bounded five-minute registry visibility window.
+ */
+export async function publishPackages({
+  packages,
+  isPublished = isVersionPublished,
+  runPublish = (pkg) => $`npm publish ${pkg.directory} --access public`,
+  setOutput: output = setOutput,
+  logger = console,
+  sleepFn = sleep,
+  verificationAttempts = 31,
+  verificationDelayMs = 10_000,
+  maxRetries = MAX_RETRIES,
+  retryDelay = RETRY_DELAY,
+}) {
+  if (
+    !packages?.length ||
+    new Set(packages.map((pkg) => pkg.version)).size !== 1
+  ) {
+    throw new Error('Publication requires packages with the same version');
+  }
+  let alreadyPublished = true;
+  for (const pkg of packages) {
+    if (await isPublished(pkg.name, pkg.version)) {
+      logger.log(`${pkg.name}@${pkg.version} is already published`);
+      continue;
+    }
+    alreadyPublished = false;
+    logger.log(`Publishing ${pkg.name}@${pkg.version}...`);
+    await publishWithRetries(
+      async () => {
+        // A failed acknowledgement may have still published. Check before every
+        // retry and immediately after failures to avoid immutable-version errors.
+        if (await isPublished(pkg.name, pkg.version)) {
+          return { code: 0 };
+        }
+        const result = await runPublish(pkg);
+        if (result.code !== 0 && (await isPublished(pkg.name, pkg.version))) {
+          return { code: 0 };
+        }
+        return result;
+      },
+      { logger, sleepFn, maxRetries, retryDelay }
+    );
+    let visible = false;
+    for (let attempt = 0; attempt < verificationAttempts; attempt++) {
+      if (await isPublished(pkg.name, pkg.version)) {
+        visible = true;
+        break;
+      }
+      if (attempt + 1 < verificationAttempts) {
+        await sleepFn(verificationDelayMs);
+      }
+    }
+    if (!visible) {
+      throw new Error(
+        `${pkg.name}@${pkg.version} is not visible on npm after publication; release outputs were not set`
+      );
+    }
+    logger.log(`✅ Verified ${pkg.name}@${pkg.version} on npm`);
+  }
+  output('published', 'true');
+  output('published_version', packages[0].version);
+  output('already_published', String(alreadyPublished));
+}
+
 async function main() {
   const config = makeConfig({
     yargs: ({ yargs, getenv }) =>
@@ -100,47 +198,20 @@ async function main() {
         describe: 'Pull latest changes before publishing',
       }),
   });
-
   if (config.shouldPull) {
-    // Pull the latest changes we just pushed
-    const pullResult = await $`git pull origin main`;
-    ensureCommandSucceeded(pullResult, 'pull the version commit from main');
+    ensureCommandSucceeded(
+      await $`git pull origin main`,
+      'pull the version commit from main'
+    );
   }
-
-  // Get current version
-  const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
-  const currentVersion = packageJson.version;
-  console.log(`Current version to publish: ${currentVersion}`);
-
-  // Check if this version is already published on npm
-  console.log(`Checking if version ${currentVersion} is already published...`);
-  const checkResult =
-    await $`npm view "${PACKAGE_NAME}@${currentVersion}" version`.run({
-      capture: true,
-    });
-
-  // command-stream returns { code: 0 } on success, { code: 1 } on failure (e.g., E404)
-  // Exit code 0 means version exists, non-zero means version not found
-  if (checkResult.code === 0) {
-    console.log(`Version ${currentVersion} is already published to npm`);
-    setOutput('published', 'true');
-    setOutput('published_version', currentVersion);
-    setOutput('already_published', 'true');
-    return;
-  }
-
-  // Version not found on npm (E404), proceed with publish
-  console.log(
-    `Version ${currentVersion} not found on npm, proceeding with publish...`
+  const outputDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'gh-upload-publish-')
   );
-
-  await publishWithRetries(() => $`npm run changeset:publish`);
-
-  // These outputs gate GitHub release creation, so only set them after a
-  // verified zero exit code from the npm publication command.
-  setOutput('published', 'true');
-  setOutput('published_version', currentVersion);
-  console.log(`\u2705 Published ${PACKAGE_NAME}@${currentVersion} to npm`);
+  try {
+    await publishPackages({ packages: preparePackages({ outputDir }) });
+  } finally {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+  }
 }
 
 const isMain =

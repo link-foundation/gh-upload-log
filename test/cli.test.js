@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
+import { writeTextFixture } from '../experiments/text-fixture.mjs';
 import {
   buildLogRepositoryPath,
   generateFileContentHash,
@@ -65,17 +66,8 @@ function setupTestFile() {
 }
 
 function setupLargeRepoTestFile() {
-  if (
-    fs.existsSync(largeCliRepoFile) &&
-    fs.statSync(largeCliRepoFile).size === 26 * 1024 * 1024
-  ) {
-    return;
-  }
-
   fs.mkdirSync(path.dirname(largeCliRepoFile), { recursive: true });
-  const fd = fs.openSync(largeCliRepoFile, 'w');
-  fs.ftruncateSync(fd, 26 * 1024 * 1024);
-  fs.closeSync(fd);
+  writeTextFixture(largeCliRepoFile, 26 * 1024 * 1024);
 }
 
 setupTestFile();

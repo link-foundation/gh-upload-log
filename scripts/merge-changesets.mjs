@@ -12,8 +12,6 @@
  *
  * This script is run before `changeset version` to ensure a clean release
  * even when multiple PRs have merged before a release cycle.
- *
- * IMPORTANT: Update the package name below to match your package.json
  */
 
 import {
@@ -25,7 +23,7 @@ import {
 } from 'fs';
 import { join } from 'path';
 
-const PACKAGE_NAME = 'gh-upload-log';
+const PACKAGE_NAME = JSON.parse(readFileSync('package.json', 'utf8')).name;
 const CHANGESET_DIR = '.changeset';
 
 // Version bump type priority (higher number = higher priority)
