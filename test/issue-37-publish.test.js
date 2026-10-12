@@ -13,9 +13,10 @@ test('issue #37 - both package names ship the universal and legacy bins', () => 
     fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
   );
   assert.equal(pkg.bin['gh-upload'], 'src/cli.js');
+  assert.equal(pkg.bin['gh-upload-file'], 'src/cli.js');
   assert.equal(pkg.bin['gh-upload-log'], 'src/cli.js');
   assert.deepEqual([pkg.name, ...pkg.publishAliases].sort(), [
-    'gh-upload',
+    'gh-upload-file',
     'gh-upload-log',
   ]);
 });
@@ -28,23 +29,23 @@ test('issue #37 - npm checks bypass caches and distinguish absence from registry
     return { status: 404, ok: false };
   };
   assert.equal(
-    await publishing.isVersionPublished('gh-upload', '1.2.3', { fetchFn }),
+    await publishing.isVersionPublished('gh-upload-file', '1.2.3', { fetchFn }),
     false
   );
   assert.equal(
-    await publishing.isVersionPublished('gh-upload', '1.2.3', { fetchFn }),
+    await publishing.isVersionPublished('gh-upload-file', '1.2.3', { fetchFn }),
     false
   );
   assert.notEqual(requests[0].url, requests[1].url);
   assert.ok(
     requests.every(
       ({ url, options }) =>
-        url.startsWith('https://registry.npmjs.org/gh-upload/1.2.3?') &&
+        url.startsWith('https://registry.npmjs.org/gh-upload-file/1.2.3?') &&
         options.headers['Cache-Control'] === 'no-cache'
     )
   );
   await assert.rejects(
-    publishing.isVersionPublished('gh-upload', '1.2.3', {
+    publishing.isVersionPublished('gh-upload-file', '1.2.3', {
       fetchFn: async () => ({ status: 503, ok: false }),
     }),
     /503/
@@ -58,7 +59,7 @@ test('issue #37 - a partial dual publication retries only the missing package an
   await publishing.publishPackages({
     packages: [
       { name: 'gh-upload-log', version: '1.2.3', directory: '/legacy' },
-      { name: 'gh-upload', version: '1.2.3', directory: '/universal' },
+      { name: 'gh-upload-file', version: '1.2.3', directory: '/universal' },
     ],
     isPublished: async (name) =>
       name === 'gh-upload-log' || published.includes(name),
@@ -72,7 +73,7 @@ test('issue #37 - a partial dual publication retries only the missing package an
     logger,
     sleepFn: async () => {},
   });
-  assert.deepEqual(published, ['gh-upload']);
+  assert.deepEqual(published, ['gh-upload-file']);
   assert.equal(outputs.published, 'true');
   assert.equal(outputs.published_version, '1.2.3');
 });
@@ -83,7 +84,7 @@ test('issue #37 - release success requires every package to become visible on np
   await assert.rejects(
     publishing.publishPackages({
       packages: [
-        { name: 'gh-upload', version: '1.2.3', directory: '/universal' },
+        { name: 'gh-upload-file', version: '1.2.3', directory: '/universal' },
       ],
       isPublished: async () => false,
       runPublish: async () => ({ code: 0 }),
@@ -105,7 +106,7 @@ test('issue #37 - failed publish acknowledgement is recovered without republishi
   let attempts = 0;
   await publishing.publishPackages({
     packages: [
-      { name: 'gh-upload', version: '1.2.3', directory: '/universal' },
+      { name: 'gh-upload-file', version: '1.2.3', directory: '/universal' },
     ],
     isPublished: async () => published,
     runPublish: async () => {
@@ -127,7 +128,7 @@ test('issue #37 - prepare manifests keeps source version and code identical for 
   try {
     const packages = await publishing.preparePackages({ outputDir: directory });
     assert.deepEqual(packages.map((pkg) => pkg.name).sort(), [
-      'gh-upload',
+      'gh-upload-file',
       'gh-upload-log',
     ]);
     const manifests = packages.map((pkg) =>
@@ -154,7 +155,7 @@ test('issue #37 - delayed registry visibility is polled before release outputs',
   const outputs = {};
   await publishing.publishPackages({
     packages: [
-      { name: 'gh-upload', version: '1.2.3', directory: '/universal' },
+      { name: 'gh-upload-file', version: '1.2.3', directory: '/universal' },
     ],
     isPublished: async () => published && ++checks >= 3,
     runPublish: async () => {
@@ -179,14 +180,14 @@ test('issue #37 - failure of the second name never reports a complete release', 
   const outputs = {};
   await assert.rejects(
     publishing.publishPackages({
-      packages: ['gh-upload', 'gh-upload-log'].map((name) => ({
+      packages: ['gh-upload-file', 'gh-upload-log'].map((name) => ({
         name,
         version: '1.2.3',
         directory: `/${name}`,
       })),
       isPublished: async (name) => visible.has(name),
       runPublish: async (pkg) => {
-        if (pkg.name === 'gh-upload') {
+        if (pkg.name === 'gh-upload-file') {
           visible.add(pkg.name);
           return { code: 0 };
         }
@@ -200,6 +201,6 @@ test('issue #37 - failure of the second name never reports a complete release', 
     }),
     /authentication failed/
   );
-  assert.deepEqual([...visible], ['gh-upload']);
+  assert.deepEqual([...visible], ['gh-upload-file']);
   assert.equal(outputs.published, undefined);
 });

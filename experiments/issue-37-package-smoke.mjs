@@ -37,7 +37,7 @@ try {
   );
   const plannedVersion = JSON.parse(
     fs.readFileSync(releasePlan, 'utf8')
-  ).releases.find((release) => release.name === 'gh-upload').newVersion;
+  ).releases.find((release) => release.name === 'gh-upload-file').newVersion;
   const packages = preparePackages({
     outputDir: path.join(directory, 'packages'),
   });
@@ -94,7 +94,7 @@ try {
       path.join(consumer, 'data.bin'),
       Buffer.from([0, 255, 128])
     );
-    for (const bin of ['gh-upload', 'gh-upload-log']) {
+    for (const bin of ['gh-upload-file', 'gh-upload-log']) {
       const binPath = path.join(consumer, 'node_modules', '.bin', bin);
       assert.equal(run(binPath, ['--version'], consumer).trim(), pkg.version);
       const output = run(
@@ -110,7 +110,7 @@ try {
       version: pkg.version,
       packedFiles: packed.files.length,
       unpackedSize: packed.unpackedSize,
-      bins: ['gh-upload', 'gh-upload-log'],
+      bins: ['gh-upload-file', 'gh-upload-log'],
       importPassed: true,
       dryPublishPassed: true,
     });

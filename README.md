@@ -2,7 +2,7 @@
 
 Upload text and binary files to GitHub as Gists or repositories
 
-[![npm version](https://img.shields.io/npm/v/gh-upload.svg)](https://www.npmjs.com/package/gh-upload)
+[![npm version](https://img.shields.io/npm/v/gh-upload-file.svg)](https://www.npmjs.com/package/gh-upload-file)
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
 [![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)
 
@@ -15,7 +15,7 @@ Upload text and binary files to GitHub as Gists or repositories
 - **Binary files of any size**: Streamed into gzip archives in repositories
 - **Repository files exceeding 100MB**: Split into parts of at most 100MB; text parts prefer line boundaries, and binary parts contain archive bytes
 
-`gh-upload-log` remains available as a package, command, and `uploadLog` API. Both npm packages ship the same version, code, and both commands. Existing `GH_UPLOAD_LOG_*` settings continue to work; `GH_UPLOAD_*` takes precedence when both names are set. Sizes such as `100MB` use `100 * 1024 * 1024` bytes throughout this tool.
+The npm package is `gh-upload-file` (npm refuses `gh-upload` as too similar to `rc-upload`); it installs the `gh-upload` and `gh-upload-file` commands. `gh-upload-log` remains available as a package, command, and `uploadLog` API. Both npm packages ship the same version, code, and commands. Existing `GH_UPLOAD_LOG_*` settings continue to work; `GH_UPLOAD_*` takes precedence when both names are set. Sizes such as `100MB` use `100 * 1024 * 1024` bytes throughout this tool.
 
 ## Features
 
@@ -49,13 +49,13 @@ gh auth login
 ### Global Installation (CLI)
 
 ```bash
-bun install -g gh-upload
+bun install -g gh-upload-file
 ```
 
 ### Local Installation (Library)
 
 ```bash
-bun add gh-upload
+bun add gh-upload-file
 ```
 
 ## Configuration
@@ -318,7 +318,7 @@ fallback; `--only-gist` reports the failure instead of falling back.
 ### Basic Example
 
 ```javascript
-import { uploadFile } from 'gh-upload';
+import { uploadFile } from 'gh-upload-file';
 
 // Upload a log file (private by default)
 const result = await uploadFile({
@@ -476,7 +476,7 @@ import {
   GITHUB_GIST_DOCUMENTED_FILE_LIMIT, // 100 MB (documented API maximum)
   GITHUB_REPO_CHUNK_SIZE, // 100 MB
   LOG_CONTENT_HASH_LENGTH, // 16 hex characters
-} from 'gh-upload';
+} from 'gh-upload-file';
 ```
 
 ## How It Works
