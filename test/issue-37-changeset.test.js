@@ -14,11 +14,11 @@ test('issue #37 - release changeset validation and merging follow the renamed ma
   fs.mkdirSync(changesets);
   fs.writeFileSync(
     path.join(directory, 'package.json'),
-    '{"name":"gh-upload"}\n'
+    '{"name":"gh-upload-file"}\n'
   );
   fs.writeFileSync(
     path.join(changesets, 'feature.md'),
-    "---\n'gh-upload': minor\n---\n\nUniversal file uploads.\n"
+    "---\n'gh-upload-file': minor\n---\n\nUniversal file uploads.\n"
   );
   const env = { ...process.env };
   for (const name of [
@@ -46,14 +46,14 @@ test('issue #37 - release changeset validation and merging follow the renamed ma
     assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
     fs.writeFileSync(
       path.join(changesets, 'fix.md'),
-      "---\n'gh-upload': patch\n---\n\nPreserve old package releases.\n"
+      "---\n'gh-upload-file': patch\n---\n\nPreserve old package releases.\n"
     );
     result = run('merge-changesets.mjs');
     assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
     const files = fs.readdirSync(changesets);
     assert.equal(files.length, 1);
     const merged = fs.readFileSync(path.join(changesets, files[0]), 'utf8');
-    assert.match(merged, /'gh-upload': minor/);
+    assert.match(merged, /'gh-upload-file': minor/);
     assert.match(merged, /Universal file uploads/);
     assert.match(merged, /Preserve old package releases/);
     result = run('validate-changeset.mjs');
