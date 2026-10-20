@@ -1,0 +1,60 @@
+{
+  "body": "Trusted publishing currently fails in a way that is expensive to debug because npm emits generic errors that point users toward the wrong subsystem.\n\nIn our GitHub Actions setup, trusted publishing failed in two different ways at different stages:\n\nFirst, npm returned a `404` while trying to publish an existing package:\n\n```text\nnpm ERR! code E404\nnpm ERR! 404 Not Found - PUT https://registry.npmjs.org/bmad-method - Not found\nnpm ERR! 404\nnpm ERR! 404  'bmad-method@6.0.5-next.0' is not in this registry.\n```\n\nThis was misleading. The package existed in the registry, and `npm view bmad-method` worked.\n\nLater, after cleaning up token and `.npmrc` variables, npm returned:\n\n```text\nnpm ERR! code ENEEDAUTH\nnpm ERR! need auth This command requires you to be logged in to https://registry.npmjs.org/\nnpm ERR! need auth You need to authorize this machine using `npm adduser`\n```\n\nThat was also misleading, because this was a GitHub Actions OIDC trusted publishing flow, not a manual login/token publish flow.\n\nWe verified all of the following:\n\n- the package exists in the registry\n- trusted publisher was configured on npm\n- the GitHub Actions job had `id-token: write`\n- the repository, workflow filename, ref, and environment matched the trusted publisher configuration\n- the runner was GitHub-hosted\n- no `.npmrc` auth config was present\n- `NODE_AUTH_TOKEN` was unset\n- GitHub OIDC claims matched the expected repo/workflow/ref/audience values\n\nWhat finally resolved the issue was upgrading npm in CI to a newer version compatible with trusted publishing. Until then, npm surfaced the problem as either:\n\n- \"package not found\"\n- or \"please log in\"\n\nBoth diagnoses were wrong enough to waste hours.\n\n## Why this matters\n\nThese error messages cause users to debug the wrong things:\n\n- package existence and naming\n- package ownership assumptions\n- GitHub secrets and tokens\n- `.npmrc` contamination\n- workflow file naming\n- trusted publisher configuration recreation\n- GitHub OIDC claims\n\nThe actual problem can be trusted publishing support or compatibility, but npm reports it as if either the package does not exist or the user forgot to authenticate manually.\n\nThat is not just vague. It is directionally wrong.\n\n## What npm should do instead\n\nWhen `npm publish` is running in a trusted publishing context, npm should provide diagnostics that distinguish between:\n\n- package genuinely not found\n- normal token/login auth missing\n- trusted publishing not supported by this npm version\n- trusted publishing attempted but rejected\n- trusted publisher config mismatch\n- unsupported runner/environment\n\nAt minimum, npm should not emit:\n\n- `404 Not Found` implying the package is absent when it is not\n- `npm adduser` guidance when trusted publishing is the intended flow\n\n## A practical compromise\n\nIf npm intentionally avoids detailed failure reasons in CLI output for abuse-prevention reasons, then package maintainers should still be able to see trusted-publishing diagnostics in the authenticated npm web UI for the package.\n\nFor example, package owners/maintainers could be shown the latest trusted publishing failure with details such as:\n\n- trusted publisher match failed\n- workflow filename mismatch\n- repository mismatch\n- environment mismatch\n- unsupported npm CLI version\n- unsupported runner type\n- OIDC token validation failed\n\nRight now, maintainers get the worst of both worlds:\n\n- the CLI exposes only vague or misleading errors like `404` or `npm adduser`\n- the npm UI provides no useful diagnostic trail explaining why trusted publishing was rejected\n\nIf failure details cannot safely be exposed to anonymous clients, they should at least be visible to authenticated maintainers on the package's trusted publisher settings page or publish history.\n\nAt present the system behaves like a high-security vault whose only diagnostic interface is \"door not found.\"\n",
+  "comments": [
+    {
+      "id": "IC_kwDOCFbcVc7wOio8",
+      "author": { "login": "alexeyv" },
+      "authorAssociation": "NONE",
+      "body": "Follow-up with the concrete outcome:\n\nAfter a long run of misleading `E404` / `ENEEDAUTH` failures, the publish started working once we explicitly upgraded npm in the GitHub Actions job to `11.6.2` before `npm publish`.\n\nImportant detail: the trusted publisher configuration itself was not changed for the successful run. The successful path still had:\n\n- GitHub Actions OIDC trusted publishing\n- GitHub-hosted runner\n- no `.npmrc` auth config file present\n- `NODE_AUTH_TOKEN` unset\n- matching repo / workflow filename / ref / audience claims\n\nSo the effective fix was upgrading npm in CI, not changing package ownership, repo identity, workflow identity, or switching back to token auth.\n\nThat is exactly why the earlier errors were so misleading: the problem presented like package absence or missing login, while the actual resolution was CLI compatibility.\n\nIf someone else lands here via search: if your trusted publishing setup appears correct and npm is still giving you `404` or `npm adduser`-style errors, check the npm version running in CI and try a current npm release explicitly.\n",
+      "createdAt": "2026-03-10T10:31:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/npm/cli/issues/9088#issuecomment-4030343740",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOCFbcVc8AAAABD6dzaA",
+      "author": { "login": "jedwards1211" },
+      "authorAssociation": "NONE",
+      "body": "I'm using npm 11.15.0 in CircleCI, a public scoped package, made sure that all the claims in the OIDC token match the settings in my npm package, made sure I unset `NPM_TOKEN` and `NODE_AUTH_TOKEN` and removed any `.npmrc`, and I'm still getting 404s.\n\nWhoever implemented npm trusted publishing just did a shitty job.",
+      "createdAt": "2026-05-27T18:45:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/npm/cli/issues/9088#issuecomment-4557599592",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOCFbcVc8AAAABFuIA5g",
+      "author": { "login": "antony" },
+      "authorAssociation": "NONE",
+      "body": "For anybody who doesn't want to read an AI generated, overly dramatic essay:\n\nalexeyv had an old version of the `npm` cli on CI, because he didn't read the docs where it states exactly what is required.\n\nthe error is misleading, because a cli built before a feature existed, cannot correctly diagnose an issue with the feature.",
+      "createdAt": "2026-06-11T08:57:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/npm/cli/issues/9088#issuecomment-4678877414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOCFbcVc8AAAABFw29HQ",
+      "author": { "login": "jedwards1211" },
+      "authorAssociation": "NONE",
+      "body": "@antony I'm still getting 404s with the latest version of `npm` and I can't seem to identify anything I configured wrong.  A 404 is flat-out wrong because my package exists and it's public.",
+      "createdAt": "2026-06-11T14:39:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        { "content": "THUMBS_UP", "users": { "totalCount": 1 } }
+      ],
+      "url": "https://github.com/npm/cli/issues/9088#issuecomment-4681743645",
+      "viewerDidAuthor": false
+    }
+  ],
+  "title": "Trusted publishing failures report misleading 404 / ENEEDAUTH errors instead of trusted-publishing diagnostics"
+}
