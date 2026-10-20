@@ -1,5 +1,11 @@
 # gh-upload-log
 
+## 0.12.1
+
+### Patch Changes
+
+- b30b770: Track the published compatibility package in the README badge, explain renamed-package availability, and add actionable npm authorization diagnostics.
+
 ## 0.12.0
 
 ### Minor Changes
