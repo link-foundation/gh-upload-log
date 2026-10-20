@@ -2,7 +2,7 @@
 
 Upload text and binary files to GitHub as Gists or repositories
 
-[![npm version](https://img.shields.io/npm/v/gh-upload-file.svg)](https://www.npmjs.com/package/gh-upload-file)
+[![gh-upload-log npm version](https://img.shields.io/npm/v/gh-upload-log.svg)](https://www.npmjs.com/package/gh-upload-log)
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
 [![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)
 
@@ -15,7 +15,7 @@ Upload text and binary files to GitHub as Gists or repositories
 - **Binary files of any size**: Streamed into gzip archives in repositories
 - **Repository files exceeding 100MB**: Split into parts of at most 100MB; text parts prefer line boundaries, and binary parts contain archive bytes
 
-The npm package is `gh-upload-file` (npm refuses `gh-upload` as too similar to `rc-upload`); it installs the `gh-upload` and `gh-upload-file` commands. `gh-upload-log` remains available as a package, command, and `uploadLog` API. Both npm packages ship the same version, code, and commands. Existing `GH_UPLOAD_LOG_*` settings continue to work; `GH_UPLOAD_*` takes precedence when both names are set. Sizes such as `100MB` use `100 * 1024 * 1024` bytes throughout this tool.
+The npm package is `gh-upload-file` (npm refuses `gh-upload` as too similar to `rc-upload`); it installs the `gh-upload` and `gh-upload-file` commands. `gh-upload-log` remains available as a package, command, and `uploadLog` API. Release automation is intended to ship both npm packages with the same version, code, and commands; see the current availability note under Installation. Existing `GH_UPLOAD_LOG_*` settings continue to work; `GH_UPLOAD_*` takes precedence when both names are set. Sizes such as `100MB` use `100 * 1024 * 1024` bytes throughout this tool.
 
 ## Features
 
@@ -45,6 +45,14 @@ gh auth login
 ```
 
 ## Installation
+
+The badge above tracks the published compatibility package `gh-upload-log`.
+As of 2026-10-20, `gh-upload-file` has not completed its first npm publish;
+its registry endpoint returns 404. Until that setup is complete, install the
+published text-log tool with `bun install -g gh-upload-log` (version 0.10.1).
+That older release does not include the newer universal binary-upload features.
+The `gh-upload-file` commands below apply once the renamed package is published.
+See the [badge and release investigation](./docs/case-studies/issue-53/README.md).
 
 ### Global Installation (CLI)
 
@@ -623,7 +631,7 @@ The following libraries are used internally by lino-arguments:
 
 ### Publishing both npm names
 
-`package.json` names `gh-upload` and lists `gh-upload-log` in `publishAliases`.
+`package.json` names `gh-upload-file` and lists `gh-upload-log` in `publishAliases`.
 One Changesets version bump supplies both manifests. Both automated and manual
 release workflows call `scripts/publish-to-npm.mjs`, which prepares identical
 runtime packages with distinct names. It skips versions already present,
@@ -636,19 +644,19 @@ Prepare and inspect the artifacts without publishing:
 
 ```bash
 bun scripts/prepare-npm-packages.mjs --output-dir dist/npm
-npm pack ./dist/npm/gh-upload
+npm pack ./dist/npm/gh-upload-file
 npm pack ./dist/npm/gh-upload-log
 node experiments/issue-37-package-smoke.mjs
 ```
 
-The first `gh-upload` publish needs npm account authorization; OIDC trusted
-publishing must then be configured for that package as well as `gh-upload-log`,
+The first `gh-upload-file` publish needs npm account authorization; OIDC trusted
+publishing must then be configured for `gh-upload-file` as well as `gh-upload-log`,
 using this repository's `release.yml` workflow. The name check does not reserve
 the name. A maintainer can bootstrap from the pushed PR before merging:
 
 ```bash
 package-registry-manager setup --repository /path/to/gh-upload-log \
-  --registry npm --package gh-upload --ref 51 --execute
+  --registry npm --package gh-upload-file --ref issue-53-c61a31a1067d --execute
 ```
 
 This command uses browser approval and the PR's actual package manifest. Inspect

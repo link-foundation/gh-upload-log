@@ -1,0 +1,2 @@
+# Preserve the investigation evidence despite the repository-wide log ignore.
+!*.log

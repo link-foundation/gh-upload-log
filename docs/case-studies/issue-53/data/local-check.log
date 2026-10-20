@@ -1,0 +1,11 @@
+$ bun run lint && bun run format:check && bun run check:file-size
+$ eslint .
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ bun scripts/check-file-size.mjs
+
+Checking JavaScript files for maximum 1000 lines...
+
+✓ All files are within the line limit
+

@@ -1,0 +1,6 @@
+{
+  "body": "npm refused the first publish of `gh-upload`:\n\n```\n403 Forbidden - PUT https://registry.npmjs.org/gh-upload - Package name too similar to existing package rc-upload\n```\n\nThis switches the npm package to `gh-upload-file`, the alternative named in #37 (free on npm).\n- The `gh-upload` command is unchanged, and a `gh-upload-file` command is added for `npx gh-upload-file`.\n- `gh-upload-log` keeps publishing alongside.\n- README install and import lines, tests and the changeset are updated.\n\n`bun test`: 181 pass. `bun run check` passes.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+  "comments": [],
+  "mergedAt": "2026-10-12T14:40:49Z",
+  "title": "Publish the universal package as gh-upload-file (npm refuses gh-upload)"
+}

@@ -1,0 +1,29 @@
+bun test v1.4.3 (c6da4a4d3)
+
+test/issue-53.test.js:
+745 |   /**
+746 |    * Assert that a value is truthy
+747 |    */
+748 |   ok(value, message) {
+749 |     if (!value) {
+750 |       throw new Error(message || 'Expected value to be truthy');
+                                                                    ^
+error: Badge package must have a published latest version
+      at ok (/tmp/gh-issue-solver-1792530455233/node_modules/test-anywhere/src/index.js:750:63)
+      at <anonymous> (/tmp/gh-issue-solver-1792530455233/test/issue-53.test.js:13:10)
+(fail) README npm badge targets an actually published package [1.62ms]
+745 |   /**
+746 |    * Assert that a value is truthy
+747 |    */
+748 |   ok(value, message) {
+749 |     if (!value) {
+750 |       throw new Error(message || 'Expected value to be truthy');
+                      ^
+error: Explain the trusted publisher workflow
+      at ok (/tmp/gh-issue-solver-1792530455233/node_modules/test-anywhere/src/index.js:750:17)
+      at <anonymous> (/tmp/gh-issue-solver-1792530455233/test/issue-53.test.js:27:10)
+(fail) failed npm publication explains package bootstrap and trust configuration [1.00ms]
+
+ 0 pass
+ 2 fail
+Ran 2 tests across 1 file. [121.00ms]

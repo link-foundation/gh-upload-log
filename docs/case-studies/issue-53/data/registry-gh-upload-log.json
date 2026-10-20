@@ -1,0 +1,1860 @@
+{
+  "_id": "gh-upload-log",
+  "_rev": "19-f0c7e6404ff0605c34d92310b5da17db",
+  "name": "gh-upload-log",
+  "dist-tags": { "latest": "0.10.1" },
+  "versions": {
+    "0.1.0": {
+      "name": "gh-upload-log",
+      "version": "0.1.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.1.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "7e6c65dadcb3d848a50cfd839471f42f70ec492a",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.1.0.tgz",
+        "fileCount": 14,
+        "integrity": "sha512-A3xyWfIP9gXO6RuYoi03vZV34Xj3uIzf0NZ8HkK+oRbJ58ZKSqYH0/79UOK2Hrtxdpw0IpoB+IEtefXb7WbNtw==",
+        "signatures": [
+          {
+            "sig": "MEQCICUSbsZnC9dVOgqpSmoaYkiBbqFub82eiJ95qPdevU7oAiBocNgJUXcJFsvoHdHTEnWSvCxLD7TDKsgP42OqYo0kEA==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "unpackedSize": 60071
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "node": ">=20.0.0" },
+      "gitHead": "0ebdfef247725527b40595f87a44145a0ce81699",
+      "scripts": {
+        "lint": "node --check src/index.js && node --check src/cli.js",
+        "test": "node --test test/index.test.js",
+        "test:bun": "bun test",
+        "changeset": "changeset",
+        "test:deno": "deno test --allow-all",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "changeset version"
+      },
+      "_npmUser": { "name": "konard", "email": "drakonard@gmail.com" },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.5.2",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "_nodeVersion": "20.19.4",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "test-anywhere": "^0.7.0",
+        "@changesets/cli": "^2.29.7",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.1.0_1763323759804_0.08252260568714553",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.2.0": {
+      "name": "gh-upload-log",
+      "version": "0.2.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.2.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "eab96429cd95c726d24dfce7f13a281204ed9201",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.2.0.tgz",
+        "fileCount": 45,
+        "integrity": "sha512-BDJTWb9bCQuT2u2JRaDppzbrqykMwjkUrzaIVN7gXvqkqABY5SzQt5bftjlL4EIP70ByM68C/Ob+oOXoARgarQ==",
+        "signatures": [
+          {
+            "sig": "MEUCIEuXODGiCn+fnxihIj0DpmE5i73FQlUy1I3hL/X6r/MAAiEA5NPaK2B5TAbYhYgaT3/ZqP2dhWIssmnyUi9VKLY7nUI=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.2.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 203105
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "node": ">=20.0.0" },
+      "gitHead": "7accdf328d4e458ef9311464a48184f83010fda9",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "node --test test/",
+        "check": "npm run lint && npm run format:check && npm run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "test:bun": "bun test",
+        "changeset": "changeset",
+        "test:deno": "deno test --allow-read --allow-write --allow-env --allow-run",
+        "format:check": "prettier --check .",
+        "check:file-size": "node scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "node scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.2.0_1766652831762_0.6305281775923859",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.3.0": {
+      "name": "gh-upload-log",
+      "version": "0.3.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.3.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "cde2556f58ebba0311d31f01d3cbbdbe13fe6f1b",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.3.0.tgz",
+        "fileCount": 45,
+        "integrity": "sha512-GlHp9lc8uQokK/0Jy+vTpI52e29EP5872ob7TnKsbzVEra+7an7nsUtfbnzoHl6JduKQCAcH0mqBudusjuCvNA==",
+        "signatures": [
+          {
+            "sig": "MEUCIQDn7T4amzovBkN1XocaIIsY6+3qRyF4tfCsUlqkcZwjYAIgSnDvhx3C+29j7dSbNroZ/MZw9w+E1CJ5hVL3pC0JMf4=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.3.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 254691
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "25364f966a3cff6cbf997e9fd710ac9dce02793f",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.3.0_1766660747780_0.5808095286862378",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.3.1": {
+      "name": "gh-upload-log",
+      "version": "0.3.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.3.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "1217e17d64fe531dc68654644e369d82b691cbdf",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.3.1.tgz",
+        "fileCount": 48,
+        "integrity": "sha512-RECWfRuxATMJtDVS8ouqMg6KQlPBpIDnsJKvIpj46Md2yzrauu8TDlt3N21UJL5+5jJtYTRICCn9zYwOZszCGA==",
+        "signatures": [
+          {
+            "sig": "MEUCIQClgzPF4bG88AUA90Le+DQWSTbhyZKHTvqKzQtgGcWbiwIgLlwvZO3rITWwhje4GrjRnv3JLj1w9z09VIPfy9fXdEk=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.3.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 262291
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "4e181976cae4d77860d99d48a94c7287637dc1e8",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.3.1_1766664780428_0.24232856733052643",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.4.0": {
+      "name": "gh-upload-log",
+      "version": "0.4.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.4.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "75788b77f0ee0873d9c2a4246e2afafa4785006a",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.4.0.tgz",
+        "fileCount": 48,
+        "integrity": "sha512-FOzUvhAt9qQC+BkLMSPdWGxwikNegW28ggKX8aDSv5W0MOkpJUcfM3PSd0rFimNtXmP4OgDJteBiwilpyzy0SQ==",
+        "signatures": [
+          {
+            "sig": "MEUCIHlpPx6WxXUZ6AeyBsTUkg+tL1k71K1T8Dh8HtZKeERNAiEApJQsYk8atBhWpyGX6GxTBiz8WufmqbJCLqxBuew2hj8=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.4.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 262949
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "fef1ad6ed29a3d5a405d18049f3c52052b71fb42",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.4.0_1766673063604_0.8624324213574217",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.4.1": {
+      "name": "gh-upload-log",
+      "version": "0.4.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.4.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "cd80a2a94649651511728ac8639b8a903e5ad110",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.4.1.tgz",
+        "fileCount": 48,
+        "integrity": "sha512-dFQC2W2i9hVqOJm2QBg9742bmozNqKv58EeXJCr6j42jqblufzyPlJvMo6WjVaKRyEDpnOk1qvlefCbaITr9Vg==",
+        "signatures": [
+          {
+            "sig": "MEYCIQDsvZhKPUj+q7+mdAZpqL/Dn4v2Gz/qHFOhGfyUpLr2SAIhAJYdD07TZ7G1Y3loGUYtGVSUR+UlcCWDcdYIjaMNXcz9",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.4.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 263165
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "0a63a00e488d7aefed0eaf4a626194b64ecb3b14",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.4.1_1766778533848_0.2882849414940758",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.5.0": {
+      "name": "gh-upload-log",
+      "version": "0.5.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.5.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "8ea17e8b17a9a9811d628f9c640bf8b31ab934d8",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.5.0.tgz",
+        "fileCount": 53,
+        "integrity": "sha512-8vgIyRGQZerN2Px4GQSxeQHGUWHxj/3CGetXxooEHomfk+J6bLnD1E1gJlzINHQDn5XDHlyx+haWlvxjSFV5Dg==",
+        "signatures": [
+          {
+            "sig": "MEQCIDyLEIhobgnYlkiji4o2g+jgpMt2tYOOI1ZLMeD76erIAiAeIKLmFC9UTCrEHBGIi9fKfd7q1lyPyxNFTa+aCcDdoQ==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.5.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 285787
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "0f2f417f052655cc34ae6e043c71dceeba46f9ae",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.7.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.19.6",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.5.0_1767743552108_0.5260866645290332",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.6.0": {
+      "name": "gh-upload-log",
+      "version": "0.6.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.6.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "1db24107e9b52a456e8ad36d012ee665917aabe4",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.6.0.tgz",
+        "fileCount": 56,
+        "integrity": "sha512-3IlSb9z0WYLZ51o6r5cEnBggFOABaXDpczLsv4bktIavzFV1P7bseGy4OZeH29nS+6SFs0TWE6kGZBj39pK1pg==",
+        "signatures": [
+          {
+            "sig": "MEQCICs4g1Y8B75iHvz+3BUEoYA7GgH/zCETwHzO6za/J1dEAiADtrTjJpAnpKVaZuEXjOk+d1BW6KjoXpXhC2aGumkk+g==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.6.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 307843
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "585c72efe1f20178f481479b370be6c0d076393d",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.8.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.6.0_1769517230222_0.06590417009901883",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.6.1": {
+      "name": "gh-upload-log",
+      "version": "0.6.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.6.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "d5bba27ce4f2d2417810f55609fd85766901b16b",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.6.1.tgz",
+        "fileCount": 58,
+        "integrity": "sha512-Yd0FLdPF7qF5pXufjMBuz4jUR3L0PDaWzS025JPA9g0ga791DxL5hr/wIOd5Y1FjnPXRP3K3+tl946+5QO0orw==",
+        "signatures": [
+          {
+            "sig": "MEUCIQD4oydxVe0VEWrFOK/fHaie6iUBEhefjmagR/MDmQs8lAIgQaqHHgJZgZ8g5P4VsA2Q+01XFHmKA45CSNI7scUukS4=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.6.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 318691
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "70b93bba8919e06f4d78d061740b15888da78c91",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.12.1",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.1",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.6.1_1774734932211_0.9460291113206638",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.7.0": {
+      "name": "gh-upload-log",
+      "version": "0.7.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.7.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "475ed67eefc1ae587167409bd3e3d7b3a4fb2fb9",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.7.0.tgz",
+        "fileCount": 60,
+        "integrity": "sha512-FwUKBtjWHWXt+l00nrDh1WxnoEXn39uNfMJZj0OV8NYqACycrmhy2ZXbHO1q3y+9oAsdeQsQBMcWn+iSnDVGng==",
+        "signatures": [
+          {
+            "sig": "MEUCIGjToRwKpqsWDhOEUb1r0UPE9TCTGUpdchQzcCbst5fvAiEAyfbFU2lUDuH1U8QAN2pu7V0++zHrEBq0Li7hIEPsC4A=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.7.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 340546
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "984ec55e63a22bfd68d7f97de0cd88a111a2a5ce",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.12.1",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.1",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.7.0_1774736508268_0.5972171262315571",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.7.1": {
+      "name": "gh-upload-log",
+      "version": "0.7.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.7.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "6547a71117f064f95b10de29c7b532dc4021a721",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.7.1.tgz",
+        "fileCount": 65,
+        "integrity": "sha512-AD4/FlA4fmAZZbsHdCTZ4X3UCnenIoPwYmT6/l8brReZ+sZuol53cWCdkF99aknFS1RVGJnsDAHxm0M8jtamLg==",
+        "signatures": [
+          {
+            "sig": "MEQCIFeG2DuoWeNK8FGr+XV8/SlJz43ubhxuAQmb+f7ILhS+AiBcRsGt4oo7Jt732RPo+sCvKdv/y4Ivj4SW8o1q8IQv4A==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.7.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 374263
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "81bd2c255f4a0ecd68d38145a9bca385ce112ab0",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.13.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.2",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.2.1"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.7.1_1777028928481_0.5384639073845561",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.8.0": {
+      "name": "gh-upload-log",
+      "version": "0.8.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.8.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "03b7169c2e7b78aa61cb962ac63e27d5cf0e29ea",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.8.0.tgz",
+        "fileCount": 75,
+        "integrity": "sha512-u4Por2+PcGygwYc5E216WuPwATwibf267+Nr/p9lpPWEN26zxjzDF50RhkZmBFuBrrlmEdF5ak5SZHgflsOLLg==",
+        "signatures": [
+          {
+            "sig": "MEUCIAI9jbEMn6ZrGjtVPn7vKRND2/Wg+NLqesnvY+mQrmOeAiEA/gGQ4XbFlMVHE1iDb7Ygo2M7dhMq/poL3IgVdu9Ou80=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.8.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 416510
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "78af9a14294b73cca81896848205c40f6c93e77c",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.13.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.2",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.8.0_1777106179615_0.41012414979592204",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.8.1": {
+      "name": "gh-upload-log",
+      "version": "0.8.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.8.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "7e2a387eca84c5347fa185e78efa451385d3640b",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.8.1.tgz",
+        "fileCount": 75,
+        "integrity": "sha512-kBqYlpAw97cTkFQtBbKmfLT3E38r6kznRggY1GPBJTtUBffmYsQJYEmI2yXFGsLW7C2oBfa+2srt/AnAOCDrAA==",
+        "signatures": [
+          {
+            "sig": "MEQCIHQPp18OL98S/sKqDC1xru3W0lISaajhGD0Tlo63oOdOAiA5ABtzES5Gk/hTdSfmYFxjN5cbojRVjftTeTh+8dRMkw==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.8.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 420987
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "44194b14bce299d5daadf39c869648d01996769b",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.17.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.2",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.8.1_1781251604537_0.3252407071102794",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.8.2": {
+      "name": "gh-upload-log",
+      "version": "0.8.2",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.8.2",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "3fdf736d16f6ba41c56b6f14ccafed03e18d5cc4",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.8.2.tgz",
+        "fileCount": 88,
+        "integrity": "sha512-/BsAjm+y6RbD+pYloZIFpecU7zqPb16bBTwgxKPYq2LfdysrKusBw4M0pNT7+ptl/UmKpzaHHGaEOGNOVi3hAg==",
+        "signatures": [
+          {
+            "sig": "MEQCIHKOPdHl7AoWpRQq21JOfqbhTFr4644tz9s/nm58DgrIAiBUkV/fh3UcbfL4D2Ffi505nGTypywJdy6r7ajxigcxtA==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.8.2",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 449954
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "2492356d3a92adf4aced9fa680f558567811d1c2",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.17.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "20.20.2",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.8.2_1782121383056_0.06318034288732433",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.9.1": {
+      "name": "gh-upload-log",
+      "version": "0.9.1",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.9.1",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "420266b276e981d5a8aa2bfc68a185ef453ef0bc",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.9.1.tgz",
+        "fileCount": 118,
+        "integrity": "sha512-Z+aCyjH6h9GWdu/XzHXCVR3ZeSBvHNjuMAmkVh+Zvtnu0CWkuNG2RtTQM0LvvHuwRtQlXdWGopbb/kMVd7Pltw==",
+        "signatures": [
+          {
+            "sig": "MEQCIH6lhLWO2mpiqIwxjetiQxi5vZurYOv9XhhbGNtZQ07SAiBALRqZC7LOos1mvoboeV5yyPSq5xVdY7m7ou61qd+GfQ==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEUCICJydDtH/AQD7MQA2t4rAvGQpguw+IvC0zV6GZ5QjJEQAiEA/5sj5+9nN0gg2bNDdQveYEh6+VqjRL3sqEspqjJ4NFY=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.9.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 657453
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "f33dd06b65f7b9b6276a3f64de92aa8d86cb7502",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.19.1",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "24.20.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.9.1_1789872724550_0.20039150460367483",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.9.2": {
+      "name": "gh-upload-log",
+      "version": "0.9.2",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.9.2",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "3ea2c7627a4f7060bc2994dc3410fd57ad7bf251",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.9.2.tgz",
+        "fileCount": 117,
+        "integrity": "sha512-oUEDGFh3/dFJetNHMxPcu4Ulq6AMCb4n7dSX/cjqbMoDemBl1o8KODrx3pePvU6+QkIHa1wvbKTTSWoY3UBkfw==",
+        "signatures": [
+          {
+            "sig": "MEUCIQDUIe7L5kPY/eKOhEeaCMk/kXg6eFeD/6X0446nUjZe9wIgLqd0dq/dNaiqPsVdZ2ZuUWiNvJoOKNCRDwzcbTj5JTQ=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEYCIQDr7i2zEcNyCJz+s1S7ebKBYsHcnRTU04SYh+4Vbjf79gIhANVSifVf7RB5to7SdghKuCBBuW/bh6pC9Sb3wVxfdb9T",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.9.2",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 661097
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "4895b3ccc353abd5bbe7864a28e28b4e655cc7ce",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "oidc:d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.19.1",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "24.20.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.9.2_1789929270077_0.549869220754273",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.9.3": {
+      "name": "gh-upload-log",
+      "version": "0.9.3",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.9.3",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "1750ee9b42a1d47c4f0cdf0088ba397ed338f1e8",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.9.3.tgz",
+        "fileCount": 124,
+        "integrity": "sha512-w1/TXcaBhqhTbN+xpo2QZ5gvjaQOI1GVGGJCXP31xUN9/3vxv+Tgi2eNnXpk6+RkbmpvXQk0vOnW7t1G3CmzDA==",
+        "signatures": [
+          {
+            "sig": "MEUCIFuCfm/syqMlqnmy2smrtf6/fXiY9uMuX34izuD3yTROAiEAjf0fs/1l8g/ydVkG3ZsDAh3v/3PuwUfOKide0ua9HpI=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEQCIEfp6ObLK0owKvyBAKVoLsLITTwxNBpi+5EswykwMBy2AiBLojQ7dmwapgGovCmUoab9BaWmDW4Jyhyajv+yigAwIA==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.9.3",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 706641
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "df9954db87e8a99a0bfabaa400b9a2cf562b9fff",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.21.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "24.21.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.9.3_1791338774130_0.9599399149919059",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.10.0": {
+      "name": "gh-upload-log",
+      "version": "0.10.0",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "author": { "name": "Link Foundation" },
+      "license": "Unlicense",
+      "_id": "gh-upload-log@0.10.0",
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "dist": {
+        "shasum": "df8a27b4842a6713addb32c8aaf6f5d07cc8d30c",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.10.0.tgz",
+        "fileCount": 133,
+        "integrity": "sha512-dT1cIu5UD/9GShH5Wa3bkEKsTQK2bYayNPpBkxgQv6LUwyxfc48k02kfgBdY+9wNNWwEz7AL8dfkSMuOcgdMWw==",
+        "signatures": [
+          {
+            "sig": "MEYCIQCJSZVoXok5+XWWQR6BdbrwRtDREYi83ZAiw/3J3nNihAIhAIr5qIZqs0i2Fk4Cf4Ck2Omi1wXGGaFUUGV+0Hz1P5W1",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "sig": "MEUCIQDip/C9C9ueYRxIyZy/9fWWwV9VjN3wGPkHCk4xUBv7SAIgdmaweRNxuA4WlHMz18m6o9mj9K4H26BegfJgZnLkheQ=",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.10.0",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 747445
+      },
+      "main": "src/index.js",
+      "type": "module",
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "a7f0139ee8c9a493bbc889cc60a60a517c5edacf",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.21.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "_nodeVersion": "24.21.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/gh-upload-log_0.10.0_1791446149520_0.21115648432964118",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    },
+    "0.10.1": {
+      "_id": "gh-upload-log@0.10.1",
+      "bin": { "gh-upload-log": "src/cli.js" },
+      "bugs": {
+        "url": "https://github.com/link-foundation/gh-upload-log/issues"
+      },
+      "dist": {
+        "shasum": "432353ccb433304ddb4abc92f7238711c8406e2e",
+        "tarball": "https://registry.npmjs.org/gh-upload-log/-/gh-upload-log-0.10.1.tgz",
+        "fileCount": 138,
+        "integrity": "sha512-Tum+qOd+xAvllOnb/XXd9YhBpU1e51u+ClQX+6XwnvM8SdpPKYb2XmGTngV4nufl6l53jgOk+12/2zc2tWE5Bg==",
+        "signatures": [
+          {
+            "sig": "MEYCIQCjz4fOMRG1isUVISV/m64Cdk1AfP2p591HJqvZwX3G8wIhAMRx0AmxKoNDbfY42QboUUPMFmcTD+Gbs/DYQL+3wXF4",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          },
+          {
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+            "sig": "MEUCIDm4KxJgBtxgLl8hd0U3imAVpakJLZIqiimNqwwZJ3dNAiEA3czgKawrhEXx2coxisZirBXxQBYXicsxFzGk3K8XFYM="
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/gh-upload-log@0.10.1",
+          "provenance": { "predicateType": "https://slsa.dev/provenance/v1" }
+        },
+        "unpackedSize": 757418
+      },
+      "main": "src/index.js",
+      "name": "gh-upload-log",
+      "type": "module",
+      "author": { "name": "Link Foundation" },
+      "engines": { "bun": ">=1.0.0" },
+      "gitHead": "0de1feb4e7d96a316ec32308942f6c4f6ac033c8",
+      "license": "Unlicense",
+      "scripts": {
+        "lint": "eslint .",
+        "test": "bun test",
+        "check": "bun run lint && bun run format:check && bun run check:file-size",
+        "format": "prettier --write .",
+        "prepare": "husky || true",
+        "lint:fix": "eslint . --fix",
+        "changeset": "changeset",
+        "format:check": "prettier --check .",
+        "check:file-size": "bun scripts/check-file-size.mjs",
+        "changeset:status": "changeset status --since=origin/main",
+        "changeset:publish": "changeset publish",
+        "changeset:version": "bun scripts/changeset-version.mjs"
+      },
+      "version": "0.10.1",
+      "_npmUser": {
+        "name": "GitHub Actions",
+        "email": "npm-oidc-no-reply@github.com",
+        "trustedPublisher": {
+          "id": "github",
+          "oidcConfigId": "d6f86ffc-ee64-4755-996b-8e46c0c11557"
+        }
+      },
+      "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+      "keywords": ["github", "gist", "log", "upload", "cli"],
+      "repository": {
+        "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+        "type": "git"
+      },
+      "_npmVersion": "11.21.0",
+      "description": "A tool to upload log files to GitHub as Gists or repositories",
+      "directories": {},
+      "lint-staged": {
+        "*.md": ["prettier --write", "prettier --check"],
+        "*.{js,mjs,cjs}": [
+          "eslint --fix --max-warnings 0",
+          "prettier --write",
+          "prettier --check"
+        ]
+      },
+      "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+      "_nodeVersion": "24.21.0",
+      "dependencies": {
+        "use-m": "^8.13.7",
+        "yargs": "^17.7.2",
+        "log-lazy": "^1.0.4",
+        "command-stream": "^0.7.1",
+        "lino-arguments": "^0.3.0"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "husky": "^9.1.7",
+        "eslint": "^9.38.0",
+        "prettier": "^3.6.2",
+        "lint-staged": "^16.2.6",
+        "test-anywhere": "^0.8.48",
+        "@changesets/cli": "^2.29.7",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "@changesets/changelog-github": "^0.5.1"
+      },
+      "_npmOperationalInternal": {
+        "host": "s3://npm-registry-packages-npm-production",
+        "tmp": "tmp/gh-upload-log_0.10.1_1791457127598_0.801382732915022"
+      }
+    }
+  },
+  "time": {
+    "created": "2025-11-16T20:09:19.802Z",
+    "modified": "2026-10-08T10:58:48.067Z",
+    "0.1.0": "2025-11-16T20:09:20.001Z",
+    "0.2.0": "2025-12-25T08:53:51.909Z",
+    "0.3.0": "2025-12-25T11:05:47.930Z",
+    "0.3.1": "2025-12-25T12:13:00.569Z",
+    "0.4.0": "2025-12-25T14:31:03.745Z",
+    "0.4.1": "2025-12-26T19:48:54.011Z",
+    "0.5.0": "2026-01-06T23:52:32.267Z",
+    "0.6.0": "2026-01-27T12:33:50.413Z",
+    "0.6.1": "2026-03-28T21:55:32.449Z",
+    "0.7.0": "2026-03-28T22:21:48.457Z",
+    "0.7.1": "2026-04-24T11:08:48.614Z",
+    "0.8.0": "2026-04-25T08:36:19.742Z",
+    "0.8.1": "2026-06-12T08:06:44.696Z",
+    "0.8.2": "2026-06-22T09:43:03.203Z",
+    "0.9.1": "2026-09-20T02:52:04.675Z",
+    "0.9.2": "2026-09-20T18:34:30.164Z",
+    "0.9.3": "2026-10-07T02:06:14.294Z",
+    "0.10.0": "2026-10-08T07:55:49.623Z",
+    "0.10.1": "2026-10-08T10:58:47.718Z"
+  },
+  "bugs": { "url": "https://github.com/link-foundation/gh-upload-log/issues" },
+  "author": { "name": "Link Foundation" },
+  "license": "Unlicense",
+  "homepage": "https://github.com/link-foundation/gh-upload-log#readme",
+  "keywords": ["github", "gist", "log", "upload", "cli"],
+  "repository": {
+    "url": "git+https://github.com/link-foundation/gh-upload-log.git",
+    "type": "git"
+  },
+  "description": "A tool to upload log files to GitHub as Gists or repositories",
+  "maintainers": [{ "name": "konard", "email": "drakonard@gmail.com" }],
+  "readme": "# gh-upload-log\n\nA smart tool to upload log files to GitHub as Gists or Repositories\n\n[![npm version](https://img.shields.io/npm/v/gh-upload-log.svg)](https://www.npmjs.com/package/gh-upload-log)\n[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)\n[![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)\n\n## Overview\n\n`gh-upload-log` is a CLI tool and JavaScript library that intelligently uploads log files to GitHub. It automatically determines the best upload strategy based on file size:\n\n- **Small files (≤25MB)**: Uploaded as GitHub Gists\n- **Large files (>25MB)**: Uploaded as GitHub Repositories\n- **Very large files (>100MB)**: Split into readable chunks of at most 100MB before repository upload\n\n## Features\n\n- **Automatic strategy selection**: Chooses between Gist and Repository based on file size\n- **Shared repository uploads by default**: Repository-mode files go into `private-logs` or `public-logs`\n- **Content-addressed versions**: Repository-mode logs are stored under `<directory>/<content-hash>/<file-name>.log.txt`, so every version of the same path is kept\n- **Duplicate protection**: Re-uploading unchanged content reuses the existing file, while changed content is always uploaded again\n- **Smart file splitting**: Automatically splits large files into manageable chunks\n- **Public/Private control**: Upload as public or private (default: private)\n- **Flexible configuration**: CLI arguments, environment variables, or `.lenv` files using [Links Notation](https://github.com/link-foundation/links-notation)\n- **Cross-platform**: Works on macOS, Linux, and Windows\n- **Dual interface**: Use as CLI tool or JavaScript library\n- **Path normalization**: Accepts relative, `./`, `../`, `~/` and absolute paths, and converts them into valid GitHub names\n- **Verbose logging**: Built-in verbose mode using [log-lazy](https://github.com/link-foundation/log-lazy) for efficient lazy evaluation\n- **Configurable logging**: Customize logging behavior with custom log targets (silent mode, custom loggers, etc.)\n\n## Prerequisites\n\n- [Bun](https://bun.sh/) ≥1.0.0\n- Git (installed and configured)\n- GitHub CLI (`gh`) installed and authenticated\n\nTo authenticate with GitHub CLI:\n\n```bash\ngh auth login\n```\n\n## Installation\n\n### Global Installation (CLI)\n\n```bash\nbun install -g gh-upload-log\n```\n\n### Local Installation (Library)\n\n```bash\nbun add gh-upload-log\n```\n\n## Configuration\n\n`gh-upload-log` supports multiple configuration methods with the following priority (highest to lowest):\n\n1. **CLI arguments** - Directly passed command-line options\n2. **Environment variables** - System environment variables\n3. **`.lenv` file** - Local configuration using Links Notation format\n4. **Defaults** - Built-in default values\n\n### Using .lenv Configuration Files\n\nThe tool now supports `.lenv` configuration files using [Links Notation](https://github.com/link-foundation/links-notation) format through [lino-arguments](https://github.com/link-foundation/lino-arguments).\n\nCreate a `.lenv` file in your project directory:\n\n```\nGH_UPLOAD_LOG_PUBLIC: false\nGH_UPLOAD_LOG_SHARED_REPOSITORY: true\nGH_UPLOAD_LOG_VERBOSE: true\nGH_UPLOAD_LOG_DESCRIPTION: Production logs\n```\n\nThe configuration priority is:\n\n1. CLI arguments (highest priority)\n2. Environment variables\n3. `.lenv` file\n4. Default values (lowest priority)\n\nYou can also specify a custom configuration file using the `--configuration` or `-c` flag:\n\n```bash\ngh-upload-log /path/to/file.log --configuration ./custom.lenv\n```\n\n### Using Environment Variables\n\nSet environment variables for persistent configuration:\n\n```bash\nexport GH_UPLOAD_LOG_PUBLIC=true\nexport GH_UPLOAD_LOG_SHARED_REPOSITORY=true\nexport GH_UPLOAD_LOG_VERBOSE=true\nexport GH_UPLOAD_LOG_DESCRIPTION=\"Production logs\"\ngh-upload-log /var/log/app.log\n```\n\n### Available Configuration Options\n\n- `GH_UPLOAD_LOG_PUBLIC` - Make uploads public (default: false)\n- `GH_UPLOAD_LOG_PRIVATE` - Make uploads private (default: true)\n- `GH_UPLOAD_LOG_AUTO` - Enable automatic strategy selection (default: true)\n- `GH_UPLOAD_LOG_ONLY_GIST` - Force gist uploads only (default: false)\n- `GH_UPLOAD_LOG_ONLY_REPOSITORY` - Force repository uploads only (default: false)\n- `GH_UPLOAD_LOG_SHARED_REPOSITORY` - Use shared `private-logs` / `public-logs` repositories for repository-mode uploads (default: true)\n- `GH_UPLOAD_LOG_REPOSITORY` - Explicit existing repository target in `OWNER/REPO` format for repository-mode uploads\n- `GH_UPLOAD_LOG_BRANCH` - Existing branch in that target (default: its default branch; requires `GH_UPLOAD_LOG_REPOSITORY` or `--repository`)\n- `GH_UPLOAD_LOG_DRY_MODE` - Enable dry run mode (default: false)\n- `GH_UPLOAD_LOG_DESCRIPTION` - Default description for uploads\n- `GH_UPLOAD_LOG_VERBOSE` - Enable verbose output (default: false)\n- `GH_UPLOAD_LOG_GIST_LIMIT` - Maximum file size uploaded as a gist, e.g. `25MB` (default: 25MB, clamped to GitHub's documented 100MB limit)\n- `GH_UPLOAD_LOG_CHUNK_SIZE` - Maximum repository chunk size, e.g. `50MB` (default: 100MB; accepts 4B through 100MB)\n- `GH_UPLOAD_LOG_CHECK_RAW_URL` - Verify that the resulting raw URL is reachable (default: false)\n\nSee [.lenv.example](./.lenv.example) for a complete configuration template.\n\n## CLI Usage\n\n### Basic Usage\n\n```bash\n# Upload a log file (private by default)\ngh-upload-log /path/to/logfile.log\n\n# Upload as public\ngh-upload-log /path/to/logfile.log --public\n\n# Upload with description\ngh-upload-log /path/to/logfile.log --description \"My application logs\"\n```\n\n### CLI Options\n\n```\nUsage: gh-upload-log <log-file> [options]\n\nOptions:\n  --public, -p         Make the upload public (default: private)\n  --private            Make the upload private (default)\n  --auto               Automatically choose upload strategy (default: true)\n  --only-gist          Upload only as GitHub Gist (disables auto mode)\n  --only-repository    Upload only as GitHub Repository (disables auto mode)\n  --shared-repository  Upload repository-mode logs into shared\n                       private-logs/public-logs repositories (default: true)\n  --repository         Existing repository target in OWNER/REPO format\n  --branch             Existing target branch (default: its default branch);\n                       requires --repository\n  --dry-mode, --dry    Dry run - show what would be done without uploading\n  --description, -d    Description for the upload\n  --verbose, -v        Enable verbose output\n  --gist-limit         Maximum file size uploaded as a gist (e.g. 25MB, 100MB).\n                       Larger files use repository mode (default: 25MB)\n  --chunk-size         Maximum repository chunk size (e.g. 50MB; default: 100MB)\n  --check-raw-url      Verify that the resulting raw URL is reachable\n  --help, -h           Show help\n  --version            Show version number\n```\n\n### CLI Examples\n\n```bash\n# Upload private log file (auto mode)\ngh-upload-log /var/log/app.log\n\n# Upload public log file (auto mode)\ngh-upload-log /var/log/app.log --public\n\n# Upload only as gist\ngh-upload-log ./error.log --only-gist\n\n# Upload only as repository\ngh-upload-log ./large.log --only-repository --public\n\n# Use the legacy dedicated repository mode\ngh-upload-log ./large.log --only-repository --no-shared-repository\n\n# Upload directly to an existing repository branch\ngh-upload-log ./session.log --only-repository --repository OWNER/REPO --branch feature/logs\n\n# Dry run mode - see what would happen\ngh-upload-log ./app.log --dry-mode\n\n# Upload with custom description\ngh-upload-log ./debug.log -d \"Debug logs from production\" --public\n\n# Disable auto mode and force repository\ngh-upload-log ./file.log --no-auto --only-repository\n\n# Raise the gist threshold (GitHub documents 100MB per gist file)\ngh-upload-log ./big.log --gist-limit 100MB\n\n# Verify that the produced raw URL really works\ngh-upload-log ./app.log --check-raw-url --verbose\n```\n\n### Reliable large log uploads\n\nFor slow or proxied connections, use smaller repository chunks:\n\n```bash\ngh-upload-log ./session.log --only-repository --public --chunk-size 50MB\n# Or set GH_UPLOAD_LOG_CHUNK_SIZE=50MB in your environment or .lenv\n```\n\nShared-repository uploads commit and push one chunk at a time. Transient HTTP\n408/429/5xx, RPC failures, connection drops, and concurrent push rejections get\nup to two retries, after 1 and 2 seconds. Each retry fetches and rebases onto the\nlatest remote branch. Authentication, permission, and file-size failures stop\nimmediately. Use `--verbose` to see chunk progress and retry details.\n\nAn interrupted upload keeps the chunks already pushed. Uploading the same log\nagain skips chunks that match the remote. A hidden `.pending` file marks the\nupload in progress and a `.complete` file replaces it\nwith the last chunk, so incomplete folders are never treated as complete uploads.\nComplete legacy chunked uploads without a pending marker are recognized by their\ntotal byte size. Pending uploads are resumed even when changing the chunk size\nhas left a mixture of old and new parts.\n\nChunks end at line boundaries where possible and preserve the original bytes.\nA line longer than the configured limit is split between UTF-8 characters to keep\neach chunk within the limit. CRLF and a missing final newline are preserved.\nThe number of chunks shown before upload is a minimum estimate; line boundaries\ncan produce additional chunks. Smaller chunks do not change the gist threshold.\n\nThe legacy dedicated-repository mode supports the chunk size and readable\nsplitting options, but still creates its repository with a single initial push.\n\n### Existing repositories and GitHub App installation tokens\n\nSelect an existing repository and branch when your token can write to that\nrepository but cannot access Gists or `GET /user`:\n\n```bash\n# Explicitly select the current Actions repository and an existing branch\ngh-upload-log ./session.log --only-repository \\\n  --repository \"$GITHUB_REPOSITORY\" --branch \"$LOG_UPLOAD_BRANCH\"\n\n# Auto mode tries Gists first and falls back to the selected repository\ngh-upload-log ./session.log --auto --repository OWNER/REPO --branch feature/logs\n```\n\nAuthenticate `gh` with your installation token (for example, through `GH_TOKEN`).\nThe token needs access to the repository and `Contents: write`; branch rules still\napply. Repository mode checks `GET /repos/OWNER/REPO`, derives the owner from the\ntarget, and skips both the authenticated-user lookup and repository creation.\nThe temporary checkout uses `gh` for Git credentials and a local `gh-upload-log`\ncommit identity, without changing your checkout or global Git configuration.\n\nBoth the repository and branch must already exist. Omit `--branch` to use the\nrepository's default branch. Reads for deduplication and raw URLs, fetches, and\npushes all use the selected branch. Logs keep the same content-addressed layout\nand chunk retry/resume behavior as shared-repository uploads.\n\n`--repository` overrides `--shared-repository` for repository-mode uploads.\nThe existing target's visibility determines the repository result;\n`--public`/`--private` still control Gists and newly created personal repositories.\nDry mode makes no GitHub requests, so the target's visibility and an omitted\nbranch remain unknown (`isPublic: null`, `branch: null`).\n\n`GITHUB_REPOSITORY` is used only when explicitly passed as shown above.\nYou can also configure `GH_UPLOAD_LOG_REPOSITORY` and `GH_UPLOAD_LOG_BRANCH` in\nyour environment or `.lenv`. Without an explicit target, personal shared and\ndedicated repository uploads retain their authenticated-user behavior.\n\nGist permission errors such as `Resource not accessible by integration` stop\nwithout retrying and trigger repository fallback in auto mode. Rate-limit\nerrors remain retryable, with waits of 60 and 120 seconds by default before\nfallback; `--only-gist` reports the failure instead of falling back.\n\n## Library Usage\n\n### Basic Example\n\n```javascript\nimport { uploadLog } from 'gh-upload-log';\n\n// Upload a log file (private by default)\nconst result = await uploadLog({\n  filePath: '/path/to/logfile.log',\n});\nconsole.log('Uploaded to:', result.url);\n\n// Upload as public with verbose logging\nconst publicResult = await uploadLog({\n  filePath: '/path/to/logfile.log',\n  isPublic: true,\n  description: 'My application logs',\n  verbose: true,\n});\nconsole.log('Public URL:', publicResult.url);\n\n// Upload with custom logger (silent mode)\nconst customLogger = {\n  log: () => {}, // Silent logging\n  error: (msg) => console.error('ERROR:', msg),\n};\n\nconst result = await uploadLog({\n  filePath: '/path/to/logfile.log',\n  logger: customLogger,\n});\n```\n\n### API Reference\n\n#### `uploadLog(options)`\n\nMain function to upload a log file. Automatically determines the best strategy.\n\n**Parameters:**\n\n- `options` (object):\n  - `filePath` (string, **required**): Path to the log file\n  - `isPublic` (boolean): Make upload public (default: false)\n  - `auto` (boolean): Automatically choose strategy (default: true)\n  - `onlyGist` (boolean): Upload only as gist (disables auto mode)\n  - `onlyRepository` (boolean): Upload only as repository (disables auto mode)\n  - `useSharedRepository` (boolean): Use shared `private-logs` / `public-logs` repositories for repository-mode uploads (default: true)\n  - `repository` (string): Explicit existing repository in `OWNER/REPO` format for repository mode and Gist fallback; overrides `useSharedRepository`\n  - `branch` (string): Existing target branch (default: repository default branch); requires `repository`\n  - `dryMode` (boolean): Dry run mode - don't actually upload\n  - `description` (string): Description for the upload\n  - `verbose` (boolean): Enable verbose logging (default: false)\n  - `logger` (object): Custom logging target (default: console)\n\n**Returns:** Promise<Object>\n\n```javascript\n{\n  type: 'gist' | 'repo',\n  url: string,\n  rawUrl?: string | null,\n  isPublic: boolean | null,   // null for an explicit repository target in dry mode\n  fileCount?: number,\n  fileName?: string,           // For gists\n  repositoryName?: string,     // For repos\n  repositoryFullName?: string, // OWNER/REPO for shared/explicit targets\n  branch?: string | null,      // Shared/explicit target branch; null if unknown in dry mode\n  repositoryPath?: string,     // Shared repository folder for repository-mode uploads\n  deduplicated?: boolean,      // True when an existing shared-repo upload was reused\n  dryMode?: boolean            // Set to true in dry mode\n}\n```\n\n#### `uploadAsGist(options)`\n\nUpload a file as a GitHub Gist.\n\n**Parameters:**\n\n- `options` (object):\n  - `filePath` (string, **required**): Path to the file\n  - `isPublic` (boolean): Make gist public (default: false)\n  - `description` (string): Gist description\n  - `verbose` (boolean): Enable verbose logging (default: false)\n  - `logger` (object): Custom logging target (default: console)\n\n**Returns:** Promise<Object>\n\n#### `uploadAsRepo(options)`\n\nUpload a file as a GitHub Repository. Repository-mode uploads use the shared\n`private-logs` / `public-logs` repositories by default. Set\n`useSharedRepository: false` to keep the legacy dedicated-repository behavior.\n\n**Parameters:**\n\n- `options` (object):\n  - `filePath` (string, **required**): Path to the file\n  - `isPublic` (boolean): Make repo public (default: false)\n  - `useSharedRepository` (boolean): Use shared repositories for repository-mode uploads (default: true)\n  - `repository` (string): Explicit existing `OWNER/REPO` target; bypasses user lookup and repository creation\n  - `branch` (string): Existing branch in that repository (default: its default branch); requires `repository`\n  - `chunkSize` (number): Maximum chunk size in bytes (default: `100 * 1024 * 1024`; accepts 4 bytes through 100MB)\n  - `pushRetries` (number): Extra shared-repository push attempts (default: 2; accepts 0 through 10)\n  - `pushRetryDelayMs` (number): Initial retry delay in milliseconds, doubled for each retry and capped at 30000 (default: 1000)\n  - `description` (string): Repository description\n  - `verbose` (boolean): Enable verbose logging (default: false)\n  - `logger` (object): Custom logging target (default: console)\n\n**Returns:** Promise<Object>\n\n#### `determineUploadStrategy(filePath)`\n\nDetermine the best upload strategy for a file.\n\n**Parameters:**\n\n- `filePath` (string): Path to the file\n\n**Returns:** Object\n\n```javascript\n{\n  type: 'gist' | 'repo',\n  fileSize: number,\n  needsSplit: boolean,\n  numChunks?: number,    // For repos\n  reason: string\n}\n```\n\n#### Utility Functions\n\n- `resolveLogFilePath(filePath)`: Resolve a relative, `./`, `../` or `~/` path to an absolute path\n- `normalizeFileName(filePath)`: Convert file path to GitHub-safe name\n- `generateRepoName(filePath)`: Generate repository name (with `log-` prefix)\n- `generateUploadedLogFileName(filePath)`: Generate the legacy flattened `.log.txt` file name\n- `generateStoredLogFileName(filePath)`: Generate the stored `.log.txt` file name (base name only)\n- `generateLogDirectorySegment(filePath)`: Generate the normalized directory folder name\n- `generateFileContentHash(filePath)`: Compute the truncated SHA-256 content hash (async)\n- `buildLogRepositoryPath(filePath, contentHash)`: Build the `<directory>/<hash>` repository path\n- `checkRawUrlExists(rawUrl)`: Check whether a raw URL is reachable (async)\n- `parseFileSize(value)`: Parse `25MB`, `1.5GB`, `1024B` (plain numbers are megabytes)\n- `generateGistFileName(filePath)`: Generate gist file name\n- `fileExists(filePath)`: Check if file exists\n- `getFileSize(filePath)`: Get file size in bytes\n\n### Constants\n\n```javascript\nimport {\n  GITHUB_GIST_FILE_LIMIT, // 25 MB (default threshold)\n  GITHUB_GIST_WEB_LIMIT, // 25 MB (github.com upload form)\n  GITHUB_GIST_DOCUMENTED_FILE_LIMIT, // 100 MB (documented API maximum)\n  GITHUB_REPO_CHUNK_SIZE, // 100 MB\n  LOG_CONTENT_HASH_LENGTH, // 16 hex characters\n} from 'gh-upload-log';\n```\n\n## How It Works\n\n### File Naming\n\nEvery accepted path form — `app.log`, `./app.log`, `../logs/app.log`,\n`~/app.log` and `/home/user/app.log` — is first resolved to an absolute path,\nso the same file always produces the same names no matter how it was spelled.\nThe absolute path is then normalized for GitHub compatibility:\n\n- Leading slashes (and a Windows drive colon) are removed\n- All `/` characters are replaced with `-`\n- Uploaded log files use `.log.txt` so raw file links open as text in browsers\n- Very long names are shortened deterministically with a short hash prefix to\n  stay within GitHub's 100-character repository name limit and the 255-byte\n  path component limit\n\n### Repository layout\n\nRepository-mode uploads are content addressed. The directory of the log becomes\na folder, the first 16 hex characters of the file's SHA-256 become a sub-folder,\nand the file keeps its own name:\n\n```\n<normalized-directory>/<content-hash>/<file-name>.log.txt\n```\n\nExamples (run from `/home/user`):\n\n- `/home/box/hive-telegram-bot.log` → `home-box/8f14e45fceea167a/hive-telegram-bot.log.txt`\n- `/home/user/app.log` → `home-user/<hash>/app.log.txt`\n- `./logs/error.log` → `home-user-logs/<hash>/error.log.txt`\n\nBecause the hash is part of the path, every version of the same log file is\nkept side by side and a changed file is always uploaded again. Uploading the\nexact same bytes twice reuses the existing file instead of pushing a duplicate.\n\nGist file names still use the flattened `home-user-app.log.txt` form, and the\nlegacy dedicated-repository mode still names the repository `log-home-user-app`\n(with the same hashed folder inside).\n\n### Upload Strategy\n\n1. **Files ≤25MB**: Uploaded as GitHub Gist\n   - Single file upload\n   - Fast and efficient\n   - Viewable directly in browser\n   - If gist creation fails in auto mode, repository fallback uses the shared `private-logs` or `public-logs` repository by default\n\n2. **Files >25MB**: Uploaded as GitHub Repository\n   - By default, uploads go into the shared `private-logs` or `public-logs` repository\n   - The old dedicated-repository flow is still available with `--no-shared-repository` or `useSharedRepository: false`\n   - Re-uploading identical content reuses the existing file; changed content is uploaded into a new content-hash folder\n   - The threshold can be raised with `--gist-limit` (up to GitHub's documented 100MB gist limit)\n\n3. **Files >100MB**: Uploaded as a chunked GitHub Repository folder\n   - File is split into chunks of at most 100MB (configurable with `--chunk-size`)\n   - Each chunk is committed and pushed separately to the shared repository target\n   - Original file structure is preserved inside the repository folder\n\n### Privacy\n\nBy default, all uploads are **private**:\n\n- **Private Gists**: Only accessible by you\n- **Private Repositories**: Only accessible by you\n\nUse `--public` flag or `isPublic: true` option for public uploads.\n\n### Raw URLs\n\nRaw URLs of **private** repositories carry a short-lived `?token=` parameter and\nreturn `404` once it expires (and also when it is stripped). This is GitHub\nbehavior, not a missing file — use the repository page URL for a permanent link,\nor make the upload public. Pass `--check-raw-url` to verify reachability right\nafter the upload.\n\n## GitHub Limits\n\n- **Default gist threshold**: 25 MB (configurable with `--gist-limit`)\n- **Documented gist file limit**: 100 MB (measured: uploads up to 102 MB succeeded, ≥104 MB returned HTTP 502; see [docs/case-studies/issue-38](./docs/case-studies/issue-38/README.md))\n- **github.com gist upload form limit**: 25 MB\n- **Repository-mode threshold**: Files larger than the gist threshold switch to repository uploads\n- **Repository size**: No strict limit, but large repos may have performance issues\n- **Chunk size**: Repository chunks default to at most 100 MB; configure a smaller limit with `--chunk-size`\n\n## Testing\n\nRun tests using Bun:\n\n```bash\nbun test\n```\n\n## Examples\n\nSee the `examples/` directory for more usage examples:\n\n- `examples/basic-usage.js`: Basic library usage\n- `examples/library-api.js`: API function examples\n- `examples/changed-file-reupload.js`: How a growing log file is uploaded again (issue #38)\n\nRun examples:\n\n```bash\nbun examples/library-api.js\n```\n\n## Development\n\n### Project Structure\n\n```\ngh-upload-log/\n├── src/\n│   ├── index.js          # Core library\n│   └── cli.js            # CLI interface\n├── test/\n│   └── index.test.js     # Tests\n├── examples/\n│   ├── basic-usage.js\n│   └── library-api.js\n├── package.json\n└── README.md\n```\n\n### Dependencies\n\nThis project uses modern Link Foundation libraries:\n\n- **[lino-arguments](https://github.com/link-foundation/lino-arguments)**: CLI argument parsing with environment variable and .lenv file support\n- **[log-lazy](https://github.com/link-foundation/log-lazy)**: Efficient lazy evaluation logging\n- **[use-m](https://github.com/link-foundation/use-m)**: Dynamic module loading without package.json pollution\n- **[command-stream](https://github.com/link-foundation/command-stream)**: Streamable command execution\n- **[test-anywhere](https://github.com/link-foundation/test-anywhere)**: Universal testing framework (dev dependency)\n\nThe following libraries are used internally by lino-arguments:\n\n- **[lino-env](https://github.com/link-foundation/lino-env)**: Configuration management using Links Notation format\n- **[links-notation](https://github.com/link-foundation/links-notation)**: Data description using references and links\n- **[yargs](https://yargs.js.org/)**: Command-line argument parsing\n\n## Contributing\n\nContributions are welcome! Please feel free to submit a Pull Request.\n\n## License\n\nThis is free and unencumbered software released into the public domain. See [LICENSE](LICENSE) for details.\n\n## Links\n\n- GitHub Repository: https://github.com/link-foundation/gh-upload-log\n- Issue Tracker: https://github.com/link-foundation/gh-upload-log/issues\n- Link Foundation: https://github.com/link-foundation\n\n## Related Projects\n\n- [lino-arguments](https://github.com/link-foundation/lino-arguments) - CLI argument parsing with environment variables and .lenv support\n- [lino-env](https://github.com/link-foundation/lino-env) - Configuration management using Links Notation\n- [links-notation](https://github.com/link-foundation/links-notation) - Data description using references and links\n- [log-lazy](https://github.com/link-foundation/log-lazy) - Efficient lazy evaluation logging\n- [use-m](https://github.com/link-foundation/use-m) - Dynamic module loading\n- [command-stream](https://github.com/link-foundation/command-stream) - Streamable commands\n- [test-anywhere](https://github.com/link-foundation/test-anywhere) - Universal testing\n",
+  "readmeFilename": "README.md"
+}

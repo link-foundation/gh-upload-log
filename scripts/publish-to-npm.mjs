@@ -73,8 +73,11 @@ export async function publishWithRetries(runPublish, options = {}) {
     }
   }
 
+  const diagnostic = /E404|E403/.test(lastError?.message || '')
+    ? ' Check npm account authorization and package settings: a missing package needs a first publish with an authorized npm account, then a trusted publisher for link-foundation/gh-upload-log, workflow release.yml. Configure each package name separately. See https://docs.npmjs.com/trusted-publishers/.'
+    : '';
   throw new Error(
-    `Failed to publish after ${maxRetries} attempts: ${lastError?.message || 'unknown error'}`,
+    `Failed to publish after ${maxRetries} attempts: ${lastError?.message || 'unknown error'}${diagnostic}`,
     { cause: lastError }
   );
 }

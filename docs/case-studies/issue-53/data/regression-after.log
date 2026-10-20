@@ -1,0 +1,9 @@
+bun test v1.4.3 (c6da4a4d3)
+
+test/issue-53.test.js:
+(pass) README npm badge targets an actually published package [2.12ms]
+(pass) failed npm publication explains package bootstrap and trust configuration [3.19ms]
+
+ 2 pass
+ 0 fail
+Ran 2 tests across 1 file. [94.00ms]
