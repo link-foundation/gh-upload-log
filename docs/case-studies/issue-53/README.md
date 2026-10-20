@@ -114,6 +114,16 @@ Until then `bun install -g gh-upload-log` installs the published 0.10.1 text-log
 tool; do not promise binary-upload features from that version. The PR remains
 unmerged and does not claim to have repaired npm account authorization.
 
+## CI investigation
+
+The prepared PR's initial run 39497838727 (2026-10-20 21:07:52 UTC,
+SHA `4c82c5189d167f5986485462dd4483768808a372`) failed before implementation.
+`data/initial-pr-39497838727.log` lines 241–245 show that no changeset existed.
+The patch changeset in this PR resolves that specific failure. This initial
+run predates the implementation and must not be confused with current-head CI.
+Local full validation passed: 183 tests, ESLint, Prettier and file-size checks;
+complete output is in `data/local-test.log` and `data/local-check.log`.
+
 ## Reproduction
 
 ```sh
