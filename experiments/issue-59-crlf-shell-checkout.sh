@@ -16,7 +16,9 @@ git ls-files --eol -- '*.sh' '.husky/*'
 printf 'first line of scripts/read-job-cancel-in-progress.sh: '
 head -n 1 scripts/read-job-cancel-in-progress.sh | od -c | head -n 1
 for script in scripts/read-job-cancel-in-progress.sh .husky/pre-commit; do
-  if [ "$(head -c 2 "$script")" = '#!' ] && head -n 1 "$script" | grep -q $'\r$'; then
+  if [ "$(head -c 2 "$script")" != '#!' ]; then
+    echo "$script: no shebang line"
+  elif head -n 1 "$script" | grep -q $'\r$'; then
     echo "$script: shebang line ends in CR, so env looks for an interpreter named with a trailing CR"
   else
     echo "$script: LF shebang"
