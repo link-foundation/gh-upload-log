@@ -86,7 +86,7 @@ only for a missing changeset, at log lines 244–246. This run predates fixes.
 Large command logs are preserved locally in `ci-logs/` and
 `experiments/output/`; concise durable evidence is recorded below and in the PR.
 
-Local verification on Linux with Bun 1.4.3 and Node 26.12.1 passed all 197 tests,
+Local verification on Linux with Bun 1.4.3 and Node 26.12.1 passed all 199 tests,
 formatting, lint and the 1,000-line JavaScript file limit. The finite streaming
 probe used Node's `--max-old-space-size=640` and checked the SHA-256 of every
 output byte against an independently generated expected stream:
@@ -108,6 +108,28 @@ and locally installed each tarball, imported the library, and executed
 binary archive dry-run metadata. Each tarball includes `src/sanitization.js`
 and the pinned sanitizer dependency. Both `npm publish --dry-run` checks pass;
 these are artifact checks, not claims of npm authorization or publication.
+
+## Windows CI investigation
+
+Run [40070014299](https://github.com/link-foundation/gh-upload-log/actions/runs/40070014299)
+passed on all three operating systems at e51bb97. The subsequent run
+[40070269183](https://github.com/link-foundation/gh-upload-log/actions/runs/40070269183),
+created at 06:27:18 UTC for 6c8bf0f, passed Linux, macOS, lint and changesets,
+but Windows's existing CLI description test hit Bun's implicit 5,000 ms deadline.
+Downloaded log lines 2868–2870 record the killed child and timeout. Other Windows
+CLI invocations took about 0.4–0.5 seconds; the logs do not establish why this one
+process was delayed. They contain no child output from the timed-out test.
+
+The CLI harness had no child deadline or timeout diagnostics, and used the
+`test-anywhere` wrapper that drops native timeout settings (already investigated
+in issue #49). A finite six-second Node preload reproduces its five-second
+failure before the fix. CLI tests now use the established native test helper
+with a 20-second deadline. A separate 15-second child deadline kills the process
+and waits for closure, retaining command arguments, stdout and stderr in the
+error. A regression verifies child termination; the slow-start regression
+verifies an actual description upload dry run still completes after six seconds.
+This bounds failures and makes a recurring stall diagnosable instead of silently
+relying on a global timeout increase or a blind CI retry.
 
 The npm owner criteria remain unfinished. Passing PR CI cannot resolve npm
 account setup, prove a release has reached users, or justify merging this PR.
