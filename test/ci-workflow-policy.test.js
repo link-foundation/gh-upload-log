@@ -218,3 +218,53 @@ test('the secrets scan runs before dependencies are installed', () => {
   assert.ok(scan !== -1 && install !== -1, 'lint must scan and install');
   assert.ok(scan < install, 'run secretlint before bun install');
 });
+
+// Principle 17: a required dispatch input without a default makes the
+// "Run workflow" form and `gh workflow run` without -f fail before any job
+// starts, so every required input must name its default.
+test('every required workflow_dispatch input has a default', () => {
+  const missing = [];
+  for (const file of workflowFiles) {
+    const lines = readWorkflow(file).split('\n');
+    const start = lines.findIndex((line) => /^ {4}inputs:\s*$/.test(line));
+    if (start === -1) {
+      continue;
+    }
+    let input = null;
+    const flush = () => {
+      if (input?.required && !input.hasDefault) {
+        missing.push(`${file}:${input.name}`);
+      }
+    };
+    for (const line of lines.slice(start + 1)) {
+      if (!/^ {6}/.test(line) && line.trim() !== '') {
+        break;
+      }
+      const name = line.match(/^ {6}([\w-]+):\s*$/);
+      if (name) {
+        flush();
+        input = { name: name[1], required: false, hasDefault: false };
+      } else if (input && /^ {8}required:\s*true\b/.test(line)) {
+        input.required = true;
+      } else if (input && /^ {8}default:/.test(line)) {
+        input.hasDefault = true;
+      }
+    }
+    flush();
+  }
+  assert.deepEqual(missing, []);
+});
+
+test('the pre-commit hook runs lint-staged and prepare verifies it', () => {
+  const hook = readFileSync(path.join(root, '.husky', 'pre-commit'), 'utf8');
+  assert.match(hook, /^npx lint-staged$/m);
+  const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.equal(pkg.scripts.prepare, 'node scripts/install-git-hooks.mjs');
+  // An ignored file passed by lint-staged must not turn into a warning that
+  // --max-warnings 0 then rejects.
+  assert.ok(
+    pkg['lint-staged']['*.{js,mjs,cjs}'].some((command) =>
+      command.includes('--no-warn-ignored')
+    )
+  );
+});
