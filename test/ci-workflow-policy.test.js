@@ -290,9 +290,8 @@ test('no job name embeds a matrix expression', () => {
       path.join(root, '.github', 'workflows', file),
       'utf8'
     );
-    assert.doesNotMatch(
-      workflow,
-      /^ {4}name:.*\$\{\{\s*matrix\./m,
+    assert.ok(
+      !/^ {4}name:.*\$\{\{\s*matrix\./m.test(workflow),
       `${file} names a job with a matrix expression`
     );
   }
