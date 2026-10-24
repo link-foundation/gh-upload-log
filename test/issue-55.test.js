@@ -95,6 +95,23 @@ test('missing input cannot enter the verified-upload callback', async () => {
   assert.equal(called, false);
 });
 
+test('symbolic-link inputs retain their name and sanitize the target', async () => {
+  await withFile(original, async (filePath, dir) => {
+    const linkedPath = path.join(dir, 'linked.log');
+    fs.symlinkSync(filePath, linkedPath, 'file');
+    const capture = captureCommands();
+    const result = await uploadAsGist({
+      filePath: linkedPath,
+      commandStreamFactory: capture.factory,
+      logger,
+    });
+    assert.equal(capture.payloads[0].toString(), expected);
+    assert.equal(fs.readFileSync(filePath, 'utf8'), original);
+    assert.ok(result.fileName.endsWith('-linked.log.txt'), result.fileName);
+    assert.equal(result.sanitization.redactions, 1);
+  });
+});
+
 for (const isPublic of [false, true]) {
   test(`every gist entry point sanitizes (${isPublic ? 'public' : 'private'})`, async () => {
     await withFile(original, async (filePath) => {

@@ -35,6 +35,9 @@ export async function withSanitizedUpload(options, upload) {
   const summary = { redactions: 0, rules: Object.create(null) };
   try {
     try {
+      // Preserve support for caller-supplied symlinks without asking the atomic
+      // file API to follow one. Upload naming still uses the supplied path.
+      const inputPath = fs.realpathSync(source);
       const sanitizerOptions = {
         credentialsOnly: true,
         knownSecrets: [
@@ -44,10 +47,10 @@ export async function withSanitizedUpload(options, upload) {
         maxInputLength: MAX_RECORD_BYTES + 1,
       };
       const engine = createSanitizer(sanitizerOptions);
-      const sizes = await sanitizeFileToFile(source, filePath, {
+      const sizes = await sanitizeFileToFile(inputPath, filePath, {
         allowBinary: true,
         maxRecordBytes: MAX_RECORD_BYTES,
-        maxTotalBytes: Math.max(1, fs.statSync(source).size),
+        maxTotalBytes: Math.max(1, fs.statSync(inputPath).size),
         sanitizerOptions,
         // The file API verifies this callback's output again with the required
         // engine union. Count only the original pass, never the residual scan.
@@ -79,7 +82,7 @@ export async function withSanitizedUpload(options, upload) {
         ERR_LIMIT: 'record exceeds 64 MiB or detector limit',
         ERR_AUTH:
           'local GitHub credential configuration could not be read safely',
-        ERR_FILE: 'input is not a readable regular file (symlinks are refused)',
+        ERR_FILE: 'input is not a readable regular file',
         ERR_OUTPUT: 'private sanitized output could not be written',
         ERR_ENGINE: 'a required credential detector failed',
         ENOSPC: 'not enough disk space for private sanitized output',
