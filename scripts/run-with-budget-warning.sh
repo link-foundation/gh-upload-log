@@ -215,9 +215,15 @@ command_is_running() {
   group_is_populated
 }
 
+# bash's SECONDS counts wall-clock second boundaries crossed since it was
+# set, not elapsed time, so it can read N after only N-1+e seconds. Only a
+# reading strictly greater than N proves N seconds have passed; -ge killed a
+# 1.4s command under a 2s budget (template issue #252).
+has_elapsed() { [ "${SECONDS}" -gt "$1" ]; }
+
 wait_while_running() {
   local deadline=$((SECONDS + $1))
-  while command_is_running && [ "${SECONDS}" -lt "${deadline}" ]; do
+  while command_is_running && ! has_elapsed "${deadline}"; do
     relay_output
     sleep "${poll_seconds}"
   done
@@ -263,7 +269,7 @@ while command_is_running; do
     echo "::warning title=${label} is approaching its execution budget::${label} has run for ${SECONDS}s of its ${budget_seconds}s budget."
   fi
 
-  if [ "${SECONDS}" -ge "${budget_seconds}" ]; then
+  if has_elapsed "${budget_seconds}"; then
     terminate_over_budget
   fi
 
