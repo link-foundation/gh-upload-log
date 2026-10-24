@@ -96,4 +96,29 @@ describe('broken link workflow', () => {
       }
     }
   });
+  // --cache without a restored .lycheecache starts every run cold, and a
+  // failure message that names an artifact must have one to point at
+  // (template issue #248).
+  it('persists the lychee cache it asks for', () => {
+    const cacheStep = getStepBlock('Restore lychee cache');
+
+    expect(workflow).toContain('--cache');
+    expect(cacheStep).toContain('uses: actions/cache@');
+    expect(cacheStep).toContain('path: .lycheecache');
+    expect(workflow.indexOf('Restore lychee cache')).toBeLessThan(
+      workflow.indexOf('Check links with lychee')
+    );
+  });
+
+  it('uploads the report the failure message points at', () => {
+    const uploadStep = getStepBlock('Upload lychee report');
+
+    expect(getStepBlock('Fail if broken links were found')).toContain(
+      'lychee-report artifact'
+    );
+    expect(uploadStep).toContain('uses: actions/upload-artifact@');
+    expect(uploadStep).toContain('!cancelled()');
+    expect(uploadStep).toContain('steps.lychee.outputs.exit_code != 0');
+    expect(uploadStep).toContain('path: lychee/');
+  });
 });
