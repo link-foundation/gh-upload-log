@@ -1,6 +1,6 @@
 /**
- * Pure helpers for format-release-notes.mjs, kept free of side effects so
- * they can be unit tested.
+ * Pure helpers for create-github-release.mjs and format-release-notes.mjs,
+ * kept free of side effects so they can be unit tested.
  *
  * The release body is the CHANGELOG.md section Changesets wrote. It used to
  * be "cleaned" with regexes that dated from passing bodies through shell
@@ -117,4 +117,26 @@ export function buildNpmVersionBadge(packageName, releaseVersion) {
   const label = encodeShieldsStaticBadgeSegment(packageName);
   const message = encodeShieldsStaticBadgeSegment(version);
   return `[![${packageName} npm version](https://img.shields.io/badge/${label}-${message}-blue.svg)](https://www.npmjs.com/package/${packageName}/v/${encodeURIComponent(version)})`;
+}
+
+/**
+ * The CHANGELOG.md section of `version`, without its heading, or '' when
+ * there is none. The heading must be exactly `## <version>`: the regex this
+ * replaces left the dots unescaped and had no boundary after the version, so
+ * `1.0.1` read the `## 1.0.10` section, and any `## <digit>` inside an entry
+ * ended the section (fixed the same way in the pipeline template).
+ */
+export function extractChangelogSection(changelog, version) {
+  const lines = changelog.replaceAll('\r\n', '\n').split('\n');
+  const start = lines.findIndex((line) => line.trimEnd() === `## ${version}`);
+  if (start === -1) {
+    return '';
+  }
+  const next = lines.findIndex(
+    (line, index) => index > start && /^## /.test(line)
+  );
+  return lines
+    .slice(start + 1, next === -1 ? lines.length : next)
+    .join('\n')
+    .trim();
 }

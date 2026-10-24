@@ -16,6 +16,7 @@ import { readFileSync } from 'fs';
 import { $ } from 'command-stream';
 import { makeConfig } from 'lino-arguments';
 import { ensureCommandSucceeded } from '../src/common.js';
+import { extractChangelogSection } from './format-release-notes-helpers.mjs';
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -52,20 +53,8 @@ try {
   // Read CHANGELOG.md
   const changelog = readFileSync('./CHANGELOG.md', 'utf8');
 
-  // Extract changelog entry for this version
-  // Read from CHANGELOG.md between this version header and the next version header
-  const versionHeaderRegex = new RegExp(`## ${version}[\\s\\S]*?(?=## \\d|$)`);
-  const match = changelog.match(versionHeaderRegex);
-
-  let releaseNotes = '';
-  if (match) {
-    // Remove the version header itself and trim
-    releaseNotes = match[0].replace(`## ${version}`, '').trim();
-  }
-
-  if (!releaseNotes) {
-    releaseNotes = `Release ${version}`;
-  }
+  const releaseNotes =
+    extractChangelogSection(changelog, version) || `Release ${version}`;
 
   // Create release using GitHub API with JSON input
   // This avoids shell escaping issues that occur when passing text via command-line arguments

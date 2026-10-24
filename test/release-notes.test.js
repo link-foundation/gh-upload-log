@@ -7,6 +7,7 @@ import { assert, test } from 'test-anywhere';
 import {
   buildNpmVersionBadge,
   buildReleaseDescription,
+  extractChangelogSection,
   formatRelatedPullRequests,
 } from '../scripts/format-release-notes-helpers.mjs';
 
@@ -199,3 +200,37 @@ test('format-release-notes publishes every entry and links every PR', () => {
     fs.rmSync(fakeBin, { recursive: true, force: true });
   }
 }, 30000);
+
+test('the release body is exactly the section of the released version', () => {
+  const changelog = [
+    '# gh-upload-log',
+    '',
+    '## 1.0.10',
+    '',
+    '### Patch Changes',
+    '',
+    '- 1111111: Newer',
+    '',
+    '## 1.0.1',
+    '',
+    '### Patch Changes',
+    '',
+    '- 2222222: Fixes issue ## 2 of the list',
+    '',
+    '## 1x0x0',
+    '',
+    '## 1.0.0',
+    '',
+    '- 3333333: Initial',
+    '',
+  ].join('\r\n');
+  assert.equal(
+    extractChangelogSection(changelog, '1.0.1'),
+    '### Patch Changes\n\n- 2222222: Fixes issue ## 2 of the list'
+  );
+  assert.equal(
+    extractChangelogSection(changelog, '1.0.0'),
+    '- 3333333: Initial'
+  );
+  assert.equal(extractChangelogSection(changelog, '2.0.0'), '');
+});
