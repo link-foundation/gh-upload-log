@@ -1,0 +1,5 @@
+# Shell scripts and git hooks must keep LF on every checkout: Windows runners
+# set core.autocrlf=true, and a CRLF script fails with
+# "set: pipefail\r: invalid option name" (experiments/issue-59-crlf-shell-checkout.sh).
+*.sh text eol=lf
+.husky/** text eol=lf

@@ -325,3 +325,24 @@ test('ShellCheck lints every tracked shell script and gates the run', () => {
     );
   }
 });
+
+// Windows runners check out with core.autocrlf=true; a CRLF shell script
+// fails with "set: pipefail\r: invalid option name".
+test('shell scripts and git hooks are always checked out with LF', () => {
+  const scripts = spawnSync('git', ['ls-files', '*.sh', '.husky/*'], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+    .stdout.split('\n')
+    .filter(Boolean);
+  const attributes = spawnSync('git', ['check-attr', 'eol', '--', ...scripts], {
+    cwd: root,
+    encoding: 'utf8',
+  }).stdout;
+  for (const script of scripts) {
+    assert.ok(
+      attributes.includes(`${script}: eol: lf\n`),
+      `${script} has no eol=lf attribute`
+    );
+  }
+});
