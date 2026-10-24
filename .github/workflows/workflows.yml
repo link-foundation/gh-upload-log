@@ -82,6 +82,7 @@ jobs:
         run: >-
           node scripts/check-status-gate-covers-all-jobs.mjs
           .github/workflows/release.yml
+          .github/workflows/links.yml
           .github/workflows/security.yml
           .github/workflows/workflows.yml
 
