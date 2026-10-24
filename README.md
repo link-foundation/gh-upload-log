@@ -6,6 +6,29 @@ Upload text and binary files to GitHub as Gists or repositories
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
 [![Bun](https://img.shields.io/badge/Bun-%E2%89%A51.0.0-f9f1e1.svg)](https://bun.sh/)
 
+## Upload sanitization
+
+Every upload, public or private, passes through
+[`@link-foundation/sensitive-data-sanitizer`](https://github.com/link-foundation/sensitive-data-sanitizer)
+before any GitHub request. It masks credentials, including local secret values
+from credential-named environment variables and GitHub CLI `hosts.yml` files.
+Public account details, emails and other noncredential content remain readable.
+The original file is unchanged. Invalid UTF-8 and binary bytes are preserved
+outside credential spans; binary uploads are archived after sanitization.
+
+The CLI prints merged credential-span counts, input bytes and counts by rule,
+including zero findings. Rule counts can overlap when several detectors identify
+the same span. Library results expose `sanitization: {redactions, rules,
+inputBytes, outputBytes}`. Dry mode runs the same scan and uses sanitized hashes.
+
+Scanning streams into a private temporary copy. Nothing is uploaded until the
+whole file verifies; failures report a safe error code and delete that copy.
+Memory depends on the largest logical record; records above 64 MiB or detector
+limits block with `ERR_LIMIT`. Large logs with 15 MiB lines are supported. Keep
+credential configuration readable and valid; a malformed `hosts.yml` blocks
+publication with `ERR_AUTH`. Detection follows the library's supported patterns;
+compressed/encrypted file internals are not recursively scanned.
+
 ## Overview
 
 `gh-upload` is a CLI tool and JavaScript library that uploads files to GitHub. It selects a strategy from the content and size:
@@ -37,6 +60,8 @@ The npm package is `gh-upload-file` (npm refuses `gh-upload` as too similar to `
 - [Bun](https://bun.sh/) ≥1.0.0
 - Git (installed and configured)
 - GitHub CLI (`gh`) installed and authenticated
+
+Node.js library consumers need Node >=22.13.0, as required by the sanitizer.
 
 To authenticate with GitHub CLI:
 
@@ -649,21 +674,11 @@ npm pack ./dist/npm/gh-upload-log
 node experiments/issue-37-package-smoke.mjs
 ```
 
-The first `gh-upload-file` publish needs npm account authorization; OIDC trusted
-publishing must then be configured for `gh-upload-file` as well as `gh-upload-log`,
-using this repository's `release.yml` workflow. The name check does not reserve
-the name. A maintainer can bootstrap from the pushed PR before merging:
-
-```bash
-package-registry-manager setup --repository /path/to/gh-upload-log \
-  --registry npm --package gh-upload-file --ref issue-53-c61a31a1067d --execute
-```
-
-This command uses browser approval and the PR's actual package manifest. Inspect
-its plan and approve the npm operations in the browser; verify the first exact
-version through uncached registry requests before enabling automatic releases.
-See the [registry setup instructions](https://github.com/link-foundation/package-registry-manager/blob/main/docs/registry-setup.md)
-and the [issue investigation](./docs/case-studies/issue-37/README.md).
+Both automatic and manual releases check npm package existence before versioning.
+The first `gh-upload-file` publication and trusted publisher setup require an
+authorized npm account. Follow the [exact recovery procedure](./docs/npm-publishing.md),
+which preserves synchronized `gh-upload-log` releases. Publication remains
+blocked until those owner steps are completed.
 
 ## Contributing
 

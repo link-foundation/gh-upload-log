@@ -101,6 +101,7 @@ jobs:
   test:
     name: Test (Bun on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     needs: [changeset-check]
     if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
     strategy:
@@ -153,6 +154,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Verify npm package bootstrap before versioning
+        run: bun scripts/check-npm-publishing.mjs
 
       - name: Update npm for OIDC trusted publishing
         run: bun scripts/setup-npm.mjs
@@ -226,6 +230,9 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Verify npm package bootstrap before versioning
+        run: bun scripts/check-npm-publishing.mjs
 
       - name: Update npm for OIDC trusted publishing
         run: bun scripts/setup-npm.mjs
