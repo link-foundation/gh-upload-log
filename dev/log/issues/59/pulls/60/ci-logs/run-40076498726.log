@@ -1,0 +1,264 @@
+Check for Changesets	Set up job	﻿2026-10-24T08:02:47.5668682Z Current runner version: '2.338.0'
+Check for Changesets	Set up job	2026-10-24T08:02:47.5694045Z ##[group]Runner Image Provisioner
+Check for Changesets	Set up job	2026-10-24T08:02:47.5694926Z Hosted Compute Agent
+Check for Changesets	Set up job	2026-10-24T08:02:47.5695854Z Version: 20261021.618
+Check for Changesets	Set up job	2026-10-24T08:02:47.5696686Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+Check for Changesets	Set up job	2026-10-24T08:02:47.5697416Z Build Date: 2026-10-21T00:45:21Z
+Check for Changesets	Set up job	2026-10-24T08:02:47.5698154Z Worker ID: {5f0f8dd5-f7cb-4d59-b101-e17f7fe6c7dd}
+Check for Changesets	Set up job	2026-10-24T08:02:47.5698885Z Region: westus2
+Check for Changesets	Set up job	2026-10-24T08:02:47.5699456Z Cloud: Azure
+Check for Changesets	Set up job	2026-10-24T08:02:47.5700085Z ##[endgroup]
+Check for Changesets	Set up job	2026-10-24T08:02:47.5701614Z ##[group]Operating System
+Check for Changesets	Set up job	2026-10-24T08:02:47.5702317Z Ubuntu
+Check for Changesets	Set up job	2026-10-24T08:02:47.5702853Z 26.04.1
+Check for Changesets	Set up job	2026-10-24T08:02:47.5703352Z LTS
+Check for Changesets	Set up job	2026-10-24T08:02:47.5703936Z ##[endgroup]
+Check for Changesets	Set up job	2026-10-24T08:02:47.5704476Z ##[group]Runner Image
+Check for Changesets	Set up job	2026-10-24T08:02:47.5705430Z Image: ubuntu-26.04
+Check for Changesets	Set up job	2026-10-24T08:02:47.5706232Z Version: 20261012.163.1
+Check for Changesets	Set up job	2026-10-24T08:02:47.5707348Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261012.163/images/ubuntu/Ubuntu2604-Readme.md
+Check for Changesets	Set up job	2026-10-24T08:02:47.5709167Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261012.163
+Check for Changesets	Set up job	2026-10-24T08:02:47.5710135Z ##[endgroup]
+Check for Changesets	Set up job	2026-10-24T08:02:47.5713345Z ##[group]GITHUB_TOKEN Permissions
+Check for Changesets	Set up job	2026-10-24T08:02:47.5716112Z Actions: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5716765Z ArtifactMetadata: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5717368Z Attestations: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5717998Z Checks: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5718557Z CodeQuality: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5719139Z Contents: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5719787Z CopilotRequests: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5720363Z Deployments: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5720954Z Discussions: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5721508Z Drives: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5722055Z Issues: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5722736Z Metadata: read
+Check for Changesets	Set up job	2026-10-24T08:02:47.5723275Z Models: read
+Check for Changesets	Set up job	2026-10-24T08:02:47.5723844Z Packages: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5724440Z Pages: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5724986Z PullRequests: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5725826Z RepositoryProjects: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5726467Z SecurityEvents: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5727083Z Statuses: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5727675Z VulnerabilityAlerts: read
+Check for Changesets	Set up job	2026-10-24T08:02:47.5728302Z ##[endgroup]
+Check for Changesets	Set up job	2026-10-24T08:02:47.5730444Z Secret source: Actions
+Check for Changesets	Set up job	2026-10-24T08:02:47.5731397Z Cache mode: write
+Check for Changesets	Set up job	2026-10-24T08:02:47.5732546Z Prepare workflow directory
+Check for Changesets	Set up job	2026-10-24T08:02:47.6071667Z Prepare all required actions
+Check for Changesets	Set up job	2026-10-24T08:02:47.6121679Z Getting action download info
+Check for Changesets	Set up job	2026-10-24T08:02:47.9333546Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Check for Changesets	Set up job	2026-10-24T08:02:48.0382132Z Download action repository 'oven-sh/setup-bun@v2' (SHA:0c5077e51419868618aeaa5fe8019c62421857d6)
+Check for Changesets	Set up job	2026-10-24T08:02:48.3201888Z Complete job name: Check for Changesets
+Check for Changesets	Run actions/checkout@v4	﻿2026-10-24T08:02:48.4079714Z ##[group]Run actions/checkout@v4
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4080614Z with:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4081047Z   fetch-depth: 0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4081542Z   repository: link-foundation/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4085798Z   token: ***
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4086239Z   ssh-strict: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4086688Z   ssh-user: git
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4087129Z   persist-credentials: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4087625Z   clean: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4088062Z   sparse-checkout-cone-mode: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4088589Z   fetch-tags: false
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4089032Z   show-progress: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4089475Z   lfs: false
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4089888Z   submodules: false
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4090337Z   set-safe-directory: true
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4090839Z   allow-unsafe-pr-checkout: false
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.4091618Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5150800Z Syncing repository: link-foundation/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5153227Z ##[group]Getting Git version info
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5154281Z Working directory is '/home/runner/work/gh-upload-log/gh-upload-log'
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5156039Z [command]/usr/bin/git version
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5156968Z git version 2.55.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5181322Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5198652Z Temporarily overriding HOME='/home/runner/work/_temp/5eef1051-5a52-47fb-848f-970d3400a6ac' before making global git config changes
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5200903Z Adding repository directory to the temporary git global config as a safe directory
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5203612Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5278045Z Deleting the contents of '/home/runner/work/gh-upload-log/gh-upload-log'
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5281217Z ##[group]Initializing the repository
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5298437Z [command]/usr/bin/git init /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5472930Z hint: Using 'master' as the name for the initial branch. This default branch name
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5474746Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5476078Z hint: to use in all of your new repositories, which will suppress this warning,
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5476852Z hint: call:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5477249Z hint:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5477760Z hint: 	git config --global init.defaultBranch <name>
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5478374Z hint:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5478955Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5479877Z hint: 'development'. The just-created branch can be renamed via this command:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5480760Z hint:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5481284Z hint: 	git branch -m <name>
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5481765Z hint:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5482389Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5483443Z Initialized empty Git repository in /home/runner/work/gh-upload-log/gh-upload-log/.git/
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5495522Z [command]/usr/bin/git remote add origin https://github.com/link-foundation/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5550324Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5551127Z ##[group]Disabling automatic garbage collection
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5554842Z [command]/usr/bin/git config --local gc.auto 0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5592758Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5593522Z ##[group]Setting up auth
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5602706Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.5641100Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6130632Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6170276Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6463468Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6502806Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6803744Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6846335Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6847318Z ##[group]Fetching the repository
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:48.6857247Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +33591cf5ba284c2fb7f53be9ee844c4aea246a91:refs/remotes/pull/60/merge
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1316494Z From https://github.com/link-foundation/gh-upload-log
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1319134Z  * [new branch]      changeset-manual-release-19508267787     -> origin/changeset-manual-release-19508267787
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1321558Z  * [new branch]      issue-1-570033a01b53                     -> origin/issue-1-570033a01b53
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1323874Z  * [new branch]      issue-11-d070e41c43c5                    -> origin/issue-11-d070e41c43c5
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1326959Z  * [new branch]      issue-13-24bbeb1aa441                    -> origin/issue-13-24bbeb1aa441
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1329386Z  * [new branch]      issue-15-0860073f9eb0                    -> origin/issue-15-0860073f9eb0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1331663Z  * [new branch]      issue-17-bafdd945b504                    -> origin/issue-17-bafdd945b504
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1333917Z  * [new branch]      issue-19-d21156abf8ff                    -> origin/issue-19-d21156abf8ff
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1336569Z  * [new branch]      issue-21-939659c74a08                    -> origin/issue-21-939659c74a08
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1338969Z  * [new branch]      issue-23-2dadf4f7942d                    -> origin/issue-23-2dadf4f7942d
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1340983Z  * [new branch]      issue-24-35267d64e3f2                    -> origin/issue-24-35267d64e3f2
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1342970Z  * [new branch]      issue-27-05a03800b7e1                    -> origin/issue-27-05a03800b7e1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1344934Z  * [new branch]      issue-29-ab70a4a6a817                    -> origin/issue-29-ab70a4a6a817
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1347184Z  * [new branch]      issue-31-28ec68d7ecc4                    -> origin/issue-31-28ec68d7ecc4
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1348530Z  * [new branch]      issue-33-f9f7dc69b691                    -> origin/issue-33-f9f7dc69b691
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1349755Z  * [new branch]      issue-35-069f665c81ce                    -> origin/issue-35-069f665c81ce
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1350920Z  * [new branch]      issue-37-663142bb0564                    -> origin/issue-37-663142bb0564
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1352060Z  * [new branch]      issue-38-08d280390544                    -> origin/issue-38-08d280390544
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1353337Z  * [new branch]      issue-4-7c098376a819                     -> origin/issue-4-7c098376a819
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1355770Z  * [new branch]      issue-40-d1c3182d7641                    -> origin/issue-40-d1c3182d7641
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1357843Z  * [new branch]      issue-43-1fc1f2777c75                    -> origin/issue-43-1fc1f2777c75
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1359849Z  * [new branch]      issue-45-105f64e99693                    -> origin/issue-45-105f64e99693
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1361728Z  * [new branch]      issue-47-5ae5f02c5aba                    -> origin/issue-47-5ae5f02c5aba
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1363859Z  * [new branch]      issue-49-87390b14e8b6                    -> origin/issue-49-87390b14e8b6
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1366548Z  * [new branch]      issue-53-c61a31a1067d                    -> origin/issue-53-c61a31a1067d
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1368421Z  * [new branch]      issue-57-12caa48bc9d3                    -> origin/issue-57-12caa48bc9d3
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1369832Z  * [new branch]      issue-59-de5fbec5d0d0                    -> origin/issue-59-de5fbec5d0d0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1371039Z  * [new branch]      issue-6-5911db19a01b                     -> origin/issue-6-5911db19a01b
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1372729Z  * [new branch]      issue-6-c93f7b8bb8e7                     -> origin/issue-6-c93f7b8bb8e7
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1374021Z  * [new branch]      issue-9-2b44c0b9a3a0                     -> origin/issue-9-2b44c0b9a3a0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1375402Z  * [new branch]      main                                     -> origin/main
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1376735Z  * [new branch]      rename-npm-gh-upload-file                -> origin/rename-npm-gh-upload-file
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1377815Z  * [new tag]         v0.10.0                                  -> v0.10.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1378765Z  * [new tag]         v0.10.1                                  -> v0.10.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1379619Z  * [new tag]         v0.2.0                                   -> v0.2.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1380472Z  * [new tag]         v0.3.0                                   -> v0.3.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1381687Z  * [new tag]         v0.3.1                                   -> v0.3.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1382587Z  * [new tag]         v0.4.0                                   -> v0.4.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1383430Z  * [new tag]         v0.4.1                                   -> v0.4.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1384697Z  * [new tag]         v0.5.0                                   -> v0.5.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1386149Z  * [new tag]         v0.6.0                                   -> v0.6.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1387069Z  * [new tag]         v0.6.1                                   -> v0.6.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1387903Z  * [new tag]         v0.7.0                                   -> v0.7.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1389501Z  * [new tag]         v0.7.1                                   -> v0.7.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1391168Z  * [new tag]         v0.8.0                                   -> v0.8.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1392879Z  * [new tag]         v0.8.1                                   -> v0.8.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1394421Z  * [new tag]         v0.8.2                                   -> v0.8.2
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1396355Z  * [new tag]         v0.8.3                                   -> v0.8.3
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1397965Z  * [new tag]         v0.9.0                                   -> v0.9.0
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1399192Z  * [new tag]         v0.9.1                                   -> v0.9.1
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1400060Z  * [new tag]         v0.9.2                                   -> v0.9.2
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1400925Z  * [new tag]         v0.9.3                                   -> v0.9.3
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1401899Z  * [new ref]         33591cf5ba284c2fb7f53be9ee844c4aea246a91 -> pull/60/merge
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1404463Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1406141Z ##[group]Determining the checkout info
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1407467Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1408162Z [command]/usr/bin/git sparse-checkout disable
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1410024Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1431681Z ##[group]Checking out the ref
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1435281Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/60/merge
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1686701Z Note: switching to 'refs/remotes/pull/60/merge'.
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1688409Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1689599Z You are in 'detached HEAD' state. You can look around, make experimental
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1691355Z changes and commit them, and you can discard any commits you make in this
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1692456Z state without impacting any branches by switching back to a branch.
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1693398Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1694048Z If you want to create a new branch to retain commits you create, you may
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1696103Z do so (now or later) by using -c with the switch command. Example:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1696738Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1697000Z   git switch -c <new-branch-name>
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1697395Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1697646Z Or undo this operation with:
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1698026Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1698256Z   git switch -
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1698859Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1699327Z Turn off this advice by setting config variable advice.detachedHead to false
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1700266Z 
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1700974Z HEAD is now at 33591cf Merge 31d3713c451aca3c4a8f9c031b67423953b282f8 into 0c4a219af400856b1c8e122314aa0f995f7f8935
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1703320Z ##[endgroup]
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1751095Z [command]/usr/bin/git log -1 --format=%H
+Check for Changesets	Run actions/checkout@v4	2026-10-24T08:02:49.1778471Z 33591cf5ba284c2fb7f53be9ee844c4aea246a91
+Check for Changesets	Setup Bun	﻿2026-10-24T08:02:49.2151739Z ##[group]Run oven-sh/setup-bun@v2
+Check for Changesets	Setup Bun	2026-10-24T08:02:49.2152453Z with:
+Check for Changesets	Setup Bun	2026-10-24T08:02:49.2152924Z   bun-version: latest
+Check for Changesets	Setup Bun	2026-10-24T08:02:49.2153434Z   no-cache: false
+Check for Changesets	Setup Bun	2026-10-24T08:02:49.2157812Z   token: ***
+Check for Changesets	Setup Bun	2026-10-24T08:02:49.2158316Z ##[endgroup]
+Check for Changesets	Setup Bun	2026-10-24T08:02:50.0603096Z Downloading a new version of Bun: https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64.zip
+Check for Changesets	Setup Bun	2026-10-24T08:02:50.3906284Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/279e44f0-0df1-4376-b8d3-85b4d25554a8.zip
+Check for Changesets	Setup Bun	2026-10-24T08:02:51.2348339Z [command]/home/runner/.bun/bin/bun --revision
+Check for Changesets	Setup Bun	2026-10-24T08:02:51.2404699Z 1.4.4+38afee6c8
+Check for Changesets	Install dependencies	﻿2026-10-24T08:02:51.2604810Z ##[group]Run bun install
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.2605829Z ^[[36;1mbun install^[[0m
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.2784520Z shell: /usr/bin/bash -e {0}
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.2784978Z ##[endgroup]
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.2919014Z bun install v1.4.4 (38afee6c8)
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.6587050Z 
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.6590611Z $ husky || true
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9236791Z 
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9237446Z + @changesets/changelog-github@0.5.1
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9237905Z + @changesets/cli@2.29.7
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9238177Z + eslint@9.39.2
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9238477Z + eslint-config-prettier@10.1.8
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9238778Z + eslint-plugin-prettier@5.5.4
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9239062Z + husky@9.1.7
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9239266Z + lint-staged@16.2.7
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9239499Z + prettier@3.7.4
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9239709Z + test-anywhere@0.8.49
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9240001Z + @link-foundation/sensitive-data-sanitizer@0.12.1
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9240327Z + command-stream@0.7.1
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9240552Z + lino-arguments@0.3.0
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9240835Z + log-lazy@1.0.4
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9241053Z + use-m@8.13.7
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9241250Z + yargs@17.7.2
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9241561Z 
+Check for Changesets	Install dependencies	2026-10-24T08:02:51.9241674Z 249 packages installed [632.00ms]
+Check for Changesets	Check for changesets	﻿2026-10-24T08:02:51.9354446Z ##[group]Run # Skip changeset check for automated version PRs
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9355408Z ^[[36;1m# Skip changeset check for automated version PRs^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9355869Z ^[[36;1mif [[ "issue-59-de5fbec5d0d0" == "changeset-release/"* ]]; then^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9356338Z ^[[36;1m  echo "Skipping changeset check for automated release PR"^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9356723Z ^[[36;1m  exit 0^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9356922Z ^[[36;1mfi^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9357112Z ^[[36;1m^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9357321Z ^[[36;1m# Run changeset validation script^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9357709Z ^[[36;1m# This validates that exactly ONE changeset was ADDED by this PR^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9358198Z ^[[36;1m# Pre-existing changesets from other merged PRs are ignored^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9358608Z ^[[36;1mbun scripts/validate-changeset.mjs^[[0m
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9422763Z shell: /usr/bin/bash -e {0}
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9423046Z env:
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9423242Z   GITHUB_BASE_REF: main
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9423534Z   GITHUB_BASE_SHA: 0c4a219af400856b1c8e122314aa0f995f7f8935
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9423971Z   GITHUB_HEAD_SHA: 31d3713c451aca3c4a8f9c031b67423953b282f8
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9424286Z ##[endgroup]
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9603911Z Validating changesets added by this PR...
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9606183Z Comparing 0c4a219af400856b1c8e122314aa0f995f7f8935...31d3713c451aca3c4a8f9c031b67423953b282f8
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9703188Z ##[error]No changeset found in this PR. Please add a changeset by running 'npm run changeset' and commit the result.
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9712829Z Found 0 changeset file(s) added by this PR
+Check for Changesets	Check for changesets	2026-10-24T08:02:51.9715345Z ##[error]Process completed with exit code 1.
+Check for Changesets	Post Run actions/checkout@v4	﻿2026-10-24T08:02:51.9860784Z Post job cleanup.
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0741780Z [command]/usr/bin/git version
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0790067Z git version 2.55.0
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0835693Z Temporarily overriding HOME='/home/runner/work/_temp/65cf5a8e-fe5c-4317-a379-ed9e1c2b5b1f' before making global git config changes
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0837017Z Adding repository directory to the temporary git global config as a safe directory
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0842037Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0892389Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.0947903Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1264054Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1293722Z http.https://github.com/.extraheader
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1307955Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1354963Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1691720Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Check for Changesets	Post Run actions/checkout@v4	2026-10-24T08:02:52.1728479Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Check for Changesets	Complete job	﻿2026-10-24T08:02:52.2147368Z Cleaning up orphan processes
+Check for Changesets	Complete job	2026-10-24T08:02:52.2506762Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

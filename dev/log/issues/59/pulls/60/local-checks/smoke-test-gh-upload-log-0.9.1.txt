@@ -1,0 +1,2 @@
+✅ gh-upload-log@0.9.1: gh-upload-log --help
+✅ gh-upload-log@0.9.1: import('gh-upload-log')

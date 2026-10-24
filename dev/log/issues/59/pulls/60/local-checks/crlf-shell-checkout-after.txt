@@ -1,0 +1,13 @@
+i/lf    w/lf    attr/text eol=lf      	.husky/pre-commit
+i/lf    w/lf    attr/text eol=lf      	experiments/issue-59-budget-seconds-early-kill.sh
+i/lf    w/lf    attr/text eol=lf      	experiments/issue-59-bunfig-test-timeout.sh
+i/lf    w/lf    attr/text eol=lf      	experiments/issue-59-crlf-shell-checkout.sh
+i/lf    w/lf    attr/text eol=lf      	experiments/issue-59-secretlint-npx-local-dep.sh
+i/lf    w/lf    attr/text eol=lf      	scripts/check-pipeline-status.sh
+i/lf    w/lf    attr/text eol=lf      	scripts/read-job-cancel-in-progress.sh
+i/lf    w/lf    attr/text eol=lf      	scripts/run-with-budget-warning.sh
+i/lf    w/lf    attr/text eol=lf      	scripts/simulate-fresh-merge.sh
+first line of scripts/read-job-cancel-in-progress.sh: 0000000   #   !   /   u   s   r   /   b   i   n   /   e   n   v       b
+scripts/read-job-cancel-in-progress.sh: LF shebang
+.husky/pre-commit: LF shebang
+bash scripts/read-job-cancel-in-progress.sh: OK

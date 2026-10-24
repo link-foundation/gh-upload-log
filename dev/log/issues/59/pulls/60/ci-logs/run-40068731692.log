@@ -1,0 +1,262 @@
+Check for Changesets	UNKNOWN STEP	﻿2026-10-24T06:04:14.4626744Z Current runner version: '2.338.0'
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4657042Z ##[group]Runner Image Provisioner
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4658069Z Hosted Compute Agent
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4658757Z Version: 20261021.618
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4659596Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4660518Z Build Date: 2026-10-21T00:45:21Z
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4661347Z Worker ID: {a1285c2d-797f-4698-aa13-c119b73cde7b}
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4662381Z Region: centralus
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4663049Z Cloud: Azure
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4663785Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4665474Z ##[group]Operating System
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4666395Z Ubuntu
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4667154Z 26.04.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4667792Z LTS
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4668501Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4669227Z ##[group]Runner Image
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4669991Z Image: ubuntu-26.04
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4670771Z Version: 20261012.163.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4672342Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261012.163/images/ubuntu/Ubuntu2604-Readme.md
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4674525Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261012.163
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4675960Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4679934Z ##[group]GITHUB_TOKEN Permissions
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4682031Z Actions: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4682660Z ArtifactMetadata: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4683166Z Attestations: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4683665Z Checks: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4684170Z CodeQuality: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4684630Z Contents: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4685159Z CopilotRequests: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4685926Z Deployments: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4686451Z Discussions: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4686917Z Drives: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4687351Z Issues: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4687946Z Metadata: read
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4688387Z Models: read
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4688811Z Packages: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4689314Z Pages: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4689782Z PullRequests: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4690372Z RepositoryProjects: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4690873Z SecurityEvents: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4691451Z Statuses: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4691968Z VulnerabilityAlerts: read
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4692470Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4694410Z Secret source: Actions
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4695190Z Cache mode: write
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4696217Z Prepare workflow directory
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.4974661Z Prepare all required actions
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.5029060Z Getting action download info
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.7398120Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:14.8517653Z Download action repository 'oven-sh/setup-bun@v2' (SHA:0c5077e51419868618aeaa5fe8019c62421857d6)
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.1956946Z Complete job name: Check for Changesets
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2583751Z ##[group]Run actions/checkout@v4
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2584429Z with:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2584766Z   fetch-depth: 0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2585161Z   repository: link-foundation/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2588356Z   token: ***
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2588712Z   ssh-strict: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2589064Z   ssh-user: git
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2589425Z   persist-credentials: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2589828Z   clean: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2590187Z   sparse-checkout-cone-mode: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2590593Z   fetch-tags: false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2590938Z   show-progress: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2591291Z   lfs: false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2591622Z   submodules: false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2591978Z   set-safe-directory: true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2592373Z   allow-unsafe-pr-checkout: false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.2593000Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3398021Z Syncing repository: link-foundation/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3400533Z ##[group]Getting Git version info
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3401688Z Working directory is '/home/runner/work/gh-upload-log/gh-upload-log'
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3403011Z [command]/usr/bin/git version
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3403637Z git version 2.55.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3408513Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3420891Z Temporarily overriding HOME='/home/runner/work/_temp/badbb3cf-b446-4e6a-8493-694811c37b65' before making global git config changes
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3422764Z Adding repository directory to the temporary git global config as a safe directory
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.3424795Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4745717Z Deleting the contents of '/home/runner/work/gh-upload-log/gh-upload-log'
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4748606Z ##[group]Initializing the repository
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4753247Z [command]/usr/bin/git init /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4917943Z hint: Using 'master' as the name for the initial branch. This default branch name
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4919483Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4921782Z hint: to use in all of your new repositories, which will suppress this warning,
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4922703Z hint: call:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4923321Z hint:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4923979Z hint: 	git config --global init.defaultBranch <name>
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4924813Z hint:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4925360Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4926516Z hint: 'development'. The just-created branch can be renamed via this command:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4927311Z hint:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4927654Z hint: 	git branch -m <name>
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4928052Z hint:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4928580Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4929394Z Initialized empty Git repository in /home/runner/work/gh-upload-log/gh-upload-log/.git/
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4932434Z [command]/usr/bin/git remote add origin https://github.com/link-foundation/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4983285Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4983935Z ##[group]Disabling automatic garbage collection
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.4988374Z [command]/usr/bin/git config --local gc.auto 0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5023498Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5024426Z ##[group]Setting up auth
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5029965Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5061943Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5546992Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5576938Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5818203Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.5848473Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.6087950Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.6124587Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.6125292Z ##[group]Fetching the repository
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:15.6133352Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +099b9c422d2f75e897af449f43bce35075efdaf9:refs/remotes/pull/58/merge
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2248657Z From https://github.com/link-foundation/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2250447Z  * [new branch]      changeset-manual-release-19508267787     -> origin/changeset-manual-release-19508267787
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2252164Z  * [new branch]      issue-1-570033a01b53                     -> origin/issue-1-570033a01b53
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2253591Z  * [new branch]      issue-11-d070e41c43c5                    -> origin/issue-11-d070e41c43c5
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2255484Z  * [new branch]      issue-13-24bbeb1aa441                    -> origin/issue-13-24bbeb1aa441
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2257344Z  * [new branch]      issue-15-0860073f9eb0                    -> origin/issue-15-0860073f9eb0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2258970Z  * [new branch]      issue-17-bafdd945b504                    -> origin/issue-17-bafdd945b504
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2260576Z  * [new branch]      issue-19-d21156abf8ff                    -> origin/issue-19-d21156abf8ff
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2262119Z  * [new branch]      issue-21-939659c74a08                    -> origin/issue-21-939659c74a08
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2263702Z  * [new branch]      issue-23-2dadf4f7942d                    -> origin/issue-23-2dadf4f7942d
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2265262Z  * [new branch]      issue-24-35267d64e3f2                    -> origin/issue-24-35267d64e3f2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2266997Z  * [new branch]      issue-27-05a03800b7e1                    -> origin/issue-27-05a03800b7e1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2268539Z  * [new branch]      issue-29-ab70a4a6a817                    -> origin/issue-29-ab70a4a6a817
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2270152Z  * [new branch]      issue-31-28ec68d7ecc4                    -> origin/issue-31-28ec68d7ecc4
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2272580Z  * [new branch]      issue-33-f9f7dc69b691                    -> origin/issue-33-f9f7dc69b691
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2274082Z  * [new branch]      issue-35-069f665c81ce                    -> origin/issue-35-069f665c81ce
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2275385Z  * [new branch]      issue-37-663142bb0564                    -> origin/issue-37-663142bb0564
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2276834Z  * [new branch]      issue-38-08d280390544                    -> origin/issue-38-08d280390544
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2278142Z  * [new branch]      issue-4-7c098376a819                     -> origin/issue-4-7c098376a819
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2279624Z  * [new branch]      issue-40-d1c3182d7641                    -> origin/issue-40-d1c3182d7641
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2280905Z  * [new branch]      issue-43-1fc1f2777c75                    -> origin/issue-43-1fc1f2777c75
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2282189Z  * [new branch]      issue-45-105f64e99693                    -> origin/issue-45-105f64e99693
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2283480Z  * [new branch]      issue-47-5ae5f02c5aba                    -> origin/issue-47-5ae5f02c5aba
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2284844Z  * [new branch]      issue-49-87390b14e8b6                    -> origin/issue-49-87390b14e8b6
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2286289Z  * [new branch]      issue-53-c61a31a1067d                    -> origin/issue-53-c61a31a1067d
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2287607Z  * [new branch]      issue-57-12caa48bc9d3                    -> origin/issue-57-12caa48bc9d3
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2288920Z  * [new branch]      issue-6-5911db19a01b                     -> origin/issue-6-5911db19a01b
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2290634Z  * [new branch]      issue-6-c93f7b8bb8e7                     -> origin/issue-6-c93f7b8bb8e7
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2292214Z  * [new branch]      issue-9-2b44c0b9a3a0                     -> origin/issue-9-2b44c0b9a3a0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2293482Z  * [new branch]      main                                     -> origin/main
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2294872Z  * [new branch]      rename-npm-gh-upload-file                -> origin/rename-npm-gh-upload-file
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2296276Z  * [new tag]         v0.10.0                                  -> v0.10.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2297406Z  * [new tag]         v0.10.1                                  -> v0.10.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2298395Z  * [new tag]         v0.2.0                                   -> v0.2.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2299521Z  * [new tag]         v0.3.0                                   -> v0.3.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2300515Z  * [new tag]         v0.3.1                                   -> v0.3.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2301514Z  * [new tag]         v0.4.0                                   -> v0.4.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2302435Z  * [new tag]         v0.4.1                                   -> v0.4.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2303324Z  * [new tag]         v0.5.0                                   -> v0.5.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2304531Z  * [new tag]         v0.6.0                                   -> v0.6.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2305491Z  * [new tag]         v0.6.1                                   -> v0.6.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2306622Z  * [new tag]         v0.7.0                                   -> v0.7.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2307510Z  * [new tag]         v0.7.1                                   -> v0.7.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2308405Z  * [new tag]         v0.8.0                                   -> v0.8.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2309296Z  * [new tag]         v0.8.1                                   -> v0.8.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2310201Z  * [new tag]         v0.8.2                                   -> v0.8.2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2311252Z  * [new tag]         v0.8.3                                   -> v0.8.3
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2312366Z  * [new tag]         v0.9.0                                   -> v0.9.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2313498Z  * [new tag]         v0.9.1                                   -> v0.9.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2314605Z  * [new tag]         v0.9.2                                   -> v0.9.2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2315858Z  * [new tag]         v0.9.3                                   -> v0.9.3
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2317110Z  * [new ref]         099b9c422d2f75e897af449f43bce35075efdaf9 -> pull/58/merge
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2319698Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2320682Z ##[group]Determining the checkout info
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2321830Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2322476Z [command]/usr/bin/git sparse-checkout disable
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2339613Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2370499Z ##[group]Checking out the ref
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2373944Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/58/merge
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2581112Z Note: switching to 'refs/remotes/pull/58/merge'.
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2582300Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2583153Z You are in 'detached HEAD' state. You can look around, make experimental
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2584921Z changes and commit them, and you can discard any commits you make in this
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2586409Z state without impacting any branches by switching back to a branch.
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2586965Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2587426Z If you want to create a new branch to retain commits you create, you may
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2588403Z do so (now or later) by using -c with the switch command. Example:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2589025Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2589385Z   git switch -c <new-branch-name>
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2589863Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2590110Z Or undo this operation with:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2590493Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2590721Z   git switch -
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2591018Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2591813Z Turn off this advice by setting config variable advice.detachedHead to false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2592544Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2593423Z HEAD is now at 099b9c4 Merge ba2cadfdd759dc61b97c2f3c2d0dee92d8b3262a into 39187d521e93fcb4388c93684482abf3e7c8a052
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2596706Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2638259Z [command]/usr/bin/git log -1 --format=%H
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.2661514Z 099b9c422d2f75e897af449f43bce35075efdaf9
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3033459Z ##[group]Run oven-sh/setup-bun@v2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3034399Z with:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3035071Z   bun-version: latest
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3035948Z   no-cache: false
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3042972Z   token: ***
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.3043657Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:16.8476151Z Downloading a new version of Bun: https://github.com/oven-sh/bun/releases/download/bun-v1.4.4/bun-linux-x64.zip
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.1898511Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/66894ef3-66d0-4e30-a743-dfe76f34b5fb.zip
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9476817Z [command]/home/runner/.bun/bin/bun --revision
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9547674Z 1.4.4+38afee6c8
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9717942Z ##[group]Run bun install
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9718288Z ^[[36;1mbun install^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9965835Z shell: /usr/bin/bash -e {0}
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:17.9966246Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:18.0084736Z bun install v1.4.4 (38afee6c8)
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.1847319Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.1850091Z $ husky || true
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4299263Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4299955Z + @changesets/changelog-github@0.5.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4300355Z + @changesets/cli@2.29.7
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4300661Z + eslint@9.39.2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4300950Z + eslint-config-prettier@10.1.8
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4301255Z + eslint-plugin-prettier@5.5.4
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4301550Z + husky@9.1.7
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4301803Z + lint-staged@16.2.7
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4302278Z + prettier@3.7.4
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4302529Z + test-anywhere@0.8.49
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4302784Z + command-stream@0.7.1
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4303037Z + lino-arguments@0.3.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4303286Z + log-lazy@1.0.4
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4303599Z + use-m@8.13.7
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4303825Z + yargs@17.7.2
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4303966Z 
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4304101Z 237 packages installed [1422.00ms]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4387076Z ##[group]Run # Skip changeset check for automated version PRs
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4387718Z ^[[36;1m# Skip changeset check for automated version PRs^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4388238Z ^[[36;1mif [[ "issue-57-12caa48bc9d3" == "changeset-release/"* ]]; then^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4388698Z ^[[36;1m  echo "Skipping changeset check for automated release PR"^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4388977Z ^[[36;1m  exit 0^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4389173Z ^[[36;1mfi^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4389342Z ^[[36;1m^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4389528Z ^[[36;1m# Run changeset validation script^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4389835Z ^[[36;1m# This validates that exactly ONE changeset was ADDED by this PR^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4390198Z ^[[36;1m# Pre-existing changesets from other merged PRs are ignored^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4390503Z ^[[36;1mbun scripts/validate-changeset.mjs^[[0m
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4448523Z shell: /usr/bin/bash -e {0}
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4448745Z env:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4448913Z   GITHUB_BASE_REF: main
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4449194Z   GITHUB_BASE_SHA: 39187d521e93fcb4388c93684482abf3e7c8a052
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4449524Z   GITHUB_HEAD_SHA: ba2cadfdd759dc61b97c2f3c2d0dee92d8b3262a
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4449785Z ##[endgroup]
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4620293Z Validating changesets added by this PR...
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4621139Z Comparing 39187d521e93fcb4388c93684482abf3e7c8a052...ba2cadfdd759dc61b97c2f3c2d0dee92d8b3262a
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4709873Z ##[error]No changeset found in this PR. Please add a changeset by running 'npm run changeset' and commit the result.
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4718658Z Found 0 changeset file(s) added by this PR
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.4721052Z ##[error]Process completed with exit code 1.
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5218883Z Post job cleanup.
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5921335Z [command]/usr/bin/git version
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5959148Z git version 2.55.0
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5988279Z Temporarily overriding HOME='/home/runner/work/_temp/18ead595-9ade-4906-ad70-3e15da9002c8' before making global git config changes
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5989410Z Adding repository directory to the temporary git global config as a safe directory
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.5992414Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/gh-upload-log/gh-upload-log
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7003254Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7045489Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7302238Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7327011Z http.https://github.com/.extraheader
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7337352Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7367663Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7611062Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.7640874Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.8006231Z Cleaning up orphan processes
+Check for Changesets	UNKNOWN STEP	2026-10-24T06:04:19.8264933Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
