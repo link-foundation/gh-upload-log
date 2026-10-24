@@ -268,3 +268,15 @@ test('the pre-commit hook runs lint-staged and prepare verifies it', () => {
     )
   );
 });
+
+// `eslint .` exits 0 on warnings, so a commit that skipped the hook landed
+// what the hook's --max-warnings 0 rejects (template issue #241).
+test('CI lint rejects the warnings the pre-commit hook rejects', () => {
+  const pkg = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.match(pkg.scripts.lint, /--max-warnings 0\b/);
+  assert.ok(
+    pkg['lint-staged']['*.{js,mjs,cjs}'].some((command) =>
+      command.includes('--max-warnings 0')
+    )
+  );
+});
