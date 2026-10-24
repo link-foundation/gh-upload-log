@@ -23,6 +23,18 @@ export { preparePackages } from './prepare-npm-packages.mjs';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
 
+// Authentication and registry-configuration failures answer the same way on
+// every attempt, so retrying only delays the explanation (the pipeline
+// template's publish-failure-classifier.mjs). Runs 37771767171, 38264680940
+// and 39507532219 each spent three attempts on the same E404.
+const NON_RETRYABLE =
+  /\b(E404|E401|E403|ENEEDAUTH)\b|npm error (404|401|403)\b|access token expired|you must be logged in|unable to authenticate/i;
+
+/** Whether a failed publish is permanent and must not be retried. */
+export function isNonRetryablePublishFailure(message) {
+  return NON_RETRYABLE.test(String(message || ''));
+}
+
 /**
  * Sleep for specified milliseconds
  * @param {number} ms
@@ -54,9 +66,11 @@ export async function publishWithRetries(runPublish, options = {}) {
     logger = console,
   } = options;
   let lastError;
+  let attempts = 0;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     logger.log(`Publish attempt ${attempt} of ${maxRetries}...`);
+    attempts = attempt;
 
     try {
       const result = await runPublish();
@@ -64,6 +78,12 @@ export async function publishWithRetries(runPublish, options = {}) {
     } catch (error) {
       lastError = error;
 
+      if (isNonRetryablePublishFailure(error.message)) {
+        logger.log(
+          'Authentication or registry configuration error: not retrying.'
+        );
+        break;
+      }
       if (attempt < maxRetries) {
         logger.log(
           `Publish failed, waiting ${retryDelay / 1000}s before retry...`
@@ -77,7 +97,7 @@ export async function publishWithRetries(runPublish, options = {}) {
     ? ' Check npm account authorization and package settings: a missing package needs a first publish with an authorized npm account, then a trusted publisher for link-foundation/gh-upload-log, workflow release.yml. Configure each package name separately. See https://docs.npmjs.com/trusted-publishers/.'
     : '';
   throw new Error(
-    `Failed to publish after ${maxRetries} attempts: ${lastError?.message || 'unknown error'}${diagnostic}`,
+    `Failed to publish after ${attempts} attempt${attempts === 1 ? '' : 's'}: ${lastError?.message || 'unknown error'}${diagnostic}`,
     { cause: lastError }
   );
 }

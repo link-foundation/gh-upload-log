@@ -39,7 +39,7 @@ test('publishWithRetries rejects non-zero command results after all attempts', a
     await publishWithRetries(
       async () => {
         attempts += 1;
-        return commandResult(1, 'npm error E404 Not Found');
+        return commandResult(1, 'npm error 503 Service Unavailable');
       },
       {
         maxRetries: 3,
@@ -54,11 +54,44 @@ test('publishWithRetries rejects non-zero command results after all attempts', a
 
   assert.ok(thrown, 'A failed npm publish must reject');
   assert.ok(
-    thrown.message.includes('npm error E404 Not Found'),
+    thrown.message.includes('npm error 503 Service Unavailable'),
     `The final error should preserve npm diagnostics, got: ${thrown.message}`
   );
   assert.equal(attempts, 3, 'Every configured attempt should run');
   assert.equal(delays.length, 2, 'Retries should wait between attempts only');
+});
+
+// Runs 37771767171, 38264680940 and 39507532219 retried the same E404 three
+// times before explaining it; the answer never changes.
+test('publishWithRetries does not retry authentication or registry errors', async () => {
+  let attempts = 0;
+  const delays = [];
+  let thrown;
+
+  try {
+    await publishWithRetries(
+      async () => {
+        attempts += 1;
+        return commandResult(
+          1,
+          'npm error code E404\nnpm error 404 Not Found - PUT https://registry.npmjs.org/gh-upload-file'
+        );
+      },
+      {
+        maxRetries: 3,
+        retryDelay: 10,
+        sleepFn: async (delay) => delays.push(delay),
+        logger: { log() {} },
+      }
+    );
+  } catch (error) {
+    thrown = error;
+  }
+
+  assert.equal(attempts, 1, 'A permanent failure must not be retried');
+  assert.equal(delays.length, 0);
+  assert.ok(thrown?.message.startsWith('Failed to publish after 1 attempt:'));
+  assert.ok(thrown.message.includes('first publish'), thrown.message);
 });
 
 test('publishWithRetries succeeds only after a zero command exit code', async () => {
