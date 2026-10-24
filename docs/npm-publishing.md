@@ -14,11 +14,34 @@ failed with npm E404 for `gh-upload-file@0.12.1`. This session's `npm whoami`
 returns ENEEDAUTH, and the repository has no Actions secrets. GitHub repository
 permissions do not authorize npm account operations.
 
-The new preflight checks every package name before **either** automated or manual
-release versioning. It fails on main with the missing names and owner steps,
-without consuming a changeset or pushing a version commit. PR CI tests this with
-mock registry responses and does not require npm account access. The preflight
-checks existence; npm validates the actual workflow authorization on publish.
+The `Release Preflight` job checks every package name before **either**
+automated or manual release versioning, so a missing npm setup cannot consume a
+changeset or push a version commit. It runs `node scripts/check-npm-publishing.mjs`
+in one of two modes:
+
+- **release** (push to `main`, instant release): fails with an
+  `npm owner action required` error annotation that names the missing packages
+  and points here. Main run
+  [40071657572](https://github.com/link-foundation/gh-upload-log/actions/runs/40071657572)
+  is the failure this replaces: it reached the publish step and failed there.
+- **report** (pull requests, changeset-PR dispatch): writes the same text as a
+  warning annotation and passes, so unrelated pull requests stay green while main
+  keeps naming the blocker.
+
+Set `NPM_PREFLIGHT_VERBOSE=1` to log every registry request and response status.
+PR CI tests both modes with mock registry responses and does not require npm
+account access. The preflight checks existence; npm validates the actual
+workflow authorization on publish.
+
+### Alternative: bootstrap with an `NPM_TOKEN` secret
+
+npm trusted publishing (OIDC) can only publish packages that already exist. As
+an alternative to the manual first publish below, an npm owner can add a
+granular automation token with publish rights as the `NPM_TOKEN` repository
+secret. The preflight then passes (missing names are reported as a notice), and
+the publish steps pass it to npm as `NODE_AUTH_TOKEN`. After the first
+successful release, configure the trusted publishers below and **delete the
+secret** so publishing returns to short-lived OIDC credentials.
 
 ## Owner procedure
 
