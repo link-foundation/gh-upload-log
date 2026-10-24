@@ -15,7 +15,7 @@
 # maintainers give in secretlint/secretlint#1624, where they declined to
 # resolve rules from the linted project.
 set -u
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 cache="$(mktemp -d)"
 scan() {
   env npm_config_cache="$cache" ${2:+NODE_PATH="$2"} npx --yes -p secretlint@13.0.7 \

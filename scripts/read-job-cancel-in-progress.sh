@@ -5,6 +5,8 @@ set -euo pipefail
 
 : "${WORKFLOW_FILE:?WORKFLOW_FILE is required}"
 
+# The Python program is single-quoted on purpose: the shell must not expand it.
+# shellcheck disable=SC2016
 WORKFLOW_FILE="$WORKFLOW_FILE" JOB_NAMES="${JOB_NAMES:-}" python3 -c '
 import os
 import re

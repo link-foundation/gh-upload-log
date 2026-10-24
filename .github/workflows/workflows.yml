@@ -9,6 +9,8 @@ on:
       - 'scripts/check-ci-workflows.mjs'
       - 'scripts/check-status-gate-covers-all-jobs.mjs'
       - 'scripts/check-pipeline-status.sh'
+      - '**.sh'
+      - '.husky/**'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
@@ -16,6 +18,8 @@ on:
       - 'scripts/check-ci-workflows.mjs'
       - 'scripts/check-status-gate-covers-all-jobs.mjs'
       - 'scripts/check-pipeline-status.sh'
+      - '**.sh'
+      - '.husky/**'
   workflow_dispatch:
 
 # Least-privilege default; these jobs only need to read the checked-out tree.
@@ -56,6 +60,32 @@ jobs:
       - uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 # v1.7.12
         with:
           args: -color
+
+  # actionlint runs shellcheck on `run:` blocks only; the scripts those
+  # blocks call (scripts/*.sh) and the husky hook were never linted
+  # (template issue #251). Every tracked shell file is checked, so a new
+  # script is covered without editing this list.
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-shellcheck
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Pinned by digest for the same reason as the actionlint image above.
+      # Reproduce locally:
+      #   git ls-files -z '*.sh' '.husky/*' | xargs -0 docker run --rm \
+      #     -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:v0.11.0
+      - name: Run ShellCheck on every tracked shell script
+        run: |
+          git ls-files -z '*.sh' '.husky/*' |
+            xargs -0 docker run --rm -v "$PWD:/mnt" -w /mnt \
+              koalaman/shellcheck@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d
 
   # The terminal status job of release.yml keys branch protection; its
   # needs list is hand-maintained, so a job left out of it could fail while
@@ -157,6 +187,7 @@ jobs:
       !cancelled()
     needs:
       - actionlint
+      - shellcheck
       - status-gate-coverage
       - zizmor
     steps:

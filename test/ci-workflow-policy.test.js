@@ -296,3 +296,32 @@ test('no job name embeds a matrix expression', () => {
     );
   }
 });
+
+// actionlint lints `run:` blocks only, so the scripts they call and the
+// husky hook went unchecked; the hook had no shebang (SC2148). Template
+// issue #251.
+test('ShellCheck lints every tracked shell script and gates the run', () => {
+  const workflow = readWorkflow('workflows.yml');
+  assert.match(
+    workflow,
+    /git ls-files -z '\*\.sh' '\.husky\/\*'[\s\S]*?koalaman\/shellcheck@sha256:[0-9a-f]{64}/
+  );
+  assert.equal(workflow.match(/^ {6}- '\*\*\.sh'$/gm)?.length, 2);
+  assert.equal(workflow.match(/^ {6}- '\.husky\/\*\*'$/gm)?.length, 2);
+  assert.match(workflow, /^ {6}- shellcheck$/m);
+
+  const scripts = spawnSync('git', ['ls-files', '*.sh', '.husky/*'], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+    .stdout.split('\n')
+    .filter(Boolean);
+  assert.ok(scripts.includes('.husky/pre-commit'));
+  for (const script of scripts) {
+    assert.match(
+      readFileSync(path.join(root, script), 'utf8'),
+      /^#!\/usr\/bin\/env (ba)?sh\n/,
+      `${script} has no shebang`
+    );
+  }
+});

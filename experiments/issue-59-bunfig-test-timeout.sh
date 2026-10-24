@@ -7,7 +7,7 @@
 # Expected: "bunfig" fails after 5000ms, "--timeout 30000" passes.
 set -u
 dir="$(mktemp -d)"
-cd "$dir"
+cd "$dir" || exit 1
 cat > slow.test.js <<'JS'
 import { test } from 'bun:test';
 test('slow', async () => {

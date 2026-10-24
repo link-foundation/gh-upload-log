@@ -8,7 +8,7 @@
 # Usage: bash experiments/issue-59-budget-seconds-early-kill.sh [runs]
 # Expected after the fix: every run prints exit=0.
 set -u
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 runs="${1:-3}"
 for _ in $(seq "${runs}"); do
   while :; do
