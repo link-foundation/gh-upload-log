@@ -53,9 +53,13 @@ jobs:
       - name: Analyze
         uses: github/codeql-action/analyze@v4
 
+  # Dependency review needs the repository's dependency graph, an admin
+  # setting. The check below names that setting instead of letting the action
+  # fail opaquely: pull requests get a warning and skip the review, while main
+  # fails until an admin enables the graph (run 40078460897).
   dependency-review:
     name: Dependency Review
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
@@ -69,7 +73,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Check dependency graph
+        id: dependency-graph
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPENDENCY_GRAPH_MODE: ${{ github.event_name == 'pull_request' && 'report' || 'enforce' }}
+        run: node scripts/check-dependency-graph.mjs
+
       - name: Review dependency changes
+        if: github.event_name == 'pull_request' && steps.dependency-graph.outputs.enabled == 'true'
         uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
