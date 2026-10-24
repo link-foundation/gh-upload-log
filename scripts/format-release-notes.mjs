@@ -190,7 +190,7 @@ try {
   try {
     await writeFile(payloadPath, updatePayload);
     const updateResult =
-      await $`${ghCommand} api repos/${repository}/releases/${releaseId} -X PATCH --input "${payloadPath}"`.run(
+      await $`${ghCommand} api repos/${repository}/releases/${releaseId} -X PATCH --input ${payloadPath}`.run(
         { capture: true }
       );
     ensureCommandSucceeded(updateResult, `update GitHub release ${releaseId}`);

@@ -12,6 +12,9 @@
  */
 
 import { readFileSync } from 'fs';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 import { $ } from 'command-stream';
 import { makeConfig } from 'lino-arguments';
@@ -32,10 +35,15 @@ const config = makeConfig({
         type: 'string',
         default: getenv('REPOSITORY', ''),
         describe: 'GitHub repository (e.g., owner/repo)',
+      })
+      .option('gh-command', {
+        type: 'string',
+        default: getenv('GH_COMMAND', 'gh'),
+        describe: 'GitHub CLI executable',
       }),
 });
 
-const { releaseVersion: version, repository } = config;
+const { releaseVersion: version, repository, ghCommand } = config;
 
 if (!version || !repository) {
   console.error('Error: Missing required arguments');
@@ -58,17 +66,40 @@ try {
 
   // Create release using GitHub API with JSON input
   // This avoids shell escaping issues that occur when passing text via command-line arguments
-  // (Previously caused apostrophes like "didn't" to appear as "didn'''" in releases)
+  // (Previously caused apostrophes like "didn't" to appear as "didn'''" in releases).
+  // The payload is a file, not stdin: under Bun, command-stream <= 0.11.1
+  // reports exit code 0 for a failed command run with `stdin`, so a refused
+  // release looked created (experiments/issue-59-command-stream-stdin-exit-code.mjs).
   const payload = JSON.stringify({
     tag_name: tag,
     name: version,
     body: releaseNotes,
   });
+  const payloadDirectory = await mkdtemp(
+    path.join(os.tmpdir(), 'gh-upload-log-release-')
+  );
+  const payloadPath = path.join(payloadDirectory, 'release.json');
+  let result;
+  try {
+    await writeFile(payloadPath, payload);
+    result =
+      await $`${ghCommand} api repos/${repository}/releases -X POST --input ${payloadPath}`.run(
+        { capture: true }
+      );
+  } finally {
+    await rm(payloadDirectory, { recursive: true, force: true });
+  }
 
-  const result =
-    await $`gh api repos/${repository}/releases -X POST --input -`.run({
-      stdin: payload,
-    });
+  // A release job re-run after a partial success (check-release-needed.mjs)
+  // may find the release already there: GitHub answers HTTP 422
+  // already_exists, which is the state this step exists to reach.
+  if (
+    result.code !== 0 &&
+    /already_exists/.test(`${result.stdout || ''}${result.stderr || ''}`)
+  ) {
+    console.log(`::notice::GitHub release ${tag} already exists`);
+    process.exit(0);
+  }
   ensureCommandSucceeded(result, `create GitHub release ${tag}`);
 
   console.log(`\u2705 Created GitHub release: ${tag}`);
