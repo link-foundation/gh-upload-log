@@ -363,10 +363,10 @@ test('an existing GitHub release is accepted on a recovery run', () => {
 });
 
 test('the release job checks every artifact before skipping a release', () => {
-  const workflow = fs.readFileSync(
-    path.join(root, '.github/workflows/release.yml'),
-    'utf8'
-  );
+  // A windows-2025 checkout stores release.yml with CRLF.
+  const workflow = fs
+    .readFileSync(path.join(root, '.github/workflows/release.yml'), 'utf8')
+    .replaceAll('\r\n', '\n');
   assert.ok(workflow.includes('run: bun scripts/check-release-needed.mjs'));
   assert.ok(
     workflow.includes(
