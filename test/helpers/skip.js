@@ -36,6 +36,15 @@ export const sandboxed =
     : null;
 
 /**
+ * On Windows a bare `bash` can resolve to WSL's System32 launcher rather than
+ * the Git Bash that runs the repository's shell scripts in CI.
+ */
+export const windowsBash =
+  process.platform === 'win32'
+    ? 'bash on PATH may be WSL rather than Git Bash'
+    : null;
+
+/**
  * @param {...(string|null|undefined|false)} reasons first truthy one wins
  * @returns {typeof it} `it`, or a registrar that reports the test as skipped
  */

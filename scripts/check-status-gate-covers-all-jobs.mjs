@@ -74,8 +74,16 @@ function listNeededJobs(jobBlock) {
 
   const neededJobs = [];
 
+  // Comments, blank lines and trailing `# comments` are not the end of the
+  // list; stopping at them reported every later job as a hole (template #253).
   for (const line of lines.slice(needsStart + 1)) {
-    const item = line.match(/^ {6}- ([a-zA-Z0-9_-]+)\s*$/);
+    const text = line.replace(/\s+#.*$/, '');
+
+    if (text.trim() === '' || text.trimStart().startsWith('#')) {
+      continue;
+    }
+
+    const item = text.match(/^ {6}- ([a-zA-Z0-9_-]+)\s*$/);
 
     if (!item) {
       break;

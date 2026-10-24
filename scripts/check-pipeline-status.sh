@@ -6,6 +6,11 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 branch_name="${BRANCH_NAME:-main}"
+# The ref whose head decides "superseded". Pull requests pass
+# refs/pull/<n>/head: it exists in this repository for fork and same-repo
+# pull requests alike, while refs/heads/<head_ref> names a fork's branch that
+# is absent here or, worse, an unrelated branch of the same name (#253).
+head_ref="${HEAD_REF:-refs/heads/${branch_name}}"
 git_remote="${GIT_REMOTE:-origin}"
 verbose="${PIPELINE_STATUS_VERBOSE:-0}"
 
@@ -19,7 +24,8 @@ run_is_superseded() {
     return 1
   fi
   if [ -z "${head}" ]; then
-    head="$(git ls-remote "${git_remote}" "refs/heads/${branch_name}" 2>/dev/null | awk 'NR == 1 { print $1 }')"
+    trace "git ls-remote ${git_remote} ${head_ref}"
+    head="$(git ls-remote "${git_remote}" "${head_ref}" 2>/dev/null | awk 'NR == 1 { print $1 }')"
   fi
   if [ -z "${head}" ]; then
     echo "Could not resolve the head of ${branch_name}; assuming this run is current." >&2

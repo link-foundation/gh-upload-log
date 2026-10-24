@@ -2,16 +2,9 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert } from 'test-anywhere';
-import { itUnless, sandboxed } from './helpers/skip.js';
+import { itUnless, sandboxed, windowsBash } from './helpers/skip.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-// On Windows a bare `bash` can resolve to WSL's System32 launcher rather than
-// the Git Bash that runs this script in CI, so the timing tests are POSIX-only.
-const windowsBash =
-  process.platform === 'win32'
-    ? 'bash on PATH may be WSL rather than Git Bash'
-    : null;
 
 function runBudget(budget, command, env = {}) {
   return spawnSync(
