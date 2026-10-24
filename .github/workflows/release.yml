@@ -203,8 +203,11 @@ jobs:
 
   # Test matrix: Bun on 3 pinned OS images (Ubuntu, macOS, Windows).
   # Tests validate the actual merge result, not a stale merge preview.
+  # Static name: a skipped job never gets matrix values, so a matrix
+  # expression in its name was listed unexpanded (template issue #247).
+  # GitHub appends the values to jobs that run: "Bun Test (ubuntu-24.04)".
   test:
-    name: Test (Bun on ${{ matrix.os }})
+    name: Bun Test
     runs-on: ${{ matrix.os }}
     # Backstop only: the suite budget below expires first, so an overrun
     # fails the step instead of turning the job grey (cancelled).

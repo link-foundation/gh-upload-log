@@ -21,8 +21,9 @@ env:
   GIT_CONFIG_VALUE_0: main
 
 jobs:
+  # Static name; GitHub appends the language (template issue #247).
   codeql:
-    name: CodeQL (${{ matrix.language }})
+    name: CodeQL
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     concurrency:

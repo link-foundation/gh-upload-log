@@ -280,3 +280,20 @@ test('CI lint rejects the warnings the pre-commit hook rejects', () => {
     )
   );
 });
+
+// A skipped job never gets matrix values, so a `${{ matrix.* }}` name was
+// listed unexpanded, e.g. "Test (Bun on ${{ matrix.os }})" in run
+// 37764693617 (template issue #247). GitHub appends the values itself.
+test('no job name embeds a matrix expression', () => {
+  for (const file of readdirSync(path.join(root, '.github', 'workflows'))) {
+    const workflow = readFileSync(
+      path.join(root, '.github', 'workflows', file),
+      'utf8'
+    );
+    assert.doesNotMatch(
+      workflow,
+      /^ {4}name:.*\$\{\{\s*matrix\./m,
+      `${file} names a job with a matrix expression`
+    );
+  }
+});
