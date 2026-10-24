@@ -198,6 +198,9 @@ jobs:
       - name: Check file size limit
         run: bun run check:file-size
 
+      - name: Check required documentation sections
+        run: bun run check:docs
+
   # Test matrix: Bun on 3 pinned OS images (Ubuntu, macOS, Windows).
   # Tests validate the actual merge result, not a stale merge preview.
   test:

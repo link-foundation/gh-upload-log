@@ -10,13 +10,14 @@
     "gh-upload-log": "src/cli.js"
   },
   "scripts": {
-    "test": "bun test",
+    "test": "bun test --timeout 30000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:file-size": "bun scripts/check-file-size.mjs",
-    "check": "bun run lint && bun run format:check && bun run check:file-size",
+    "check:docs": "node scripts/check-required-docs.mjs",
+    "check": "bun run lint && bun run format:check && bun run check:file-size && bun run check:docs",
     "prepare": "node scripts/install-git-hooks.mjs",
     "changeset": "changeset",
     "changeset:version": "bun scripts/changeset-version.mjs",
