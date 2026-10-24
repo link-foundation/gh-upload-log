@@ -7,21 +7,15 @@
  *   repository: GitHub repository (e.g., owner/repo)
  *
  * Uses link-foundation libraries:
- * - use-m: Dynamic package loading without package.json dependencies
  * - command-stream: Modern shell command execution with streaming support
  * - lino-arguments: Unified configuration from CLI args, env vars, and .lenv files
  */
 
 import { readFileSync } from 'fs';
 
-// Load use-m dynamically
-const { use } = eval(
-  await (await fetch('https://unpkg.com/use-m/use.js')).text()
-);
-
-// Import link-foundation libraries
-const { $ } = await use('command-stream');
-const { makeConfig } = await use('lino-arguments');
+import { $ } from 'command-stream';
+import { makeConfig } from 'lino-arguments';
+import { ensureCommandSucceeded } from '../src/common.js';
 
 // Parse CLI arguments using lino-arguments
 // Note: Using --release-version instead of --version to avoid conflict with yargs' built-in --version flag
@@ -82,9 +76,11 @@ try {
     body: releaseNotes,
   });
 
-  await $`gh api repos/${repository}/releases -X POST --input -`.run({
-    stdin: payload,
-  });
+  const result =
+    await $`gh api repos/${repository}/releases -X POST --input -`.run({
+      stdin: payload,
+    });
+  ensureCommandSucceeded(result, `create GitHub release ${tag}`);
 
   console.log(`\u2705 Created GitHub release: ${tag}`);
 } catch (error) {
