@@ -81,10 +81,14 @@ test('publishWithRetries succeeds only after a zero command exit code', async ()
 });
 
 test('release workflow uses an OIDC-compatible Node and npm toolchain', () => {
-  const workflow = fs.readFileSync(
-    path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
-    'utf8'
-  );
+  // Normalise line endings: a Windows checkout stores CRLF, which would
+  // otherwise leave the job split below with no blocks at all.
+  const workflow = fs
+    .readFileSync(
+      path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
+      'utf8'
+    )
+    .replaceAll('\r\n', '\n');
   // Split the workflow into top-level job blocks (two-space indented keys).
   const jobs = Object.fromEntries(
     workflow
