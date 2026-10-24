@@ -101,7 +101,7 @@ function createFakeCommandStream(handler) {
   return commandStream;
 }
 
-function ensureLargeTestFile(filePath, sizeBytes = 26 * 1024 * 1024) {
+function writeRepositoryTestFile(filePath, sizeBytes = 4 * 1024) {
   writeTextFixture(filePath, sizeBytes);
 }
 
@@ -542,7 +542,7 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
 
 test('uploadLog - stores large files in the shared visibility repository by default', async () => {
   const sharedFile = path.join('test', 'fixtures', 'shared-default-large.log');
-  ensureLargeTestFile(sharedFile);
+  writeRepositoryTestFile(sharedFile);
 
   const sharedFolder = buildLogRepositoryPath(
     path.resolve(sharedFile),
@@ -676,7 +676,7 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
     'fixtures',
     'shared-duplicate-large.log'
   );
-  ensureLargeTestFile(duplicateFile);
+  writeRepositoryTestFile(duplicateFile);
 
   const sharedFolder = buildLogRepositoryPath(
     path.resolve(duplicateFile),
@@ -747,7 +747,7 @@ test('uploadLog - skips duplicate uploads already present in the shared reposito
 
 test('uploadLog - keeps dedicated repository mode available when shared mode is disabled', async () => {
   const legacyFile = path.join('test', 'fixtures', 'legacy-repo-large.log');
-  ensureLargeTestFile(legacyFile);
+  writeRepositoryTestFile(legacyFile);
 
   const commands = [];
 

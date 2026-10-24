@@ -53,6 +53,11 @@ try {
     assert.equal(packed.name, pkg.name);
     assert.equal(packed.version, pkg.version);
     assert.ok(packed.files.some((file) => file.path === 'src/file-upload.js'));
+    assert.ok(packed.files.some((file) => file.path === 'src/sanitization.js'));
+    assert.equal(
+      manifest.dependencies['@link-foundation/sensitive-data-sanitizer'],
+      '0.12.1'
+    );
     assert.ok(
       !packed.files.some(
         (file) =>
@@ -94,7 +99,7 @@ try {
       path.join(consumer, 'data.bin'),
       Buffer.from([0, 255, 128])
     );
-    for (const bin of ['gh-upload-file', 'gh-upload-log']) {
+    for (const bin of ['gh-upload', 'gh-upload-file', 'gh-upload-log']) {
       const binPath = path.join(consumer, 'node_modules', '.bin', bin);
       assert.equal(run(binPath, ['--version'], consumer).trim(), pkg.version);
       const output = run(
@@ -110,7 +115,7 @@ try {
       version: pkg.version,
       packedFiles: packed.files.length,
       unpackedSize: packed.unpackedSize,
-      bins: ['gh-upload-file', 'gh-upload-log'],
+      bins: ['gh-upload', 'gh-upload-file', 'gh-upload-log'],
       importPassed: true,
       dryPublishPassed: true,
     });

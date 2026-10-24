@@ -8,6 +8,7 @@
  * - Repositories (for larger text files and gzip archives of binary files)
  */
 
+import { withSanitizedUpload, uploadSourcePath } from './sanitization.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -119,7 +120,7 @@ export function determineUploadStrategy(rawFilePath, options = {}) {
   }
 
   const fileSize = getFileSize(filePath);
-  const info = getFileUploadInfo(filePath);
+  const info = getFileUploadInfo(filePath, options.sourcePath);
   const gistFileLimit = resolveGistFileLimit(options.gistFileLimit);
   const chunkSize = resolveChunkSize(options.chunkSize);
 
@@ -195,7 +196,11 @@ export function isTransientGistError(errorText = '') {
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Gist information including URL
  */
-export async function uploadAsGist(options = {}) {
+export function uploadAsGist(options = {}) {
+  return withSanitizedUpload(options, uploadSanitizedGist);
+}
+
+async function uploadSanitizedGist(options) {
   const {
     isPublic = false,
     description,
@@ -218,7 +223,7 @@ export async function uploadAsGist(options = {}) {
   }
   const $ = await getCommandStream(options);
   const log = createDefaultLogger({ verbose, logger });
-  const gistFileName = generateGistFileName(filePath);
+  const gistFileName = generateGistFileName(uploadSourcePath(options));
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-upload-log-gist-'));
   const stagedFilePath = path.join(workDir, gistFileName);
   const desc = description || `Log file: ${path.basename(filePath)}`;
@@ -338,7 +343,11 @@ export async function uploadAsGist(options = {}) {
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
  */
-export async function uploadLog(options = {}) {
+export function uploadLog(options = {}) {
+  return withSanitizedUpload(options, uploadSanitizedLog);
+}
+
+async function uploadSanitizedLog(options) {
   const {
     isPublic = false,
     auto = true,
@@ -370,6 +379,7 @@ export async function uploadLog(options = {}) {
 
   const log = createDefaultLogger({ verbose, logger });
   const strategy = determineUploadStrategy(filePath, {
+    sourcePath: uploadSourcePath(options),
     gistFileLimit,
     chunkSize,
   });
@@ -409,7 +419,7 @@ export async function uploadLog(options = {}) {
           ? repositoryTarget.repositoryName
           : sharedRepositoryMode
             ? getSharedRepositoryName(isPublic)
-            : generateRepoName(filePath);
+            : generateRepoName(uploadSourcePath(options));
     // Hashing the file is the only way to know the target folder up front, and
     // dry mode is expected to print the exact path a real upload would use.
     const contentHash =
@@ -418,7 +428,7 @@ export async function uploadLog(options = {}) {
         : undefined;
     const repositoryPath =
       uploadType === 'repo'
-        ? buildLogRepositoryPath(filePath, contentHash)
+        ? buildLogRepositoryPath(uploadSourcePath(options), contentHash)
         : undefined;
 
     return {
@@ -436,7 +446,7 @@ export async function uploadLog(options = {}) {
       fileCountIsEstimate: uploadType === 'repo',
       fileName:
         uploadType === 'gist'
-          ? generateGistFileName(filePath)
+          ? generateGistFileName(uploadSourcePath(options))
           : strategy.fileName,
       repositoryName,
       ...(uploadType === 'repo' && repositoryTarget

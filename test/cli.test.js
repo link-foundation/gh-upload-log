@@ -65,13 +65,13 @@ function setupTestFile() {
   }
 }
 
-function setupLargeRepoTestFile() {
+function setupRepositoryTestFile() {
   fs.mkdirSync(path.dirname(largeCliRepoFile), { recursive: true });
-  writeTextFixture(largeCliRepoFile, 26 * 1024 * 1024);
+  writeTextFixture(largeCliRepoFile, 4 * 1024);
 }
 
 setupTestFile();
-setupLargeRepoTestFile();
+setupRepositoryTestFile();
 
 const largeCliRepoPath = buildLogRepositoryPath(
   path.resolve(largeCliRepoFile),
