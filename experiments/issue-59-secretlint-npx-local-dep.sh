@@ -10,12 +10,15 @@
 # its own folder.
 #
 # Usage: bash experiments/issue-59-secretlint-npx-local-dep.sh
-# Expected: "with node_modules" exits 2, "without node_modules" exits 0.
+# Expected: "with node_modules" exits 2; "with node_modules and NODE_PATH"
+# and "without node_modules" exit 0. NODE_PATH is the workaround secretlint's
+# maintainers give in secretlint/secretlint#1624, where they declined to
+# resolve rules from the linted project.
 set -u
 cd "$(dirname "$0")/.."
 cache="$(mktemp -d)"
 scan() {
-  npm_config_cache="$cache" npx --yes -p secretlint@13.0.7 \
+  env npm_config_cache="$cache" ${2:+NODE_PATH="$2"} npx --yes -p secretlint@13.0.7 \
     -p @secretlint/secretlint-rule-preset-recommend@13.0.7 \
     secretlint "**/*" > "$cache/out.txt" 2>&1
   echo "$1 exit=$?"
@@ -24,6 +27,7 @@ scan() {
 }
 [ -d node_modules ] || bun install --frozen-lockfile > /dev/null
 scan "with node_modules"
+scan "with node_modules and NODE_PATH" "$PWD/node_modules"
 mv node_modules "$cache/node_modules.aside"
 scan "without node_modules"
 mv "$cache/node_modules.aside" node_modules
