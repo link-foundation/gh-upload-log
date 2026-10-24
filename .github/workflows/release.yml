@@ -397,6 +397,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bun scripts/publish-to-npm.mjs --should-pull
 
+      # Install every published name from the registry as a consumer would,
+      # before the GitHub release announces it.
+      - name: Smoke-test the published package
+        if: steps.publish.outputs.published == 'true'
+        env:
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+        run: bash scripts/run-with-budget-warning.sh 600 "npm package smoke test" node scripts/smoke-test-package.mjs --package-version "$PACKAGE_VERSION"
+
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
         env:
@@ -492,6 +500,14 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bun scripts/publish-to-npm.mjs
+
+      # Install every published name from the registry as a consumer would,
+      # before the GitHub release announces it.
+      - name: Smoke-test the published package
+        if: steps.publish.outputs.published == 'true'
+        env:
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+        run: bash scripts/run-with-budget-warning.sh 600 "npm package smoke test" node scripts/smoke-test-package.mjs --package-version "$PACKAGE_VERSION"
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
