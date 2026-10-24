@@ -53,7 +53,7 @@ modify npm account settings.
 
 ```sh
 bun install --frozen-lockfile
-bun test
+bun run test
 bun run check
 bun scripts/prepare-npm-packages.mjs --output-dir dist/npm
 npm pack ./dist/npm/gh-upload-file --dry-run
