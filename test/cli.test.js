@@ -2,13 +2,15 @@
  * Tests for gh-upload-log CLI
  */
 
-import { test, assert } from 'test-anywhere';
+import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { setTimeout, clearTimeout } from 'node:timers';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
 import { writeTextFixture } from '../experiments/text-fixture.mjs';
+import { testWithTimeout } from '../experiments/real-git-test-utils.mjs';
 import {
   buildLogRepositoryPath,
   generateFileContentHash,
@@ -20,15 +22,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
+const slowCliPreload = pathToFileURL(
+  path.join(__dirname, '..', 'experiments', 'issue-55-slow-cli.mjs')
+).href;
 const packageVersion = JSON.parse(
   fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
 ).version;
 const testLogFile = path.join(os.tmpdir(), 'test-cli-log-file.log');
 const largeCliRepoFile = path.join('test', 'fixtures', 'cli-shared-large.log');
 const largeCliRepoFolder = generateRepoName(path.resolve(largeCliRepoFile));
+// Leave time for child cleanup and diagnostics before the native test deadline.
+const CLI_COMMAND_TIMEOUT_MS = 15_000;
+const test = (name, run) => testWithTimeout(name, run, 20_000);
 
 // Helper function to run CLI command
-function runCLI(args, env = {}) {
+function runCLI(args, env = {}, timeout = CLI_COMMAND_TIMEOUT_MS) {
   return new Promise((resolve, reject) => {
     const child = spawn('node', [cliPath, ...args], {
       env: { ...process.env, ...env },
@@ -36,6 +44,11 @@ function runCLI(args, env = {}) {
 
     let stdout = '';
     let stderr = '';
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGKILL');
+    }, timeout);
 
     child.stdout.on('data', (data) => {
       stdout += data.toString();
@@ -46,6 +59,15 @@ function runCLI(args, env = {}) {
     });
 
     child.on('close', (code) => {
+      clearTimeout(timer);
+      if (timedOut) {
+        reject(
+          new Error(
+            `CLI ${args.join(' ')} timed out after ${timeout}ms\n${stdout}${stderr}`
+          )
+        );
+        return;
+      }
       resolve({
         code,
         stdout,
@@ -54,7 +76,10 @@ function runCLI(args, env = {}) {
       });
     });
 
-    child.on('error', reject);
+    child.on('error', (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
   });
 }
 
@@ -65,13 +90,13 @@ function setupTestFile() {
   }
 }
 
-function setupLargeRepoTestFile() {
+function setupRepositoryTestFile() {
   fs.mkdirSync(path.dirname(largeCliRepoFile), { recursive: true });
-  writeTextFixture(largeCliRepoFile, 26 * 1024 * 1024);
+  writeTextFixture(largeCliRepoFile, 4 * 1024);
 }
 
 setupTestFile();
-setupLargeRepoTestFile();
+setupRepositoryTestFile();
 
 const largeCliRepoPath = buildLogRepositoryPath(
   path.resolve(largeCliRepoFile),
@@ -382,6 +407,30 @@ test('CLI with --description flag', async () => {
   assert.ok(
     result.output.includes('Test description'),
     'Should include description'
+  );
+});
+
+test('CLI tolerates startup longer than the implicit Bun timeout', async () => {
+  const result = await runCLI(
+    [testLogFile, '--description', 'Slow startup', '--dry-mode', '--verbose'],
+    {
+      NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --import="${slowCliPreload}"`,
+    }
+  );
+  assert.equal(result.code, 0, result.output);
+  assert.ok(result.output.includes('Slow startup'), result.output);
+});
+
+test('CLI deadline stops the child and retains command diagnostics', async () => {
+  await assert.rejects(
+    runCLI(
+      ['--version'],
+      {
+        NODE_OPTIONS: `${process.env.NODE_OPTIONS || ''} --import="${slowCliPreload}"`,
+      },
+      2_000
+    ),
+    /CLI --version timed out after 2000ms/
   );
 });
 

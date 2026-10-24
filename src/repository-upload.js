@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { withSanitizedUpload, uploadSourcePath } from './sanitization.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -339,16 +340,19 @@ async function uploadAsDedicatedRepo(options = {}) {
 
   const filePath = resolveLogFilePath(options.filePath);
   const chunkSize = resolveChunkSize(options.chunkSize);
-  const info = getFileUploadInfo(filePath);
+  const info = getFileUploadInfo(filePath, uploadSourcePath(options));
   const log = createDefaultLogger({ verbose, logger });
-  const baseRepositoryName = generateRepoName(filePath);
+  const baseRepositoryName = generateRepoName(uploadSourcePath(options));
   const workDir = createWorkDirPath(baseRepositoryName);
   const $workDir = createWorkDirRunner($, workDir, verbose);
   const $quiet = $({ mirror: Boolean(verbose), capture: true });
 
   try {
     const contentHash = await generateFileContentHash(filePath);
-    const repositoryPath = buildLogRepositoryPath(filePath, contentHash);
+    const repositoryPath = buildLogRepositoryPath(
+      uploadSourcePath(options),
+      contentHash
+    );
     log.debug(() => `Content hash: ${contentHash}`);
     log.debug(() => `Repository path: ${repositoryPath}`);
 
@@ -477,20 +481,25 @@ async function uploadAsSharedRepo(options = {}) {
 
   const filePath = resolveLogFilePath(options.filePath);
   const chunkSize = resolveChunkSize(options.chunkSize);
-  const info = getFileUploadInfo(filePath);
+  const info = getFileUploadInfo(filePath, uploadSourcePath(options));
   const log = createDefaultLogger({ verbose, logger });
   const target = resolveRepositoryTarget(options);
   const repositoryName =
     target?.repositoryName || getSharedRepositoryName(isPublic);
   const storedFileName = info.fileName;
-  const workDir = createWorkDirPath(generateRepoName(filePath));
+  const workDir = createWorkDirPath(
+    generateRepoName(uploadSourcePath(options))
+  );
   const $workDir = createWorkDirRunner($, workDir, verbose);
   const $quiet = $({ mirror: Boolean(verbose), capture: true });
   let repositoryPath;
 
   try {
     const contentHash = await generateFileContentHash(filePath);
-    repositoryPath = buildLogRepositoryPath(filePath, contentHash);
+    repositoryPath = buildLogRepositoryPath(
+      uploadSourcePath(options),
+      contentHash
+    );
     log.debug(() => `Content hash: ${contentHash}`);
     log.debug(() => `Repository path: ${repositoryPath}`);
     log.debug(() => `Stored file name: ${storedFileName}`);
@@ -793,6 +802,10 @@ async function uploadAsSharedRepo(options = {}) {
  * @returns {Promise<Object>} Repository information including URL
  */
 export function uploadAsRepo(options = {}) {
+  return withSanitizedUpload(options, uploadSanitizedRepo);
+}
+
+function uploadSanitizedRepo(options) {
   const { filePath, useSharedRepository = true } = options;
 
   if (!filePath) {

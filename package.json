@@ -43,6 +43,7 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
+    "@link-foundation/sensitive-data-sanitizer": "0.12.1",
     "command-stream": "^0.7.1",
     "lino-arguments": "^0.3.0",
     "log-lazy": "^1.0.4",

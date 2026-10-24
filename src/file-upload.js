@@ -48,13 +48,13 @@ export function detectFileType(filePath) {
 }
 
 /** Names and metadata refer to the source, even when staging an archive. */
-export function getFileUploadInfo(filePath) {
+export function getFileUploadInfo(filePath, sourcePath = filePath) {
   const fileType = detectFileType(filePath);
-  const originalFileName = path.basename(filePath);
+  const originalFileName = path.basename(sourcePath);
   let fileName =
     fileType === 'binary'
       ? `${shortenGeneratedName(normalizeFileName(originalFileName), MAX_UPLOADED_FILE_NAME_LENGTH - 3)}.gz`
-      : generateStoredLogFileName(filePath);
+      : generateStoredLogFileName(sourcePath);
   // Hidden source files must not be confused with completion markers.
   if (fileName.startsWith('.')) {
     fileName = `file-${fileName}`;

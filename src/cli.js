@@ -330,6 +330,14 @@ async function main() {
 
     const result = await uploadLog(options);
 
+    const summary = result.sanitization;
+    console.log(
+      `Sanitization: ${summary.redactions} credential span(s) masked; ${summary.inputBytes} bytes scanned`
+    );
+    for (const [rule, count] of Object.entries(summary.rules).sort()) {
+      console.log(`  ${rule}: ${count}`);
+    }
+
     // Display concise results
     const typeEmoji = result.type === 'gist' ? '📝' : '📦';
     const typeLabel = result.type === 'gist' ? 'Gist' : 'Repository';
