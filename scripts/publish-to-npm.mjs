@@ -126,8 +126,31 @@ export async function isVersionPublished(
 }
 
 /**
- * Resume partial publication and gate release outputs on every name. Each
- * successful publish gets a bounded five-minute registry visibility window.
+ * npm answers E409 "Cannot publish over previously staged version" while a
+ * version it accepted is not yet visible, and EPUBLISHCONFLICT once it is.
+ * Both mean "already landed": a cue to verify on the registry, not a failure.
+ */
+const ALREADY_LANDED =
+  /E409|EPUBLISHCONFLICT|cannot publish over (the )?previously (staged|published) version/i;
+
+export function isAlreadyLandedOutput(result) {
+  return ALREADY_LANDED.test(
+    `${result?.stdout || ''}\n${result?.stderr || ''}`
+  );
+}
+
+/**
+ * The first check is immediate; 150 ten-second sleeps span 25 minutes. npm
+ * visibility lag reached 874 seconds in September 2026 (hive-mind #2923,
+ * CI-CD-BEST-PRACTICES principle 9), so the old 5-minute window could turn a
+ * good release into a red run with no GitHub release.
+ */
+export const VERIFICATION_ATTEMPTS = 151;
+export const VERIFICATION_DELAY_MS = 10_000;
+
+/**
+ * Resume partial publication and gate release outputs on every name. All
+ * published names share one registry visibility window.
  */
 export async function publishPackages({
   packages,
@@ -136,8 +159,9 @@ export async function publishPackages({
   setOutput: output = setOutput,
   logger = console,
   sleepFn = sleep,
-  verificationAttempts = 31,
-  verificationDelayMs = 10_000,
+  now = Date.now,
+  verificationAttempts = VERIFICATION_ATTEMPTS,
+  verificationDelayMs = VERIFICATION_DELAY_MS,
   maxRetries = MAX_RETRIES,
   retryDelay = RETRY_DELAY,
 }) {
@@ -148,6 +172,7 @@ export async function publishPackages({
     throw new Error('Publication requires packages with the same version');
   }
   let alreadyPublished = true;
+  const pending = [];
   for (const pkg of packages) {
     if (await isPublished(pkg.name, pkg.version)) {
       logger.log(`${pkg.name}@${pkg.version} is already published`);
@@ -163,6 +188,12 @@ export async function publishPackages({
           return { code: 0 };
         }
         const result = await runPublish(pkg);
+        if (result.code !== 0 && isAlreadyLandedOutput(result)) {
+          logger.log(
+            `npm reports ${pkg.name}@${pkg.version} as already landed; verifying on the registry`
+          );
+          return { code: 0 };
+        }
         if (result.code !== 0 && (await isPublished(pkg.name, pkg.version))) {
           return { code: 0 };
         }
@@ -170,22 +201,33 @@ export async function publishPackages({
       },
       { logger, sleepFn, maxRetries, retryDelay }
     );
-    let visible = false;
-    for (let attempt = 0; attempt < verificationAttempts; attempt++) {
+    pending.push(pkg);
+  }
+
+  const started = now();
+  for (
+    let attempt = 0;
+    pending.length > 0 && attempt < verificationAttempts;
+    attempt++
+  ) {
+    for (const pkg of [...pending]) {
       if (await isPublished(pkg.name, pkg.version)) {
-        visible = true;
-        break;
-      }
-      if (attempt + 1 < verificationAttempts) {
-        await sleepFn(verificationDelayMs);
+        pending.splice(pending.indexOf(pkg), 1);
+        const seconds = Math.round((now() - started) / 1000);
+        logger.log(
+          `✅ Verified ${pkg.name}@${pkg.version} on npm after ${seconds}s`
+        );
       }
     }
-    if (!visible) {
-      throw new Error(
-        `${pkg.name}@${pkg.version} is not visible on npm after publication; release outputs were not set`
-      );
+    if (pending.length > 0 && attempt + 1 < verificationAttempts) {
+      await sleepFn(verificationDelayMs);
     }
-    logger.log(`✅ Verified ${pkg.name}@${pkg.version} on npm`);
+  }
+  if (pending.length > 0) {
+    const seconds = Math.round((now() - started) / 1000);
+    throw new Error(
+      `${pending.map((pkg) => `${pkg.name}@${pkg.version}`).join(', ')} not visible on npm ${seconds}s after publication; release outputs were not set`
+    );
   }
   output('published', 'true');
   output('published_version', packages[0].version);

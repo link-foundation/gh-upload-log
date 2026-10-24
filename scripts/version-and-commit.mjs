@@ -17,6 +17,12 @@ import { fileURLToPath } from 'node:url';
 import { $ } from 'command-stream';
 import { makeConfig } from 'lino-arguments';
 import { ensureCommandSucceeded } from '../src/common.js';
+import {
+  isBlockedByRepositoryRule,
+  isNonFastForward,
+} from './push-failure-classifier.mjs';
+
+const PUSH_ATTEMPTS = 3;
 
 /**
  * Append to GitHub Actions output file
@@ -45,6 +51,41 @@ function countChangesets() {
 
 function readLocalVersion() {
   return JSON.parse(readFileSync('./package.json', 'utf8')).version;
+}
+
+/**
+ * Push the version commit to main. The main-writer concurrency group orders
+ * writers but does not rebase them, so a commit merged meanwhile rejects the
+ * push as non-fast-forward: rebase and retry. A repository rule (GH006,
+ * GH013) can never be satisfied by a rebase, so fail with the rule's output.
+ */
+export async function pushToMain({
+  run,
+  logger = console,
+  attempts = PUSH_ATTEMPTS,
+}) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const result = await run`git push origin main`;
+    if (result.code === 0) {
+      return { attempt };
+    }
+    if (isBlockedByRepositoryRule(result)) {
+      const output = (result.stderr || result.stdout || '').trim();
+      throw new Error(
+        `Failed to push version commit to main: a repository rule refused it, and no rebase can fix that. Remove the rule or add github-actions as a bypass actor (CI-CD-BEST-PRACTICES principle 9).\n${output}`
+      );
+    }
+    if (!isNonFastForward(result) || attempt === attempts) {
+      ensureCommandSucceeded(result, 'push version commit to main');
+    }
+    logger.log(
+      `::warning::main advanced during the release (push attempt ${attempt} of ${attempts}); rebasing on origin/main before retrying.`
+    );
+    ensureCommandSucceeded(
+      await run`git pull --rebase origin main`,
+      'rebase the version commit on origin/main'
+    );
+  }
 }
 
 /**
@@ -169,7 +210,7 @@ export async function versionAndCommit({
   // Commit with version number as message (command-stream quotes it)
   await exec(run`git commit -m ${newVersion}`, 'commit version bump');
   // Push directly to main
-  await exec(run`git push origin main`, 'push version commit to main');
+  await pushToMain({ run, logger });
 
   logger.log('\u2705 Version bump committed and pushed to main');
   setOutput('version_committed', 'true');
