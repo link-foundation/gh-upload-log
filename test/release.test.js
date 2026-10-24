@@ -85,13 +85,23 @@ test('release workflow uses an OIDC-compatible Node and npm toolchain', () => {
     path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
     'utf8'
   );
-  const node24Setups = workflow.match(/node-version: '24\.x'/g) || [];
-
-  assert.equal(
-    node24Setups.length,
-    2,
-    'Both automatic and manual npm publishing jobs must use Node 24'
+  // Split the workflow into top-level job blocks (two-space indented keys).
+  const jobs = Object.fromEntries(
+    workflow
+      .slice(workflow.indexOf('\njobs:\n'))
+      .split(/\n(?= {2}[\w-]+:\n)/)
+      .slice(1)
+      .map((block) => [block.trim().split(':')[0], block])
   );
+
+  for (const job of ['release', 'instant-release']) {
+    assert.ok(jobs[job], `release.yml must define the ${job} job`);
+    assert.match(
+      jobs[job],
+      /node-version: '24\.x'/,
+      `The ${job} npm publishing job must use Node 24`
+    );
+  }
   assert.equal(TRUSTED_PUBLISHING_NPM_RANGE, '^11.5.1');
 });
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -49,6 +49,10 @@ export function checkWorkflowPolicy(text) {
 }
 
 function workflowFiles(directory) {
+  // Repositories without composite actions have no .github/actions folder.
+  if (!existsSync(directory)) {
+    return [];
+  }
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
     return entry.isDirectory()

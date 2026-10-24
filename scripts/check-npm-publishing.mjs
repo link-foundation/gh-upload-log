@@ -3,7 +3,7 @@
 // Run before versioning so missing npm account setup cannot consume a changeset
 // or push an unreleasable version commit. Account authorization stays on npm.
 //
-// Usage: bun scripts/check-npm-publishing.mjs [--mode release|report]
+// Usage: node scripts/check-npm-publishing.mjs [--mode release|report]
 //
 // Environment:
 //   NPM_PREFLIGHT_MODE     release (default) fails the step when an npm owner

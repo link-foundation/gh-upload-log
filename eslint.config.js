@@ -71,6 +71,7 @@ export default [
       'dist/**',
       '*.min.js',
       '.eslintcache',
+      'dev/log/**',
     ],
   },
 ];

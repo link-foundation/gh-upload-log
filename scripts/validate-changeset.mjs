@@ -218,7 +218,7 @@ try {
   // Ensure exactly one changeset file was added
   if (changesetCount === 0) {
     console.error(
-      "::error::No changeset found in this PR. Please add a changeset by running 'npm run changeset' and commit the result."
+      "::error::No changeset found in this PR. Please add a changeset by running 'bun run changeset' and commit the result."
     );
     process.exit(1);
   } else if (changesetCount > 1) {
