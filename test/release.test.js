@@ -137,7 +137,7 @@ test('setupNpm rejects when the npm upgrade command has a non-zero exit code', a
 test('release-note parent fails when its formatter child exits non-zero', () => {
   const projectRoot = path.join(__dirname, '..');
   const fakeBin = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'gh-upload-log-release-test-')
+    path.join(os.tmpdir(), 'gh-upload-log release-test-')
   );
   const fakeGhScript = path.join(fakeBin, 'fake-gh.mjs');
   const fakeGh = path.join(fakeBin, 'gh');
