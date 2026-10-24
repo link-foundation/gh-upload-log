@@ -23,6 +23,7 @@ on:
         description: 'Manual release type'
         required: true
         type: choice
+        default: 'patch'
         options:
           - patch
           - minor
@@ -32,61 +33,161 @@ on:
         required: false
         type: string
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# Least-privilege default; the publishing jobs escalate individually.
+permissions:
+  contents: read
+
+# Provide Git config to actions/checkout itself; checkout runs git init before
+# any workflow step can configure Git (avoids the default-branch hint).
+env:
+  GIT_CONFIG_COUNT: '1'
+  GIT_CONFIG_KEY_0: init.defaultBranch
+  GIT_CONFIG_VALUE_0: main
+
+# Concurrency is per job, not per workflow: a workflow-level group cancelled
+# whole main runs mid-release. Check jobs cancel superseded pull request runs;
+# jobs that write to main share one queue and never cancel (issue #59).
 
 jobs:
-  # Changeset check - only runs on PRs
-  changeset-check:
-    name: Check for Changesets
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+  # === DETECT CHANGES - decides which pull request checks can be skipped ===
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-detect-changes
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    if: github.event_name != 'workflow_dispatch'
+    outputs:
+      js-changed: ${{ steps.changes.outputs.js-changed }}
+      docs-changed: ${{ steps.changes.outputs.docs-changed }}
+      any-code-changed: ${{ steps.changes.outputs.any-code-changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Detect changes
+        id: changes
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_BEFORE_SHA: ${{ github.event.before }}
+        run: node scripts/detect-code-changes.mjs
+
+  # === VERSION CHANGE CHECK - versions are bumped only by the release job ===
+  version-check:
+    name: Check for Manual Version Changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-version-check
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v6
         with:
-          bun-version: latest
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Install dependencies
-        run: bun install
+      - name: Check for version changes in package.json
+        env:
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/check-version.mjs
+
+  # === CHANGESET CHECK - only pull requests that change code need one ===
+  changeset-check:
+    name: Check for Changesets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-changeset-check
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    needs: [detect-changes]
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.any-code-changed == 'true'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Check for changesets
         env:
-          # Pass PR context to the validation script
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          # Skip changeset check for automated version PRs
-          if [[ "${{ github.head_ref }}" == "changeset-release/"* ]]; then
+          # Automated version PRs carry no changeset by design
+          if [[ "$GITHUB_HEAD_REF" == changeset-release/* ]]; then
             echo "Skipping changeset check for automated release PR"
             exit 0
           fi
+          # Validates that exactly ONE changeset was ADDED by this PR;
+          # pre-existing changesets from other merged PRs are ignored
+          node scripts/validate-changeset.mjs
 
-          # Run changeset validation script
-          # This validates that exactly ONE changeset was ADDED by this PR
-          # Pre-existing changesets from other merged PRs are ignored
-          bun scripts/validate-changeset.mjs
-
-  # Linting and formatting - runs after changeset check on PRs, immediately on main
+  # === LINT AND FORMAT CHECK ===
+  # Runs independently of changeset-check so a missing changeset never hides
+  # lint results (hive-mind CI/CD principle #5).
   lint:
     name: Lint and Format Check
-    runs-on: ubuntu-latest
-    needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-lint
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    needs: [detect-changes]
+    if: |
+      !cancelled() &&
+      (
+        github.event_name != 'pull_request' ||
+        needs.detect-changes.outputs.docs-changed == 'true' ||
+        needs.detect-changes.outputs.any-code-changed == 'true'
+      )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Simulate fresh merge with base branch (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/simulate-fresh-merge.sh
+
+      # secretlint 13 requires Node >=22; the image's default Node may be older.
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      # Runs before `bun install` on purpose: this package depends on
+      # @secretlint/secretlint-rule-preset-recommend (through
+      # sensitive-data-sanitizer), and npm exec skips installing a requested
+      # package that already sits in ./node_modules. secretlint then resolves
+      # the preset from its own npx folder and fails with "is not found"
+      # (issue #59, experiments/issue-59-secretlint-npx-local-dep.sh).
+      - name: Check for secrets
+        run: npx --yes -p secretlint@13.0.7 -p @secretlint/secretlint-rule-preset-recommend@13.0.7 secretlint "**/*"
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: '1.x'
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
+
+      # Exercise versioning without credentials so a malformed changeset
+      # fails the pull request instead of the release on main. Restore the
+      # consumed changesets so lint checks the merge, not release files.
+      - name: Dry-run release versioning (PR only)
+        if: github.event_name == 'pull_request'
+        run: |
+          trap 'git restore --source=HEAD --staged --worktree -- .' EXIT
+          bun run changeset:version
+          git status --short
 
       - name: Run ESLint
         run: bun run lint
@@ -97,66 +198,152 @@ jobs:
       - name: Check file size limit
         run: bun run check:file-size
 
-  # Test matrix: Bun on 3 OS (Ubuntu, macOS, Windows)
+      - name: Check required documentation sections
+        run: bun run check:docs
+
+  # Test matrix: Bun on 3 pinned OS images (Ubuntu, macOS, Windows).
+  # Tests validate the actual merge result, not a stale merge preview.
+  # Static name: a skipped job never gets matrix values, so a matrix
+  # expression in its name was listed unexpanded (template issue #247).
+  # GitHub appends the values to jobs that run: "Bun Test (ubuntu-24.04)".
   test:
-    name: Test (Bun on ${{ matrix.os }})
+    name: Bun Test
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    needs: [changeset-check]
-    if: always() && (github.event_name == 'push' || needs.changeset-check.result == 'success')
+    # Backstop only: the suite budget below expires first, so an overrun
+    # fails the step instead of turning the job grey (cancelled).
+    timeout-minutes: 20
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-test-${{ matrix.os }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    needs: [detect-changes, changeset-check, lint]
+    # !cancelled() instead of always() so cancellation propagates.
+    if: |
+      !cancelled() &&
+      (
+        github.event_name == 'push' ||
+        needs.detect-changes.outputs.any-code-changed == 'true' ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.event.inputs.release_mode == 'instant'
+        )
+      ) &&
+      (needs.changeset-check.result == 'success' || needs.changeset-check.result == 'skipped') &&
+      (needs.lint.result == 'success' || needs.lint.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-15, windows-2025]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Simulate fresh merge with base branch (PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        shell: bash
+        run: bash scripts/simulate-fresh-merge.sh
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: '1.x'
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Run tests
-        run: bun test
+        shell: bash
+        # --timeout caps each test at 30s (Bun's 5s default flaked on cold
+        # Windows runners); the suite budget bounds the whole run.
+        run: bash scripts/run-with-budget-warning.sh 360 "Bun test suite" bun test --timeout 30000
 
-  # Release - only runs on main after tests pass (for push events)
+  # Prove npm can accept the release before versioning consumes changesets.
+  # Release mode (push to main, instant release) fails with an annotation
+  # naming the owner action; report mode (pull requests) only warns.
+  release-preflight:
+    name: Release Preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-release-preflight
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Verify npm package bootstrap
+        env:
+          NPM_PREFLIGHT_MODE: >-
+            ${{
+              (
+                (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+                (github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant')
+              ) && 'release' || 'report'
+            }}
+          HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+        run: node scripts/check-npm-publishing.mjs
+
+  # Release - only runs on main after every check passes (push events)
   release:
     name: Release
-    needs: [lint, test]
-    # Use always() to ensure this job runs even if changeset-check was skipped
-    # This is needed because lint/test jobs have a transitive dependency on changeset-check
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.lint.result == 'success' && needs.test.result == 'success'
-    runs-on: ubuntu-latest
+    needs:
+      [
+        detect-changes,
+        version-check,
+        changeset-check,
+        lint,
+        test,
+        release-preflight,
+      ]
+    timeout-minutes: 45
+    concurrency:
+      group: main-writer-${{ github.repository }}-main
+      cancel-in-progress: false
+    if: |
+      !cancelled() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.release-preflight.result == 'success' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-24.04
     # Permissions required for npm OIDC trusted publishing
     permissions:
       contents: write
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      # Keeps credentials in .git/config: version-and-commit.mjs pushes the
+      # version commit to main. Every other checkout sets
+      # persist-credentials: false.
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: '1.x'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # npm trusted publishing requires Node >=22.14 and npm >=11.5.1.
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: bun install
+      - name: Remove deprecated npm auth config
+        run: node scripts/sanitize-npm-userconfig.mjs
 
-      - name: Verify npm package bootstrap before versioning
-        run: bun scripts/check-npm-publishing.mjs
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Update npm for OIDC trusted publishing
         run: bun scripts/setup-npm.mjs
@@ -167,8 +354,20 @@ jobs:
           # Count changeset files (excluding README.md and config.json)
           CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" | wc -l)
           echo "Found $CHANGESET_COUNT changeset file(s)"
-          echo "has_changesets=$([[ $CHANGESET_COUNT -gt 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-          echo "changeset_count=$CHANGESET_COUNT" >> $GITHUB_OUTPUT
+          if [[ "$CHANGESET_COUNT" -gt 0 ]]; then HAS=true; else HAS=false; fi
+          {
+            echo "has_changesets=$HAS"
+            echo "changeset_count=$CHANGESET_COUNT"
+          } >> "$GITHUB_OUTPUT"
+
+      # The version commit consumes the changesets, so a run that died after
+      # it would otherwise never publish or release that version.
+      - name: Check whether anything is left to release
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_CHANGESETS: ${{ steps.check_changesets.outputs.has_changesets }}
+        run: bun scripts/check-release-needed.mjs
 
       - name: Merge multiple changesets
         if: steps.check_changesets.outputs.has_changesets == 'true' && steps.check_changesets.outputs.changeset_count > 1
@@ -182,118 +381,203 @@ jobs:
         run: bun scripts/version-and-commit.mjs --mode changeset
 
       - name: Publish to npm
-        # Run if version was committed OR if a previous attempt already committed (for re-runs)
-        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+        # Run if version was committed, if a previous attempt already committed
+        # (re-runs), or if the current version is missing on npm or GitHub.
+        if: >-
+          steps.version.outputs.version_committed == 'true' ||
+          steps.version.outputs.already_released == 'true' ||
+          (steps.check_release.outputs.should_release == 'true' &&
+          steps.check_release.outputs.skip_bump == 'true')
         id: publish
+        # Optional NPM_TOKEN bootstrap: OIDC trusted publishing cannot create
+        # a brand-new package (the first publish returns E404). With the
+        # secret set, the first publish succeeds; afterwards configure the
+        # trusted publisher and delete the secret. See docs/npm-publishing.md.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bun scripts/publish-to-npm.mjs --should-pull
+
+      # Install every published name from the registry as a consumer would,
+      # before the GitHub release announces it.
+      - name: Smoke-test the published package
+        if: steps.publish.outputs.published == 'true'
+        env:
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+        run: bash scripts/run-with-budget-warning.sh 600 "npm package smoke test" node scripts/smoke-test-package.mjs --package-version "$PACKAGE_VERSION"
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}"
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+          REPOSITORY: ${{ github.repository }}
+        run: bun scripts/create-github-release.mjs --release-version "$PACKAGE_VERSION" --repository "$REPOSITORY"
 
       - name: Format GitHub release notes
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: bun scripts/format-github-release.mjs --release-version "$PACKAGE_VERSION" --repository "$REPOSITORY" --commit-sha "$COMMIT_SHA"
 
   # Manual Instant Release - triggered via workflow_dispatch with instant mode
   # This job is in release.yml because npm trusted publishing
   # only allows one workflow file to be registered as a trusted publisher
   instant-release:
     name: Instant Release
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'instant'
-    runs-on: ubuntu-latest
+    # Publishing waits for the same quality gates as the automated release.
+    needs:
+      [
+        detect-changes,
+        version-check,
+        changeset-check,
+        lint,
+        test,
+        release-preflight,
+      ]
+    if: |
+      !cancelled() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.release_mode == 'instant' &&
+      needs.release-preflight.result == 'success' &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    concurrency:
+      group: main-writer-${{ github.repository }}-main
+      cancel-in-progress: false
     # Permissions required for npm OIDC trusted publishing
     permissions:
       contents: write
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      # Keeps credentials in .git/config: version-and-commit.mjs pushes the
+      # version commit to main.
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: '1.x'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # npm trusted publishing requires Node >=22.14 and npm >=11.5.1.
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: bun install
+      - name: Remove deprecated npm auth config
+        run: node scripts/sanitize-npm-userconfig.mjs
 
-      - name: Verify npm package bootstrap before versioning
-        run: bun scripts/check-npm-publishing.mjs
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Update npm for OIDC trusted publishing
         run: bun scripts/setup-npm.mjs
 
       - name: Version packages and commit to main
         id: version
-        run: bun scripts/version-and-commit.mjs --mode instant --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
+        run: bun scripts/version-and-commit.mjs --mode instant --bump-type "$BUMP_TYPE" --description "$RELEASE_DESCRIPTION"
 
       - name: Publish to npm
         # Run if version was committed OR if a previous attempt already committed (for re-runs)
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish
+        # Optional NPM_TOKEN bootstrap; see the release job above.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bun scripts/publish-to-npm.mjs
+
+      # Install every published name from the registry as a consumer would,
+      # before the GitHub release announces it.
+      - name: Smoke-test the published package
+        if: steps.publish.outputs.published == 'true'
+        env:
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+        run: bash scripts/run-with-budget-warning.sh 600 "npm package smoke test" node scripts/smoke-test-package.mjs --package-version "$PACKAGE_VERSION"
 
       - name: Create GitHub Release
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun scripts/create-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}"
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+          REPOSITORY: ${{ github.repository }}
+        run: bun scripts/create-github-release.mjs --release-version "$PACKAGE_VERSION" --repository "$REPOSITORY"
 
       - name: Format GitHub release notes
         if: steps.publish.outputs.published == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun scripts/format-github-release.mjs --release-version "${{ steps.publish.outputs.published_version }}" --repository "${{ github.repository }}" --commit-sha "${{ github.sha }}"
+          PACKAGE_VERSION: ${{ steps.publish.outputs.published_version }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: bun scripts/format-github-release.mjs --release-version "$PACKAGE_VERSION" --repository "$REPOSITORY" --commit-sha "$COMMIT_SHA"
 
   # Manual Changeset PR - creates a pull request with the changeset for review
   changeset-pr:
     name: Create Changeset PR
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.release_mode == 'changeset-pr'
-    runs-on: ubuntu-latest
+    # PR creation does not publish, but it must still pass the fast lint gate.
+    needs: [lint]
+    if: |
+      !cancelled() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.release_mode == 'changeset-pr' &&
+      needs.lint.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: main-writer-${{ github.repository }}-main
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      # create-pull-request receives the token directly; nothing else needs
+      # a credential in .git/config.
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check release pull-request token
+        env:
+          HAS_RELEASE_PR_TOKEN: ${{ secrets.RELEASE_PR_TOKEN != '' }}
+        run: |
+          if [[ "$HAS_RELEASE_PR_TOKEN" != "true" ]]; then
+            echo "::warning title=RELEASE_PR_TOKEN not configured::The changeset PR is created with GITHUB_TOKEN, and GitHub does not start pull_request workflows for it. Close and reopen the PR (or push to it) to run CI, or add a RELEASE_PR_TOKEN secret (fine-grained PAT with contents and pull-requests write)."
+          fi
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          bun-version: latest
+          bun-version: '1.x'
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Create changeset file
-        run: bun scripts/create-manual-changeset.mjs --bump-type "${{ github.event.inputs.bump_type }}" --description "${{ github.event.inputs.description }}"
-
-      - name: Format changeset with Prettier
-        run: |
-          # Run Prettier on the changeset file to ensure it matches project style
-          bunx prettier --write ".changeset/*.md" || true
-
-          echo "Formatted changeset files"
+        env:
+          BUMP_TYPE: ${{ github.event.inputs.bump_type }}
+          RELEASE_DESCRIPTION: ${{ github.event.inputs.description }}
+        run: bun scripts/create-manual-changeset.mjs --bump-type "$BUMP_TYPE" --description "$RELEASE_DESCRIPTION"
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_PR_TOKEN || secrets.GITHUB_TOKEN }}
           commit-message: 'chore: add changeset for manual ${{ github.event.inputs.bump_type }} release'
           branch: changeset-manual-release-${{ github.run_id }}
           delete-branch: true
@@ -311,5 +595,48 @@ jobs:
             ### Next Steps
             1. Review the changeset in this PR
             2. Merge this PR to main
-            3. The automated release workflow will create a version PR
-            4. Merge the version PR to publish to npm and create a GitHub release
+            3. The release workflow on main versions, publishes to npm and creates a GitHub release
+
+  # The single required check. GitHub reports jobs killed by timeout-minutes
+  # as cancelled, not failed; this gate observes every job and excuses only
+  # cancellations caused by a newer commit superseding this run. needs is
+  # derived and checked by the status-gate-coverage job in workflows.yml.
+  pipeline-status:
+    name: Pipeline Status
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: check-${{ github.workflow }}-${{ github.ref }}-pipeline-status
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    # A status function is required: without one the gate inherits the
+    # implicit "every dependency succeeded" condition and is skipped in
+    # exactly the runs it exists to report.
+    if: >-
+      !cancelled()
+    needs:
+      - detect-changes
+      - version-check
+      - changeset-check
+      - lint
+      - test
+      - release-preflight
+      - release
+      - instant-release
+      - changeset-pr
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Fail the run when a required job was cancelled or failed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          RUN_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+          HEAD_REF: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/head', github.event.pull_request.number) || github.ref }}
+        run: bash scripts/check-pipeline-status.sh

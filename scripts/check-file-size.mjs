@@ -1,103 +1,106 @@
 #!/usr/bin/env bun
 
 /**
- * Check for files exceeding the maximum allowed line count
- * Exits with error code 1 if any files exceed the limit
+ * Check tracked files against the line limits (best-practices principles 2
+ * and 12): 1000 lines for JavaScript, matching the ESLint `max-lines` rule,
+ * and 1500 for Markdown and workflow YAML, like the pipeline template's
+ * check-file-line-limits.sh.
+ *
+ * Walks `git ls-files` so git-ignored output (node_modules, test fixtures,
+ * coverage) is never flagged, while documentation and workflows can no
+ * longer slip past a check that used to read JavaScript only.
+ *
+ * Exits with 1 and a `::error file=...` annotation per violation.
+ * Set DEBUG=1 to print every checked file and its line count.
  */
 
-import { readdir, readFile } from 'fs/promises';
-import { join, relative } from 'path';
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const MAX_LINES = 1000;
-const FILE_EXTENSIONS = ['.js', '.mjs', '.cjs'];
+export const LIMITS = [
+  { extensions: ['.js', '.mjs', '.cjs'], maxLines: 1000 },
+  { extensions: ['.md', '.yml', '.yaml'], maxLines: 1500 },
+];
 
-/**
- * Recursively find all JavaScript files in a directory
- * @param {string} dir - Directory to search
- * @param {string[]} filesToExclude - Patterns to exclude
- * @returns {Promise<string[]>} Array of file paths
- */
-async function findJavaScriptFiles(dir, filesToExclude = []) {
-  const files = [];
-  const entries = await readdir(dir, { withFileTypes: true });
+// Captured evidence (saved web pages, CI logs, case studies) is kept
+// verbatim, as the template's check excludes its case studies.
+export const EXCLUDED_PREFIXES = ['docs/case-studies/', 'dev/log/'];
 
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    const relativePath = relative(process.cwd(), fullPath);
-
-    // Skip excluded directories and files
-    if (
-      filesToExclude.some((pattern) =>
-        relativePath.includes(pattern.replace(/\*\*/g, ''))
-      )
-    ) {
-      continue;
-    }
-
-    if (entry.isDirectory()) {
-      files.push(...(await findJavaScriptFiles(fullPath, filesToExclude)));
-    } else if (FILE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
+export function limitFor(file) {
+  if (EXCLUDED_PREFIXES.some((prefix) => file.startsWith(prefix))) {
+    return null;
   }
-
-  return files;
+  const extension = path.extname(file).toLowerCase();
+  const limit = LIMITS.find((entry) => entry.extensions.includes(extension));
+  return limit ? limit.maxLines : null;
 }
 
-/**
- * Count lines in a file
- * @param {string} filePath - Path to the file
- * @returns {Promise<number>} Number of lines
- */
-async function countLines(filePath) {
-  const content = await readFile(filePath, 'utf-8');
+export function countLines(content) {
   return content.split('\n').length;
 }
 
-/**
- * Main function
- */
-async function main() {
-  const excludePatterns = ['node_modules', 'coverage', 'dist', '.git', 'build'];
-
-  console.log(
-    `\nChecking JavaScript files for maximum ${MAX_LINES} lines...\n`
-  );
-
-  const files = await findJavaScriptFiles(process.cwd(), excludePatterns);
+export function findViolations(files, readFile) {
   const violations = [];
-
+  const checked = [];
   for (const file of files) {
-    const lineCount = await countLines(file);
-    if (lineCount > MAX_LINES) {
-      violations.push({
-        file: relative(process.cwd(), file),
-        lines: lineCount,
-      });
+    const maxLines = limitFor(file);
+    if (maxLines === null) {
+      continue;
+    }
+    const lines = countLines(readFile(file));
+    checked.push({ file, lines, maxLines });
+    if (lines > maxLines) {
+      violations.push({ file, lines, maxLines });
     }
   }
-
-  if (violations.length === 0) {
-    console.log('✓ All files are within the line limit\n');
-    process.exit(0);
-  } else {
-    console.error('✗ Found files exceeding the line limit:\n');
-    for (const violation of violations) {
-      console.error(
-        `  ${violation.file}: ${violation.lines} lines (exceeds ${MAX_LINES})`
-      );
-    }
-    console.error(
-      `\nPlease refactor these files to be under ${MAX_LINES} lines\n`
-    );
-    process.exit(1);
-  }
+  return { checked, violations };
 }
 
-main().catch((error) => {
-  console.error('Error:', error.message);
+function listTrackedFiles() {
+  return execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+    .split('\0')
+    .filter(Boolean);
+}
+
+function main() {
+  const { checked, violations } = findViolations(listTrackedFiles(), (file) =>
+    readFileSync(file, 'utf8')
+  );
   if (process.env.DEBUG) {
-    console.error('Stack trace:', error.stack);
+    for (const entry of checked) {
+      console.log(`  ${entry.file}: ${entry.lines}/${entry.maxLines}`);
+    }
   }
-  process.exit(1);
-});
+  console.log(
+    `\nChecked ${checked.length} files (JavaScript <= 1000 lines, Markdown and YAML <= 1500 lines).\n`
+  );
+  if (violations.length === 0) {
+    console.log('✓ All files are within the line limit\n');
+    return 0;
+  }
+  console.error('✗ Found files exceeding the line limit:\n');
+  for (const { file, lines, maxLines } of violations) {
+    console.error(`  ${file}: ${lines} lines (exceeds ${maxLines})`);
+    console.log(
+      `::error file=${file}::File has ${lines} lines (limit: ${maxLines}). Split it into smaller files.`
+    );
+  }
+  return 1;
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  try {
+    process.exitCode = main();
+  } catch (error) {
+    console.error('Error:', error.message);
+    if (process.env.DEBUG) {
+      console.error('Stack trace:', error.stack);
+    }
+    process.exitCode = 1;
+  }
+}

@@ -1,0 +1,13 @@
+$ bun run lint && bun run format:check && bun run check:file-size && bun run check:docs
+$ eslint . --max-warnings 0
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ bun scripts/check-file-size.mjs
+
+Checked 128 files (JavaScript <= 1000 lines, Markdown and YAML <= 1500 lines).
+
+✓ All files are within the line limit
+
+$ node scripts/check-required-docs.mjs
+All documentation requirements satisfied (3 documents checked).

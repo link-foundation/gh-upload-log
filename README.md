@@ -602,8 +602,12 @@ after the upload.
 Run tests using Bun:
 
 ```bash
-bun test
+bun run test
 ```
+
+`bun run test` uses the same 30-second per-test timeout as CI; a bare
+`bun test` keeps Bun's 5-second default, which some subprocess tests can
+exceed on a busy machine.
 
 ## Examples
 

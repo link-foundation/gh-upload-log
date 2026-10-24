@@ -23,6 +23,18 @@ export { preparePackages } from './prepare-npm-packages.mjs';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 10000; // 10 seconds
 
+// Authentication and registry-configuration failures answer the same way on
+// every attempt, so retrying only delays the explanation (the pipeline
+// template's publish-failure-classifier.mjs). Runs 37771767171, 38264680940
+// and 39507532219 each spent three attempts on the same E404.
+const NON_RETRYABLE =
+  /\b(E404|E401|E403|ENEEDAUTH)\b|npm error (404|401|403)\b|access token expired|you must be logged in|unable to authenticate/i;
+
+/** Whether a failed publish is permanent and must not be retried. */
+export function isNonRetryablePublishFailure(message) {
+  return NON_RETRYABLE.test(String(message || ''));
+}
+
 /**
  * Sleep for specified milliseconds
  * @param {number} ms
@@ -54,9 +66,11 @@ export async function publishWithRetries(runPublish, options = {}) {
     logger = console,
   } = options;
   let lastError;
+  let attempts = 0;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     logger.log(`Publish attempt ${attempt} of ${maxRetries}...`);
+    attempts = attempt;
 
     try {
       const result = await runPublish();
@@ -64,6 +78,12 @@ export async function publishWithRetries(runPublish, options = {}) {
     } catch (error) {
       lastError = error;
 
+      if (isNonRetryablePublishFailure(error.message)) {
+        logger.log(
+          'Authentication or registry configuration error: not retrying.'
+        );
+        break;
+      }
       if (attempt < maxRetries) {
         logger.log(
           `Publish failed, waiting ${retryDelay / 1000}s before retry...`
@@ -77,7 +97,7 @@ export async function publishWithRetries(runPublish, options = {}) {
     ? ' Check npm account authorization and package settings: a missing package needs a first publish with an authorized npm account, then a trusted publisher for link-foundation/gh-upload-log, workflow release.yml. Configure each package name separately. See https://docs.npmjs.com/trusted-publishers/.'
     : '';
   throw new Error(
-    `Failed to publish after ${maxRetries} attempts: ${lastError?.message || 'unknown error'}${diagnostic}`,
+    `Failed to publish after ${attempts} attempt${attempts === 1 ? '' : 's'}: ${lastError?.message || 'unknown error'}${diagnostic}`,
     { cause: lastError }
   );
 }
@@ -126,8 +146,31 @@ export async function isVersionPublished(
 }
 
 /**
- * Resume partial publication and gate release outputs on every name. Each
- * successful publish gets a bounded five-minute registry visibility window.
+ * npm answers E409 "Cannot publish over previously staged version" while a
+ * version it accepted is not yet visible, and EPUBLISHCONFLICT once it is.
+ * Both mean "already landed": a cue to verify on the registry, not a failure.
+ */
+const ALREADY_LANDED =
+  /E409|EPUBLISHCONFLICT|cannot publish over (the )?previously (staged|published) version/i;
+
+export function isAlreadyLandedOutput(result) {
+  return ALREADY_LANDED.test(
+    `${result?.stdout || ''}\n${result?.stderr || ''}`
+  );
+}
+
+/**
+ * The first check is immediate; 150 ten-second sleeps span 25 minutes. npm
+ * visibility lag reached 874 seconds in September 2026 (hive-mind #2923,
+ * CI-CD-BEST-PRACTICES principle 9), so the old 5-minute window could turn a
+ * good release into a red run with no GitHub release.
+ */
+export const VERIFICATION_ATTEMPTS = 151;
+export const VERIFICATION_DELAY_MS = 10_000;
+
+/**
+ * Resume partial publication and gate release outputs on every name. All
+ * published names share one registry visibility window.
  */
 export async function publishPackages({
   packages,
@@ -136,8 +179,9 @@ export async function publishPackages({
   setOutput: output = setOutput,
   logger = console,
   sleepFn = sleep,
-  verificationAttempts = 31,
-  verificationDelayMs = 10_000,
+  now = Date.now,
+  verificationAttempts = VERIFICATION_ATTEMPTS,
+  verificationDelayMs = VERIFICATION_DELAY_MS,
   maxRetries = MAX_RETRIES,
   retryDelay = RETRY_DELAY,
 }) {
@@ -148,6 +192,7 @@ export async function publishPackages({
     throw new Error('Publication requires packages with the same version');
   }
   let alreadyPublished = true;
+  const pending = [];
   for (const pkg of packages) {
     if (await isPublished(pkg.name, pkg.version)) {
       logger.log(`${pkg.name}@${pkg.version} is already published`);
@@ -163,6 +208,12 @@ export async function publishPackages({
           return { code: 0 };
         }
         const result = await runPublish(pkg);
+        if (result.code !== 0 && isAlreadyLandedOutput(result)) {
+          logger.log(
+            `npm reports ${pkg.name}@${pkg.version} as already landed; verifying on the registry`
+          );
+          return { code: 0 };
+        }
         if (result.code !== 0 && (await isPublished(pkg.name, pkg.version))) {
           return { code: 0 };
         }
@@ -170,22 +221,33 @@ export async function publishPackages({
       },
       { logger, sleepFn, maxRetries, retryDelay }
     );
-    let visible = false;
-    for (let attempt = 0; attempt < verificationAttempts; attempt++) {
+    pending.push(pkg);
+  }
+
+  const started = now();
+  for (
+    let attempt = 0;
+    pending.length > 0 && attempt < verificationAttempts;
+    attempt++
+  ) {
+    for (const pkg of [...pending]) {
       if (await isPublished(pkg.name, pkg.version)) {
-        visible = true;
-        break;
-      }
-      if (attempt + 1 < verificationAttempts) {
-        await sleepFn(verificationDelayMs);
+        pending.splice(pending.indexOf(pkg), 1);
+        const seconds = Math.round((now() - started) / 1000);
+        logger.log(
+          `✅ Verified ${pkg.name}@${pkg.version} on npm after ${seconds}s`
+        );
       }
     }
-    if (!visible) {
-      throw new Error(
-        `${pkg.name}@${pkg.version} is not visible on npm after publication; release outputs were not set`
-      );
+    if (pending.length > 0 && attempt + 1 < verificationAttempts) {
+      await sleepFn(verificationDelayMs);
     }
-    logger.log(`✅ Verified ${pkg.name}@${pkg.version} on npm`);
+  }
+  if (pending.length > 0) {
+    const seconds = Math.round((now() - started) / 1000);
+    throw new Error(
+      `${pending.map((pkg) => `${pkg.name}@${pkg.version}`).join(', ')} not visible on npm ${seconds}s after publication; release outputs were not set`
+    );
   }
   output('published', 'true');
   output('published_version', packages[0].version);

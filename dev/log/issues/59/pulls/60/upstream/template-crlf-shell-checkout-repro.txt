@@ -1,0 +1,18 @@
+i/lf    w/crlf  attr/                 	.husky/pre-commit
+i/lf    w/crlf  attr/                 	docs/case-studies/issue-41/data/hive-mind-check-file-line-limits.sh
+i/lf    w/crlf  attr/                 	docs/case-studies/issue-41/data/js-template-check-file-line-limits-before.sh
+i/lf    w/crlf  attr/                 	experiments/budget-runner-demo.sh
+i/lf    w/crlf  attr/                 	experiments/issue-141-multilang-ignore-list.sh
+i/lf    w/crlf  attr/                 	experiments/test-issue75-buildx-mirror-fallback.sh
+i/lf    w/crlf  attr/                 	scripts/check-file-line-limits.sh
+i/lf    w/crlf  attr/                 	scripts/check-mjs-syntax.sh
+i/lf    w/crlf  attr/                 	scripts/check-pipeline-status.sh
+i/lf    w/crlf  attr/                 	scripts/check-required-docs.sh
+i/lf    w/crlf  attr/                 	scripts/preflight-credentials.sh
+i/lf    w/crlf  attr/                 	scripts/read-job-cancel-in-progress.sh
+i/lf    w/crlf  attr/                 	scripts/run-with-budget-warning.sh
+i/lf    w/crlf  attr/                 	scripts/simulate-fresh-merge.sh
+first line of scripts/read-job-cancel-in-progress.sh: 0000000   #   !   /   u   s   r   /   b   i   n   /   e   n   v       b
+scripts/read-job-cancel-in-progress.sh: shebang line ends in CR, so env looks for an interpreter named with a trailing CR
+.husky/pre-commit: no shebang line
+bash scripts/read-job-cancel-in-progress.sh: FAILED: scripts/read-job-cancel-in-progress.sh: line 4: set: pipefail: invalid option name

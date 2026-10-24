@@ -10,14 +10,15 @@
     "gh-upload-log": "src/cli.js"
   },
   "scripts": {
-    "test": "bun test",
-    "lint": "eslint .",
+    "test": "bun test --timeout 30000",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:file-size": "bun scripts/check-file-size.mjs",
-    "check": "bun run lint && bun run format:check && bun run check:file-size",
-    "prepare": "husky || true",
+    "check:docs": "node scripts/check-required-docs.mjs",
+    "check": "bun run lint && bun run format:check && bun run check:file-size && bun run check:docs",
+    "prepare": "node scripts/install-git-hooks.mjs",
     "changeset": "changeset",
     "changeset:version": "bun scripts/changeset-version.mjs",
     "changeset:publish": "bun scripts/publish-to-npm.mjs",
@@ -63,7 +64,7 @@
   },
   "lint-staged": {
     "*.{js,mjs,cjs}": [
-      "eslint --fix --max-warnings 0",
+      "eslint --fix --max-warnings 0 --no-warn-ignored",
       "prettier --write",
       "prettier --check"
     ],

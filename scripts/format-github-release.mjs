@@ -78,8 +78,11 @@ try {
     console.log(`Formatting release notes for ${tag}...`);
     // Pass the trigger commit SHA for PR detection
     // This allows proper PR lookup even if the changelog doesn't have a commit hash
+    // Bare interpolations: command-stream single-quotes values such as
+    // Windows paths, and an extra pair of double quotes would keep those
+    // single quotes as literal characters of the argument.
     const formatterResult =
-      await $`${process.execPath} scripts/format-release-notes.mjs --release-id "${releaseId}" --release-version "${tag}" --repository "${repository}" --commit-sha "${commitSha}" --gh-command "${ghCommand}"`.run();
+      await $`${process.execPath} scripts/format-release-notes.mjs --release-id ${releaseId} --release-version ${tag} --repository ${repository} --commit-sha ${commitSha} --gh-command ${ghCommand}`.run();
     ensureCommandSucceeded(formatterResult, `format release notes for ${tag}`);
     console.log(`\u2705 Formatted release notes for ${tag}`);
   }

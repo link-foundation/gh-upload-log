@@ -39,7 +39,7 @@ test('publishWithRetries rejects non-zero command results after all attempts', a
     await publishWithRetries(
       async () => {
         attempts += 1;
-        return commandResult(1, 'npm error E404 Not Found');
+        return commandResult(1, 'npm error 503 Service Unavailable');
       },
       {
         maxRetries: 3,
@@ -54,11 +54,44 @@ test('publishWithRetries rejects non-zero command results after all attempts', a
 
   assert.ok(thrown, 'A failed npm publish must reject');
   assert.ok(
-    thrown.message.includes('npm error E404 Not Found'),
+    thrown.message.includes('npm error 503 Service Unavailable'),
     `The final error should preserve npm diagnostics, got: ${thrown.message}`
   );
   assert.equal(attempts, 3, 'Every configured attempt should run');
   assert.equal(delays.length, 2, 'Retries should wait between attempts only');
+});
+
+// Runs 37771767171, 38264680940 and 39507532219 retried the same E404 three
+// times before explaining it; the answer never changes.
+test('publishWithRetries does not retry authentication or registry errors', async () => {
+  let attempts = 0;
+  const delays = [];
+  let thrown;
+
+  try {
+    await publishWithRetries(
+      async () => {
+        attempts += 1;
+        return commandResult(
+          1,
+          'npm error code E404\nnpm error 404 Not Found - PUT https://registry.npmjs.org/gh-upload-file'
+        );
+      },
+      {
+        maxRetries: 3,
+        retryDelay: 10,
+        sleepFn: async (delay) => delays.push(delay),
+        logger: { log() {} },
+      }
+    );
+  } catch (error) {
+    thrown = error;
+  }
+
+  assert.equal(attempts, 1, 'A permanent failure must not be retried');
+  assert.equal(delays.length, 0);
+  assert.ok(thrown?.message.startsWith('Failed to publish after 1 attempt:'));
+  assert.ok(thrown.message.includes('first publish'), thrown.message);
 });
 
 test('publishWithRetries succeeds only after a zero command exit code', async () => {
@@ -81,17 +114,31 @@ test('publishWithRetries succeeds only after a zero command exit code', async ()
 });
 
 test('release workflow uses an OIDC-compatible Node and npm toolchain', () => {
-  const workflow = fs.readFileSync(
-    path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
-    'utf8'
+  // Normalise line endings: a Windows checkout stores CRLF, which would
+  // otherwise leave the job split below with no blocks at all.
+  const workflow = fs
+    .readFileSync(
+      path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
+      'utf8'
+    )
+    .replaceAll('\r\n', '\n');
+  // Split the workflow into top-level job blocks (two-space indented keys).
+  const jobs = Object.fromEntries(
+    workflow
+      .slice(workflow.indexOf('\njobs:\n'))
+      .split(/\n(?= {2}[\w-]+:\n)/)
+      .slice(1)
+      .map((block) => [block.trim().split(':')[0], block])
   );
-  const node24Setups = workflow.match(/node-version: '24\.x'/g) || [];
 
-  assert.equal(
-    node24Setups.length,
-    2,
-    'Both automatic and manual npm publishing jobs must use Node 24'
-  );
+  for (const job of ['release', 'instant-release']) {
+    assert.ok(jobs[job], `release.yml must define the ${job} job`);
+    assert.match(
+      jobs[job],
+      /node-version: '24\.x'/,
+      `The ${job} npm publishing job must use Node 24`
+    );
+  }
   assert.equal(TRUSTED_PUBLISHING_NPM_RANGE, '^11.5.1');
 });
 
@@ -123,7 +170,7 @@ test('setupNpm rejects when the npm upgrade command has a non-zero exit code', a
 test('release-note parent fails when its formatter child exits non-zero', () => {
   const projectRoot = path.join(__dirname, '..');
   const fakeBin = fs.mkdtempSync(
-    path.join(os.tmpdir(), 'gh-upload-log-release-test-')
+    path.join(os.tmpdir(), 'gh-upload-log release-test-')
   );
   const fakeGhScript = path.join(fakeBin, 'fake-gh.mjs');
   const fakeGh = path.join(fakeBin, 'gh');

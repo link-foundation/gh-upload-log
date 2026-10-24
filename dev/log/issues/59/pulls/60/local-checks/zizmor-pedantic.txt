@@ -1,0 +1,5 @@
+ INFO zizmor: 🌈 zizmor v1.30.1
+ INFONo findings to report. Good job! (6 ignored, 7 suppressed)
+ audit: zizmor: 🌈 completed .github/workflows/release.yml
+ INFO audit: zizmor: 🌈 completed .github/workflows/security.yml
+ INFO audit: zizmor: 🌈 completed .github/workflows/workflows.yml

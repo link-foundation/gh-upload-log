@@ -1,0 +1,1204 @@
+Bun Test (windows-2025)	Run tests	﻿2026-10-24T09:42:33.0288100Z ##[group]Run bash scripts/run-with-budget-warning.sh 360 "Bun test suite" bun test --timeout 30000
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0288907Z ^[[36;1mbash scripts/run-with-budget-warning.sh 360 "Bun test suite" bun test --timeout 30000^[[0m
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0307490Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0307940Z env:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0308125Z   GIT_CONFIG_COUNT: 1
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0308359Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0308814Z   GIT_CONFIG_VALUE_0: main
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.0309048Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.1829894Z Running Bun test suite with a 360s budget (warning at 252s).
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.2917318Z bun test v1.4.4 (38afee6c8)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3676572Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3678701Z ##[group]test\check-web-archive.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3679487Z (pass) extractErrorsSection > stops at the next top-level heading [0.52ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3680854Z (pass) extractErrorsSection > falls back to the whole document when the heading is absent [0.10ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3682381Z (pass) extractBrokenUrls > ignores successful redirects outside the errors section [0.42ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3683653Z (pass) extractBrokenUrls > parses the full document when the errors section is absent [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3685057Z (pass) extractBrokenUrls > extracts every http error from a full report exactly once [0.28ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3686080Z (pass) extractBrokenLinks > reports errors that the Wayback Machine cannot answer [0.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3686940Z (pass) extractBrokenLinks > never classifies a non-http error as a URL [0.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3687485Z (pass) extractBrokenLinks > matches the error count lychee itself reports [0.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3688279Z (pass) check-web-archive.mjs end to end > fails when the only lychee errors have no http URL to archive [31.43ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3688694Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3688957Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3689067Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3689318Z ##[group]test\ci-workflow-policy.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3689677Z (pass) every workflow declares least-privilege permissions [0.73ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3690123Z (pass) hosted runners are pinned and actions do not run on Node 20 [0.53ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3690561Z (pass) every job has a timeout and job-level concurrency [1.32ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3691042Z (pass) status functions never use always() and run scripts never inline expressions [1.65ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3691540Z (pass) only jobs that push keep the checkout credential [3.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3691995Z (pass) every workflow has a pipeline-status gate covering all its jobs [31.77ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3692445Z (pass) the run-script parser sees inline expressions [0.10ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3692846Z (pass) the secrets scan runs before dependencies are installed [0.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3693267Z (pass) every required workflow_dispatch input has a default [1.32ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3693723Z (pass) the pre-commit hook runs lint-staged and prepare verifies it [0.52ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3694197Z (pass) CI lint rejects the warnings the pre-commit hook rejects [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3694594Z (pass) no job name embeds a matrix expression [0.48ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3694956Z 837 |    * Assert that a string matches a regular expression
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3695247Z 838 |    */
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3695429Z 839 |   match(actual, regexp, message) {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3695690Z 840 |     if (!regexp.test(actual)) {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3696476Z 841 |       const defaultMessage = `Expected ${JSON.stringify(actual)} to match ${regexp}`;
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3696949Z 842 |       throw new Error(message || defaultMessage);
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3697245Z                                                      ^
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3697508Z error: .husky/pre-commit has no shebang
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3697933Z       at match (D:\a\gh-upload-log\gh-upload-log\node_modules\test-anywhere\src\index.js:842:48)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3701125Z       at <anonymous> (D:\a\gh-upload-log\gh-upload-log\test\ci-workflow-policy.test.js:321:12)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3701487Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3721107Z ##[error]
+Bun Test (windows-2025)	Run tests	      at match (D:\a\gh-upload-log\gh-upload-log\node_modules\test-anywhere\src\index.js:842:48)
+Bun Test (windows-2025)	Run tests	      at <anonymous> (D:\a\gh-upload-log\gh-upload-log\test\ci-workflow-policy.test.js:321:12)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3727876Z (fail) ShellCheck lints every tracked shell script and gates the run [33.49ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3728528Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3728774Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3728883Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:33.3729120Z ##[group]test\cli-chunk-size.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:36.7907714Z (pass) CLI chunk-size flag and environment control repository dry-run planning [2550.39ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:40.1965813Z (pass) CLI rejects invalid, zero, unsafe and oversized chunk limits before upload [3220.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:40.1967016Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:40.1968615Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:40.1969620Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:40.1970343Z ##[group]test\cli-repository-target.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:42.4978506Z (pass) CLI repository and branch support flags, environment, .lenv and precedence [2397.48ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:43.6865631Z (pass) CLI validates malformed repository and branch before file lookup [1596.86ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:43.6866874Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:43.6868523Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:43.6869120Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:43.6869704Z ##[group]test\cli.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:44.8604850Z (pass) CLI --version reports the installed package version [587.91ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:44.8606293Z (pass) CLI basic usage - accepts positional argument without conflicts error [715.89ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:46.0419427Z (pass) CLI with --public flag [719.40ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:47.2328255Z (pass) CLI with --private flag [723.26ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:47.2329680Z (pass) CLI without visibility flags defaults to private [646.98ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:48.4294128Z (pass) CLI with both --public and --private shows conflict error [597.43ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:48.4304848Z (pass) CLI with --only-gist flag [728.69ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:49.6161673Z (pass) CLI gist dry mode shows .log.txt filename in verbose details [723.76ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:50.8131151Z (pass) CLI with --only-repository flag [716.52ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:50.8133733Z (pass) CLI repository dry mode uses shared repositories by default [689.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:52.0074878Z (pass) CLI repository dry mode allows disabling shared repositories [753.25ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:52.0101371Z (pass) CLI accepts a bare relative path [705.36ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:53.1986452Z (pass) CLI accepts an explicit ./ relative path [741.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:54.3724860Z (pass) CLI accepts a quoted home-relative path [738.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:54.3726968Z (pass) CLI never prints the git master branch hint [699.28ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:55.5259996Z (pass) CLI with both --only-gist and --only-repository shows conflict error [580.00ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:55.5261759Z (pass) CLI with --verbose flag shows options [818.77ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:56.6924712Z (pass) CLI with --help flag shows usage [527.27ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:56.6978090Z (pass) CLI without file path shows error [509.48ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:57.8559192Z (pass) CLI with non-existent file shows error [537.73ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:57.8560658Z (pass) CLI with non-existent file does not print upload status before error [520.37ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:42:59.0059728Z (pass) CLI with --description flag [661.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:05.7088585Z (pass) CLI tolerates startup longer than the implicit Bun timeout [6605.28ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8615808Z (pass) CLI deadline stops the child and retains command diagnostics [2011.93ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8620709Z (pass) CLI ENOSPC - isENOSPC detects disk space errors correctly [0.25ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8621750Z (pass) CLI ENOSPC - --only-gist hint only shown when error message contains it [0.17ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8622413Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8624005Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8625738Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8629222Z ##[group]test\index.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8629805Z (pass) normalizeFileName - removes leading slashes [0.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8630511Z (pass) normalizeFileName - replaces all slashes with dashes [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8631264Z (pass) normalizeFileName - replaces backslashes with dashes [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8631994Z (pass) normalizeFileName - handles relative paths [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8632707Z (pass) normalizeFileName - handles multiple leading slashes [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8633855Z (pass) generateRepoName - adds log- prefix and removes extension [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8634696Z (pass) generateRepoName - works with non-log extensions [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8635484Z (pass) generateGistFileName - returns normalized filename [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8636353Z (pass) generateGistFileName - does not duplicate log text extension [0.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8637184Z (pass) fileExists - returns true for existing file [0.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8637827Z (pass) fileExists - returns false for non-existing file [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8638235Z (pass) fileExists - returns false for directory [0.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8638652Z (pass) getFileSize - returns correct size for small file [0.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8639094Z (pass) getFileSize - returns correct size for medium file [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8639656Z (pass) formatFileSize - formats 0 bytes [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8640286Z (pass) formatFileSize - formats bytes [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8640836Z (pass) formatFileSize - formats kilobytes [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8641248Z (pass) formatFileSize - formats kilobytes with decimals [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8641614Z (pass) formatFileSize - formats megabytes [0.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8641959Z (pass) formatFileSize - formats 1.9 KB file correctly [0.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8642410Z (pass) formatFileSize - formats gigabytes
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8642899Z (pass) determineUploadStrategy - chooses gist for small files [0.70ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8643414Z (pass) determineUploadStrategy - chooses gist for medium files under limit [1.34ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8643968Z (pass) determineUploadStrategy - chooses repo for files exceeding gist limit [28.99ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8644510Z (pass) determineUploadStrategy - throws error for non-existent file [0.20ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8644964Z (pass) GITHUB_GIST_FILE_LIMIT - is 25MB (safe API limit) [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8645320Z (pass) GITHUB_REPO_CHUNK_SIZE - is 100MB [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8645649Z (pass) isENOSPC - detects error with code ENOSPC [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8646010Z (pass) isENOSPC - detects ENOSPC in error message [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8646422Z (pass) isENOSPC - detects "no space left on device" in error message [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8646870Z (pass) isENOSPC - detects ENOSPC in stderr [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8647245Z (pass) isENOSPC - detects "no space left on device" in stderr [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8647658Z (pass) isENOSPC - returns false for null/undefined [0.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8648036Z (pass) isENOSPC - returns false for non-ENOSPC errors [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8648632Z (pass) isENOSPC - returns false for generic errors [0.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8649069Z (pass) createENOSPCError - creates error with ENOSPC code [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8649521Z (pass) createENOSPCError - includes actionable suggestions [0.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8650045Z (pass) createENOSPCError - --only-gist hint only added for repo upload of small files [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8650653Z (pass) determineUploadStrategy - always picks gist for files within gist limit [1.37ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:06.8651218Z (pass) determineUploadStrategy - only picks repo when file exceeds gist limit [36.09ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0335436Z (pass) uploadLog - surfaces gh repo create failures instead of reporting success [75.52ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0337173Z (pass) uploadLog - retries with a unique repository name after a collision [23.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0339832Z (pass) uploadLog - stores repository uploads in the shared visibility repository by default [23.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0341231Z (pass) uploadLog - skips duplicate uploads already present in the shared repository [17.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0342558Z (pass) uploadLog - keeps dedicated repository mode available when shared mode is disabled [17.46ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0344106Z (pass) uploadLog - gist fallback uses shared repositories for small files by default [29.63ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0345774Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0346122Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0346230Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0346528Z ##[group]test\install-git-hooks.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0346913Z (pass) CI and HUSKY=0 skip the hook install without loading husky [0.29ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0347350Z (pass) a consumer install without .git is not an error [0.68ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0347800Z (pass) husky exiting quietly without hooks fails instead of passing [1.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0348322Z (pass) a missing husky package is reported, and verbose is off by default [1.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0348831Z (pass) installed hooks pass and GIT_HOOKS_VERBOSE=1 traces the decision [1.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0349330Z (pass) the script installs husky hooks into a real repository [168.89ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0349605Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0349809Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0349918Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0350556Z ##[group]test\issue-37-changeset.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0351034Z (pass) issue #37 - release changeset validation and merging follow the renamed manifest [198.94ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0351408Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0351607Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0351708Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:08.0351923Z ##[group]test\issue-37-cli.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:12.5530016Z (pass) issue #37 - universal environment settings take precedence and .lenv accepts the new names [4539.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:12.5531077Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:12.5532888Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:12.5534763Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:12.5537632Z ##[group]test\issue-37-git.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:23.7627373Z (pass) issue #37 - real Git binary archives resume and reconstruct on the selected branch [11390.95ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:23.7628625Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:23.7630002Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:23.7630375Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:23.7631006Z ##[group]test\issue-37-publish.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9136486Z [TRACE 2026-10-24T09:43:23.862Z] [Initialization] Registering built-in virtual commands
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9139096Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] registerBuiltins() called - registering all built-in commands
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9140523Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9141253Z   "name": "cd"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9141854Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9142305Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9142886Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9143185Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9143613Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9144179Z   "name": "pwd"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9144469Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9144868Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9145426Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9145721Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9146129Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9146710Z   "name": "echo"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9146989Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9147389Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9147952Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9148267Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9148683Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9149262Z   "name": "sleep"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9149553Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9149967Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9150538Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9154645Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9155100Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9155734Z   "name": "true"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9156050Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9156534Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9156941Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9157134Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9157400Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9158189Z   "name": "false"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9158374Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9158888Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9159416Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9159610Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9159857Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9160185Z   "name": "which"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9160358Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9160596Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9160923Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9161099Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9161345Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9161662Z   "name": "exit"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9161830Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9162061Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9162385Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9162554Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9162799Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9163230Z   "name": "env"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9163480Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9163718Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9164040Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9164214Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9164564Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9164979Z   "name": "cat"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9165145Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9165387Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9165707Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9165900Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9166145Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9166477Z   "name": "ls"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9166648Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9166962Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9167299Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9167484Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9167727Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9168044Z   "name": "mkdir"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9168210Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9168439Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9168754Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9168937Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9169170Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9169493Z   "name": "rm"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9169662Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9169906Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9170222Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9170396Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9170625Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9170949Z   "name": "mv"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9171113Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9171342Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9171668Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9171842Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9172458Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9172794Z   "name": "cp"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9172957Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9173188Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9173512Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9173689Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9173919Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9175738Z   "name": "touch"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9176052Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9176491Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9177068Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9177392Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9177816Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9178387Z   "name": "basename"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9178689Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9179387Z [TRACE 2026-10-24T09:43:23.862Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9179980Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9180311Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9180744Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9181308Z   "name": "dirname"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9181607Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9182044Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9182620Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9182928Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9183325Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9183888Z   "name": "yes"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9184170Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9184572Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9185133Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9185471Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9185890Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9186470Z   "name": "seq"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9187208Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9187658Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9188267Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9188530Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9188793Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9189150Z   "name": "test"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9189323Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9189576Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] register EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9190117Z   "registered": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9190472Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9190990Z [TRACE 2026-10-24T09:43:23.863Z] [VirtualCommands] listCommands() returning 21 commands
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9192849Z [TRACE 2026-10-24T09:43:23.863Z] [Initialization] Built-in commands registered: cd, pwd, echo, sleep, true, false, which, exit, env, cat, ls, mkdir, rm, mv, cp, touch, basename, dirname, yes, seq, test
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9194395Z (pass) issue #37 - both package names ship the universal and legacy bins [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9195413Z (pass) issue #37 - npm checks bypass caches and distinguish absence from registry failure [0.56ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9196598Z (pass) issue #37 - a partial dual publication retries only the missing package and gates release outputs [0.86ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9197780Z (pass) issue #37 - release success requires every package to become visible on npm [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9198872Z (pass) issue #37 - failed publish acknowledgement is recovered without republishing [0.69ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9199982Z (pass) issue #37 - prepare manifests keeps source version and code identical for both names [469.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9201063Z (pass) issue #37 - delayed registry visibility is polled before release outputs [0.34ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9202035Z (pass) issue #37 - failure of the second name never reports a complete release [0.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9202615Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9203079Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9203260Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9203671Z ##[group]test\issue-37.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:24.9204314Z (pass) issue #37 - a small binary file selects an archive in repository mode [396.95ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:26.0763364Z (pass) issue #37 - binary gist requests fail before running GitHub commands, including dry mode [311.92ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:26.0765819Z (pass) issue #37 - binary upload archives all bytes and exposes archive metadata [368.96ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:26.0767786Z (pass) issue #37 - archive overhead counts toward chunk limits and parts reconstruct exactly [256.42ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:27.2450955Z (pass) issue #37 - identical archived files deduplicate and partial archives remain resumable [332.08ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:27.2452402Z (pass) issue #37 - UTF-8 and ANSI text keep existing gist and line-splitting behavior [140.40ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:27.2453446Z (pass) issue #37 - classification checks bytes beyond the first buffer and honors UTF-8 boundaries [2.65ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:27.2454521Z (pass) issue #37 - dedicated repositories also archive binary files [209.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:31.7941963Z (pass) issue #37 - hundreds of archive parts sort correctly and repeated staging is deterministic [4757.00ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9622253Z (pass) issue #37 - hidden text and binary names remain visible upload files [985.36ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9623651Z (pass) issue #37 - empty text, UTF-16 and truncated UTF-8 classify without losing bytes [3.57ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9624801Z (pass) issue #37 - long text chunk names match the shortened upload name [111.21ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9626219Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9626979Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9627348Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9627881Z ##[group]test\issue-38.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9629438Z (pass) issue #38 - stored path is <directory>/<hash>/<file name> without duplication [0.85ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9630691Z (pass) issue #38 - the example from the issue maps to home-box/<hash>/file.log.txt [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9631637Z (pass) issue #38 - chunked uploads are recognized as the stored log file [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9632525Z (pass) issue #38 - changed content is uploaded again into a new hash folder [204.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9633084Z (pass) issue #38 - identical content reuses the existing file that really exists [13.30ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9633626Z (pass) issue #38 - a folder without the expected file is uploaded again [112.96ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9634297Z (pass) issue #38 - dedicated repository mode uses the same hashed layout [45.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9634886Z (pass) issue #38 - the gist limit is configurable and clamped to the documented maximum [0.09ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9635421Z (pass) issue #38 - parseFileSize understands the sizes users type [0.18ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9635888Z (pass) issue #38 - a raised gist limit keeps large files in gist mode [72.34ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9636358Z (pass) issue #38 - transient GitHub errors are recognized for retrying [0.09ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9636838Z (pass) issue #38 - gist uploads retry after a transient GitHub error [84.45ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9637127Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9637396Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9637497Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:32.9637736Z ##[group]test\issue-45.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1351394Z (pass) issue #45 - retries a push after error: RPC failed; HTTP 408 curl 22 The requested URL returned error: 408 [131.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1354038Z (pass) issue #45 - retries a push after fatal: the remote end hung up unexpectedly [236.95ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1357462Z (pass) issue #45 - retries a push after send-pack: unexpected disconnect while reading sideband packet [230.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1358898Z (pass) issue #45 - retries a push after fatal: unable to access remote: The requested URL returned error: 429 [140.28ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1361074Z (pass) issue #45 - retries a push after fatal: unable to access remote: The requested URL returned error: 503 [103.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1362921Z (pass) issue #45 - retries a push after ! [rejected] main -> main (fetch first) [158.02ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1364010Z (pass) issue #45 - authentication failure stops after one attempt [19.90ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1364731Z (pass) issue #45 - transient retries stop after three attempts [28.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:34.1366201Z (pass) issue #45 - commits and pushes each chunk before staging the next [86.62ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:35.3080462Z (pass) issue #45 - one existing chunk is an incomplete upload [212.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:35.3082995Z (pass) issue #45 - splitting respects byte limits and whole lines [3.95ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:35.3084460Z (pass) issue #45 - an oversized line keeps UTF-8 characters intact [6.85ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:39.9096969Z (pass) issue #45 - real Git rebases onto a concurrent shallow-clone update [4701.60ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:46.6980053Z (pass) issue #45 - real Git resumes only the missing chunk after exhaustion [6975.08ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:55.8830875Z (pass) issue #45 - real Git handles a lost acknowledgement and a new-branch race [8899.78ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:55.8833690Z (pass) issue #45 - retry delays increase exponentially and can be disabled [1.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:55.8838634Z (pass) issue #45 - complete new and legacy chunks still deduplicate [45.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:55.8844859Z (pass) issue #45 - byte-preserving splitting covers CRLF, final lines and many parts [936.64ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:43:57.0566841Z (pass) issue #45 - pending chunks cannot deduplicate just because sizes add up [30.40ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:02.6972750Z (pass) issue #45 - real Git resumes mixed chunks after changing chunk size [6227.97ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:02.6973531Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:02.6974980Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:02.6975221Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:02.6975662Z ##[group]test\issue-47-git.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:04.9966260Z (pass) issue #47 - real Git fallback writes only selected branch, preserves files and deduplicates [2411.93ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2560038Z (pass) issue #47 - real Git retry refreshes the selected branch and preserves concurrent changes [2273.74ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2561060Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2562270Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2563539Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2567558Z ##[group]test\issue-47.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2568382Z (pass) issue #47 - Gist 403 falls back to the explicit repository without GET /user or creation [30.30ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2569864Z (pass) issue #47 - direct repository target overrides legacy mode and uses metadata default branch [17.99ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2571076Z (pass) issue #47 - selected branch can deduplicate without fetching or pushing [12.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2572250Z (pass) issue #47 - inaccessible explicit repository (HTTP 403) fails without creation or push [15.91ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2574132Z (pass) issue #47 - inaccessible explicit repository (HTTP 404) fails without creation or push [9.83ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2575231Z (pass) issue #47 - missing explicit branch is never created implicitly [12.54ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2576102Z (pass) issue #47 - permanent target push failure is reported [16.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2581786Z (pass) issue #47 - target URL encodes branch characters while API and Git keep the branch name [16.46ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2584995Z (pass) issue #47 - invalid target fails before any upload: {"repository":"repo"} [19.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2586095Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo/extra"} [23.91ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2587201Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/.."} [19.67ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2588397Z (pass) issue #47 - invalid target fails before any upload: {"repository":"https://github.com/owner/repo"} [17.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2589519Z (pass) issue #47 - invalid target fails before any upload: {"repository":""} [19.60ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2590494Z (pass) issue #47 - invalid target fails before any upload: {"branch":"feature/logs"} [17.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2591619Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"--all"} [19.27ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2592873Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"HEAD"} [23.42ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2594146Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"bad..ref"} [23.45ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2595432Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"bad:ref"} [18.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2596722Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"feature/.hidden"} [24.70ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2598781Z (pass) issue #47 - invalid target fails before any upload: {"repository":"owner/repo","branch":"feature/logs.lock"} [22.58ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2599847Z (pass) issue #47 - permission 403 is permanent while a rate-limit 403 stays retryable [16.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2600220Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2600493Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2600885Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2601303Z ##[group]test\issue-49.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2601990Z (pass) issue #49 - hung Git command names the command and preserves diagnostics [0.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2603088Z (pass) issue #49 - scenario deadline leaves time for its error before the test deadline [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:07.2604089Z (pass) issue #49 - failed scenario retains the Git command failure [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4035817Z (pass) issue #49 - real Git test tolerates startup longer than Bun default [10881.66ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4036943Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4038024Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4039744Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4040816Z ##[group]test\issue-53.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4041518Z (pass) README npm badge targets an actually published package [1.56ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4042412Z (pass) failed npm publication explains package bootstrap and trust configuration [0.22ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4043395Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4043837Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4044036Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4044404Z ##[group]test\issue-55.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4044854Z (pass) missing input cannot enter the verified-upload callback [0.15ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4045363Z (pass) symbolic-link inputs retain their name and sanitize the target [172.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4045850Z (pass) every gist entry point sanitizes (private) [43.43ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:18.4046385Z (pass) every gist entry point sanitizes (public) [45.17ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5580388Z (pass) sanitizes repository shared before hashing, splitting or compression [34.49ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5583123Z (pass) sanitizes repository dedicated before hashing, splitting or compression [29.46ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5584981Z (pass) sanitizes repository existing before hashing, splitting or compression [36.58ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5589317Z (pass) sanitizes repository fallback before hashing, splitting or compression [26.57ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5614909Z (pass) sanitization failure blocks every network operation and explains why [650.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5616605Z (pass) environment credentials are masked and dry mode hashes the verified copy [17.86ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:19.5617851Z (pass) local credential config is masked and later source changes cannot affect the verified snapshot [14.33ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:20.7109373Z (pass) CLI reports credential counts by rule and zero findings [1514.55ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4008941Z (pass) streams a 17 MiB log with a 15 MiB line and checks every output byte [15663.32ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4010415Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4011705Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4011923Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4016698Z ##[group]test\issue-56.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4018289Z (pass) OIDC preflight blocks missing packages with exact owner recovery steps [0.82ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4019638Z (pass) OIDC preflight accepts existing packages but never treats registry outages as missing [0.41ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4020520Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4021136Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4021364Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4021827Z ##[group]test\issue-59-ci-scripts.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4022510Z (pass) placeholder and log-only changes are not code changes [0.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4023415Z (pass) documentation-only changes skip code checks but are reported [0.08ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4024722Z (pass) unknown file types count as code so tests can never be skipped [0.26ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4025742Z (pass) pull requests diff the whole PR and fall back when HEAD^2 is missing [0.38ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4026616Z (pass) pushes ignore the all-zero before SHA of a new branch [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4028412Z (pass) manual version edits fail except on the changeset release branch [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4028962Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4029330Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4029494Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4029884Z ##[group]test\issue-59-dependency-graph.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4030610Z (pass) a disabled dependency graph fails main with the settings link [0.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4031684Z (pass) a disabled dependency graph only warns on pull requests [0.22ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4032467Z (pass) an enabled dependency graph lets Dependency Review run [0.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4033319Z (pass) persistent API failures are errors in every mode, never a guess [0.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4034249Z (pass) rate limits and 5xx are retried before the graph state is decided [0.20ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4035140Z (pass) verbose mode is off by default and logs requests when enabled [0.34ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4035978Z (pass) unknown modes and a missing repository are usage errors [0.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4036489Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4036869Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4037033Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4037386Z ##[group]test\issue-59-doc-checks.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4037971Z (pass) file-size limits cover JavaScript, Markdown and workflow YAML [0.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4038699Z (pass) file-size check reports each oversized file with its limit [0.35ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4039411Z (pass) ESLint max-lines matches the CI JavaScript file-size limit [0.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4040065Z (pass) required docs match whole heading lines only [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4040726Z (pass) required docs check names missing files and missing sections [0.21ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4041461Z (pass) the repository satisfies its documentation requirements [0.91ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:36.4042688Z (pass) doc and size checks run in the check script and the CI lint job [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.5159545Z Comparing: git diff --name-only base HEAD^2
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.5160803Z Range unavailable (unknown revision)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.5162718Z Comparing: git diff --name-only base HEAD
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.5164168Z Comparing: git diff --name-only HEAD^1 HEAD
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6088393Z (pass) check-required-docs --list prints path and section pairs [26.90ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6090797Z (pass) the local test script uses the same per-test timeout as CI [0.30ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6091652Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6092573Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6092995Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6094464Z ##[group]test\issue-59-preflight.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6105610Z (pass) release mode fails with an ::error:: annotation naming the owner action [0.76ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6107056Z (pass) report mode warns about the same blocker without failing pull requests [0.26ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6108407Z (pass) an NPM_TOKEN secret lets the release bootstrap missing packages [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6110226Z (pass) registry outages fail release mode instead of passing silently [0.25ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6112340Z (pass) verbose mode traces every registry request; unknown modes are rejected [0.25ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6112963Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6113361Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6113549Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6114125Z ##[group]test\issue-59-release-recovery.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6114860Z (pass) push rejections are classified: a rule is never a lost race [0.20ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6115647Z (pass) a lost race is rebased and pushed again [0.57ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6116355Z (pass) a repository rule fails at once with the rule and its fix [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6117240Z (pass) other push failures and endless races are not retried forever [0.31ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6118180Z (pass) anything to release is decided from npm and GitHub, not changesets alone [0.67ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6119065Z (pass) an unknown npm or GitHub state never releases [0.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6119758Z (pass) only a GitHub 404 means the release is missing [0.48ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6120906Z (pass) E409 "previously staged" is verified on the registry, not retried [0.26ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6121863Z (pass) every name shares one 25-minute registry window and logs its wait [0.49ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6122694Z (pass) a refused GitHub release creation fails the step [435.82ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6123488Z (pass) an existing GitHub release is accepted on a recovery run [678.66ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6124097Z 20 |       actual: value,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6124306Z 21 |       expected: !0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6124504Z 22 |       message,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6124694Z 23 |       operator: "==",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6124916Z 24 |       stackStartFn: fn
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6125196Z 25 |     throw err.generatedMessage = generatedMessage, err;
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6125518Z                                                            ^
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6125784Z AssertionError: false == true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6126273Z       at innerOk (internal:assert/utils:25:55)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6126568Z       at ok (node:assert:96:10)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6127277Z       at <anonymous> (D:\a\gh-upload-log\gh-upload-log\test\issue-59-release-recovery.test.js:371:10)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6127674Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6130210Z ##[error]
+Bun Test (windows-2025)	Run tests	      at innerOk (internal:assert/utils:25:55)
+Bun Test (windows-2025)	Run tests	      at ok (node:assert:96:10)
+Bun Test (windows-2025)	Run tests	      at <anonymous> (D:\a\gh-upload-log\gh-upload-log\test\issue-59-release-recovery.test.js:371:10)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6132203Z (fail) the release job checks every artifact before skipping a release [2.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6132566Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6132807Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6132923Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6133160Z ##[group]test\issue-59-scripts.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6133572Z (pass) a rejected git push fails versioning instead of reporting a commit [3.39ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6134062Z (pass) a failing changeset version stops before committing [0.17ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6134608Z (pass) a successful run commits, pushes and reports the commit [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6135174Z (pass) release scripts check every command and load no code from unpkg [1.48ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6135950Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6136368Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6136566Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6136955Z ##[group]test\links-workflow.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6137662Z (pass) broken link workflow > fails for every nonzero Lychee exit even when an archive exists [0.42ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6138343Z (pass) broken link workflow > re-asks the links that never got an answer before giving up [0.10ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6138982Z (pass) broken link workflow > downgrades a failure only when every unanswered link recovered [0.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6140003Z (pass) broken link workflow > feeds the recovered list to the Web Archive check [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6140976Z (pass) broken link workflow > triggers on changes to every file the check depends on [0.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6142272Z (pass) broken link workflow > persists the lychee cache it asks for [0.09ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6143193Z (pass) broken link workflow > uploads the report the failure message points at [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6143786Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6144149Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6144331Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6144726Z ##[group]test\log-text-extension.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6145366Z (pass) generateGistFileName - returns .log.txt for log input [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6146194Z (pass) generateGistFileName - does not duplicate .log.txt suffix [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6147154Z (pass) generateUploadedLogFileName - appends .log.txt for non-log input [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6148152Z (pass) splitFileIntoChunks - creates browser-viewable chunk file names [4.29ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6149128Z (pass) uploadLog - creates gists with browser-viewable log text filenames [14.82ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6149699Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6150070Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6150248Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6151377Z ##[group]test\path-handling.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6152339Z (pass) resolveLogFilePath - resolves a bare relative path [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6153147Z (pass) resolveLogFilePath - resolves an explicit ./ path [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6153967Z (pass) resolveLogFilePath - resolves a parent-relative path [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6154784Z (pass) resolveLogFilePath - keeps absolute paths unchanged [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6156770Z (pass) resolveLogFilePath - expands a quoted home-relative path [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6157566Z (pass) resolveLogFilePath - expands a lone tilde [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6158206Z (pass) resolveLogFilePath - rejects empty input [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6158935Z (pass) generated names are identical for every form of the same path [1.13ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6159731Z (pass) generated names stay within GitHub and git length limits [0.22ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6160584Z (pass) generated folder segments stay within git length limits [0.16ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:37.6161171Z (pass) generated folder segment falls back to a root name [0.04ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7714426Z (pass) uploadLog - accepts a relative path even when the working directory changes [22.96ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7715971Z (pass) uploadLog - runs git commands through the cwd option instead of `cd` [15.53ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7717204Z (pass) uploadLog - initializes git without the master branch hint [17.82ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7718124Z [TRACE 2026-10-24T09:44:37.615Z] [API] $tagged called with options | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7719061Z   "options": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7719835Z     "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7721545Z     "mirror": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7721907Z     "capture": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7722242Z   }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7722506Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7722956Z [TRACE 2026-10-24T09:44:37.615Z] [API] $tagged.withOptions ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7723980Z   "stringsLength": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7724332Z   "valuesLength": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7724617Z   "options": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7725081Z     "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7726195Z     "mirror": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7726542Z     "capture": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7726846Z   }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7727092Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7727523Z [TRACE 2026-10-24T09:44:37.615Z] [Utils] buildShellCommand ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7728118Z   "stringsLength": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7728452Z   "valuesLength": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7728771Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7729191Z [TRACE 2026-10-24T09:44:37.615Z] [Utils] buildShellCommand EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7729821Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7730288Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7730706Z [TRACE 2026-10-24T09:44:37.615Z] [ProcessRunner] constructor ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7731270Z   "spec": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7731563Z     "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7732009Z     "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7732510Z   },
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7732777Z   "options": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7733149Z     "mirror": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7733464Z     "capture": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7733983Z     "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7734594Z   }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7734847Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7735675Z [TRACE 2026-10-24T09:44:37.615Z] [StreamMonitor] Setting up parent stream monitoring
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7736567Z [TRACE 2026-10-24T09:44:37.616Z] [ProcessRunner] Added to activeProcessRunners | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7737294Z   "command": "git -c init.defaultBranch=main init -q",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7737786Z   "totalActive": 1
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7738056Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7738410Z [TRACE 2026-10-24T09:44:37.616Z] [SignalHandler] Installing SIGINT handler | {"activeRunners":1}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7739170Z [TRACE 2026-10-24T09:44:37.616Z] [API] $tagged.withOptions EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7739883Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7740177Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7740424Z [TRACE 2026-10-24T09:44:37.616Z] [ProcessRunner] then() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7740751Z   "hasPromise": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7740949Z   "started": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7741142Z   "finished": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7741315Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7741572Z [TRACE 2026-10-24T09:44:37.617Z] [ProcessRunner] _doStartAsync ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7742070Z   "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7742311Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7742583Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7742858Z [TRACE 2026-10-24T09:44:37.617Z] [ProcessRunner] BRANCH: spec.mode => shell | {}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7743332Z [TRACE 2026-10-24T09:44:37.617Z] [ProcessRunner] Shell operator detection | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7743705Z   "hasShellOperators": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7743945Z   "shellOperatorsEnabled": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7744191Z   "isStreamingPattern": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7744425Z   "shouldUseShellOperators": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7744721Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7745024Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7745275Z [TRACE 2026-10-24T09:44:37.617Z] [ProcessRunner] _parseCommand ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7745614Z   "commandLength": 38,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7745852Z   "preview": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7746132Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7746375Z [TRACE 2026-10-24T09:44:37.617Z] [ProcessRunner] Parsed command | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7746697Z   "type": "simple",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7746873Z   "cmd": "git",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7747058Z   "argsCount": 4
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7747226Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7747530Z [TRACE 2026-10-24T09:44:37.634Z] [ShellDetection] Found shell in PATH: sh => /usr/bin/sh
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7748017Z [TRACE 2026-10-24T09:44:37.634Z] [ProcessRunner] Constructed argv | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7748365Z   "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7748542Z   "argv": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7748699Z     "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7748852Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7749006Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7749204Z     "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7749454Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7749690Z   "originalCommand": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7750060Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7750587Z [TRACE 2026-10-24T09:44:37.634Z] [ProcessRunner] Interactive command detection | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7751291Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7751663Z   "stdinInherit": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7752030Z   "interactiveOption": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7752407Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7752859Z [TRACE 2026-10-24T09:44:37.634Z] [ProcessRunner] About to spawn process | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7753501Z   "needsExplicitPipe": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7753922Z   "preferNodeForInput": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7754302Z   "runtime": "Bun",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7754630Z   "command": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7754936Z   "args": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7755588Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7755886Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7756236Z     "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7756684Z   ]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7756956Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7757438Z [TRACE 2026-10-24T09:44:37.635Z] [ProcessRunner] spawnBun: Creating process | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7758187Z   "command": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7758529Z   "args": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7758794Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7759158Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7759639Z     "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7760187Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7760694Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7761363Z   "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7762143Z   "platform": "win32"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7762557Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7763509Z [TRACE 2026-10-24T09:44:37.635Z] [ProcessRunner] spawnBun: Using non-interactive mode with pipes and detached=false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7765490Z [TRACE 2026-10-24T09:44:37.635Z] [ProcessRunner] spawnBun: About to spawn | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7765957Z   "argv": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7766241Z     "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7766502Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7779210Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7779836Z     "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7780303Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7781085Z   "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7781782Z   "shellCmd": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7782224Z   "shellArgs": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7782536Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7782809Z     "-c"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7783063Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7783430Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7783930Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7784516Z [TRACE 2026-10-24T09:44:37.636Z] [ProcessRunner] spawnBun: Non-interactive process created | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7785306Z   "pid": 4472,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7785610Z   "killed": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7785956Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7786280Z   "hasStderr": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7786596Z   "hasStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7786885Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7787322Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] Child process created | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7787944Z   "pid": 4472,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7788258Z   "killed": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7788610Z   "exitCode": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7788850Z   "signalCode": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7789225Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7789553Z   "hasStderr": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7789860Z   "hasStdin": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7790163Z   "platform": "win32",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7790569Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7791072Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7791899Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] Skipping event listeners - child does not support .on() method (likely Bun process)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7793195Z [TRACE 2026-10-24T09:44:37.637Z] [Utils] pumpReadable: Starting to pump readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7794144Z [TRACE 2026-10-24T09:44:37.637Z] [Utils] pumpReadable: Starting to pump readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7795055Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] Setting up stdin handling | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7796032Z   "stdinType": "string",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7796403Z   "stdin": "inherit",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7796749Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7797108Z   "hasChildStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7797426Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7797918Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] stdin: Non-interactive inherit mode | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7798598Z   "isPipedIn": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7798919Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7799531Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] stdin: Forwarding TTY stdin for non-interactive command
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7800513Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] _forwardTTYStdin ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7801156Z   "hasChildStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7801498Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7802074Z [TRACE 2026-10-24T09:44:37.637Z] [ProcessRunner] TTY forwarding skipped - no TTY or no child stdin
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7802978Z [TRACE 2026-10-24T09:44:37.880Z] [Utils] pumpReadable: Finished pumping readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7803841Z [TRACE 2026-10-24T09:44:37.880Z] [Utils] pumpReadable: Finished pumping readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7804761Z [TRACE 2026-10-24T09:44:37.882Z] [ProcessRunner] Raw exit code from child | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7805415Z   "code": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7805729Z   "codeType": "number",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7806080Z   "childExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7806448Z   "isBun": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7806771Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7807269Z [TRACE 2026-10-24T09:44:37.882Z] [ProcessRunner] Processing exit code | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7807908Z   "rawCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7808235Z   "cancelled": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7808862Z   "childKilled": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7809227Z   "childExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7809577Z   "childSignalCode": null
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7809941Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7810391Z [TRACE 2026-10-24T09:44:37.882Z] [ProcessRunner] Process completed | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7810990Z   "finalExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7811397Z   "captured": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7811719Z   "hasStdout": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7812257Z   "hasStderr": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7812582Z   "stdoutLength": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7812897Z   "stderrLength": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7813211Z   "stdoutPreview": "",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7813543Z   "stderrPreview": "",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7813879Z   "childPid": 4472,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7814182Z   "cancelled": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7814526Z   "cancellationSignal": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7814902Z   "platform": "win32",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7815234Z   "runtime": "Bun"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7815533Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7816485Z [TRACE 2026-10-24T09:44:37.882Z] [ProcessRunner] About to finish process with result | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7817171Z   "exitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7817474Z   "finished": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7817772Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7818176Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] finish() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7818771Z   "alreadyFinished": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7819130Z   "resultCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7819433Z   "hasStdout": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7819755Z   "hasStderr": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7820154Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7820656Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7821158Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Result stored, about to emit events
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7822258Z [TRACE 2026-10-24T09:44:37.883Z] [StreamEmitter] Emitting event | {"event":"end","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7823320Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] 'end' event emitted
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7824334Z [TRACE 2026-10-24T09:44:37.883Z] [StreamEmitter] Emitting event | {"event":"exit","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7825428Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] 'exit' event emitted with code 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7826303Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Marked as finished, calling cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7827136Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] _cleanup() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7827811Z   "wasActiveBeforeCleanup": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7828259Z   "totalActiveBefore": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7828635Z   "finished": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7828960Z   "hasChild": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7829435Z   "command": "git -c init.defaultBranch=main init -q"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7829903Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7830401Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Removed from activeProcessRunners | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7831156Z   "command": "git -c init.defaultBranch=main init -q",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7831481Z   "totalActiveAfter": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7831697Z   "remainingCommands": []
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7831911Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7832241Z [TRACE 2026-10-24T09:44:37.883Z] [SignalHandler] Removing SIGINT handler | {"activeRunners":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7832828Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Cleaning up abort controller during cleanup | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7833506Z   "wasAborted": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7834144Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7834498Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Abort controller aborted successfully during cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7835100Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Abort controller reference cleared during cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7835646Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Cleaning up child process reference | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7836030Z   "hasChild": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7836206Z   "childPid": 4472,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7836380Z   "childKilled": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7836763Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7837085Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Child process listeners removed successfully
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7837624Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Child process reference cleared
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7838223Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] No virtual generator to clean up
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7839125Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] _cleanup() completed | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7839919Z   "totalActiveAfter": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7840146Z   "sigintListenerCount": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7840345Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7840580Z [TRACE 2026-10-24T09:44:37.883Z] [ProcessRunner] Cleanup completed
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7841368Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Process finished, result set | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7842832Z   "finished": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7843536Z   "resultCode": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7843749Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7844878Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Returning result successfully | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7845952Z   "exitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7846264Z   "errexit": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7846553Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7846969Z [TRACE 2026-10-24T09:44:37.884Z] [API] $tagged.withOptions ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7847495Z   "stringsLength": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7847817Z   "valuesLength": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7848131Z   "options": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7848645Z     "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7849313Z     "mirror": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7849634Z     "capture": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7849931Z   }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7850174Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7850604Z [TRACE 2026-10-24T09:44:37.884Z] [Utils] buildShellCommand ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7851200Z   "stringsLength": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7851527Z   "valuesLength": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7851826Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7852232Z [TRACE 2026-10-24T09:44:37.884Z] [Utils] buildShellCommand EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7852892Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7853306Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7853732Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] constructor ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7855152Z   "spec": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7856475Z     "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7856886Z     "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7857331Z   },
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7857601Z   "options": {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7857933Z     "mirror": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7858266Z     "capture": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7858824Z     "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7859467Z   }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7859727Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7860289Z [TRACE 2026-10-24T09:44:37.884Z] [StreamMonitor] Parent streams already monitored, skipping
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7861268Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Added to activeProcessRunners | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7861973Z   "command": "git branch --show-current",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7862419Z   "totalActive": 1
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7862726Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7863300Z [TRACE 2026-10-24T09:44:37.884Z] [SignalHandler] Installing SIGINT handler | {"activeRunners":1}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7864197Z [TRACE 2026-10-24T09:44:37.884Z] [API] $tagged.withOptions EXIT | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7864801Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7865220Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7865631Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] then() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7866191Z   "hasPromise": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7866534Z   "started": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7866864Z   "finished": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7867166Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7867622Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] _doStartAsync ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7868245Z   "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7868597Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7869026Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7869515Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] BRANCH: spec.mode => shell | {}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7870617Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Shell operator detection | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7871294Z   "hasShellOperators": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7871724Z   "shellOperatorsEnabled": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7872149Z   "isStreamingPattern": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7872568Z   "shouldUseShellOperators": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7873032Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7873645Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7874522Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] _parseCommand ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7875153Z   "commandLength": 25,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7875535Z   "preview": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7875973Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7876395Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Parsed command | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7876975Z   "type": "simple",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7877289Z   "cmd": "git",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7877590Z   "argsCount": 2
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7877893Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7878330Z [TRACE 2026-10-24T09:44:37.884Z] [ShellDetection] Using cached shell: sh
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7879119Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Constructed argv | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7879698Z   "mode": "shell",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7880003Z   "argv": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7880267Z     "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7880527Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7880780Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7881069Z     "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7881416Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7881740Z   "originalCommand": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7882191Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7882632Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] Interactive command detection | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7883311Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7883673Z   "stdinInherit": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7884028Z   "interactiveOption": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7884385Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7884833Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] About to spawn process | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7885463Z   "needsExplicitPipe": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7885883Z   "preferNodeForInput": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7886268Z   "runtime": "Bun",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7886589Z   "command": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7886886Z   "args": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7887170Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7887444Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7887737Z     "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7888115Z   ]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7888361Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7888837Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] spawnBun: Creating process | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7889504Z   "command": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7889830Z   "args": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7890095Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7890351Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7890654Z     "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7891034Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7891315Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7891903Z   "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7892573Z   "platform": "win32"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7892898Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7893585Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] spawnBun: Using non-interactive mode with pipes and detached=false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7895064Z [TRACE 2026-10-24T09:44:37.884Z] [ProcessRunner] spawnBun: About to spawn | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7895711Z   "argv": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7896004Z     "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7896280Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7896542Z     "-c",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7896834Z     "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7897209Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7897714Z   "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\gh-upload-log-init-qTCGeU",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7898378Z   "shellCmd": "sh",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7898700Z   "shellArgs": [
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7899000Z     "-l",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7899275Z     "-c"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7899518Z   ],
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7899813Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7901331Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7901683Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] spawnBun: Non-interactive process created | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902112Z   "pid": 7744,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902285Z   "killed": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902462Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902645Z   "hasStderr": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902825Z   "hasStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7902988Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7903372Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] Child process created | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7903714Z   "pid": 7744,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7903882Z   "killed": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904058Z   "exitCode": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904240Z   "signalCode": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904427Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904607Z   "hasStderr": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904785Z   "hasStdin": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7904961Z   "platform": "win32",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7905172Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7905413Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7905872Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] Skipping event listeners - child does not support .on() method (likely Bun process)
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7906546Z [TRACE 2026-10-24T09:44:37.887Z] [Utils] pumpReadable: Starting to pump readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7907058Z [TRACE 2026-10-24T09:44:37.887Z] [Utils] pumpReadable: Starting to pump readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7907537Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] Setting up stdin handling | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7907948Z   "stdinType": "string",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7908153Z   "stdin": "inherit",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7908343Z   "isInteractive": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7908545Z   "hasChildStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7908731Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7909023Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] stdin: Non-interactive inherit mode | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7909405Z   "isPipedIn": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7909578Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7909921Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] stdin: Forwarding TTY stdin for non-interactive command
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7910472Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] _forwardTTYStdin ENTER | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7910815Z   "hasChildStdin": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7910991Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7911310Z [TRACE 2026-10-24T09:44:37.887Z] [ProcessRunner] TTY forwarding skipped - no TTY or no child stdin
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7911849Z [TRACE 2026-10-24T09:44:38.115Z] [Utils] asBuffer: Converting unknown type to buffer
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7912561Z [TRACE 2026-10-24T09:44:38.116Z] [ProcessRunner] stdout data received | {"pid":7744,"bufferLength":5,"capture":true,"mirror":false,"preview":"main\n"}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7913841Z [TRACE 2026-10-24T09:44:38.116Z] [AnsiUtils] processOutput() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7914433Z   "dataType": "object",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7914992Z   "dataLength": 5,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7915184Z   "options": {}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7915348Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7915766Z [TRACE 2026-10-24T09:44:38.116Z] [StreamEmitter] Emitting event | {"event":"stdout","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7917100Z [TRACE 2026-10-24T09:44:38.116Z] [StreamEmitter] Emitting event | {"event":"data","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7918222Z [TRACE 2026-10-24T09:44:38.116Z] [Utils] pumpReadable: Finished pumping readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7919142Z [TRACE 2026-10-24T09:44:38.116Z] [Utils] pumpReadable: Finished pumping readable stream
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7920015Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Raw exit code from child | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7920625Z   "code": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7920918Z   "codeType": "number",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7921258Z   "childExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7921586Z   "isBun": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7921863Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7922295Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Processing exit code | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7922887Z   "rawCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7923447Z   "cancelled": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7923810Z   "childKilled": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7924156Z   "childExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7924489Z   "childSignalCode": null
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7924872Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7925336Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Process completed | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7925970Z   "finalExitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7926315Z   "captured": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7926624Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7927204Z   "hasStderr": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7927541Z   "stdoutLength": 5,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7927866Z   "stderrLength": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7928184Z   "stdoutPreview": "main\n",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7928554Z   "stderrPreview": "",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7928888Z   "childPid": 7744,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7929185Z   "cancelled": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7929528Z   "cancellationSignal": null,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7929890Z   "platform": "win32",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7930611Z   "runtime": "Bun"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7930996Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7931601Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] About to finish process with result | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7932305Z   "exitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7932616Z   "finished": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7932918Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7933338Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] finish() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7934259Z   "alreadyFinished": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7934638Z   "resultCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7934965Z   "hasStdout": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7935278Z   "hasStderr": false,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7935635Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7936047Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7936559Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Result stored, about to emit events
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7937756Z [TRACE 2026-10-24T09:44:38.119Z] [StreamEmitter] Emitting event | {"event":"end","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7938796Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] 'end' event emitted
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7939825Z [TRACE 2026-10-24T09:44:38.119Z] [StreamEmitter] Emitting event | {"event":"exit","hasListeners":false,"listenerCount":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7940911Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] 'exit' event emitted with code 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7941780Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Marked as finished, calling cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7942594Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] _cleanup() called | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7943208Z   "wasActiveBeforeCleanup": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7943632Z   "totalActiveBefore": 1,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7943994Z   "finished": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7944304Z   "hasChild": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7944648Z   "command": "git branch --show-current"
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7945063Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7945603Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Removed from activeProcessRunners | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7946316Z   "command": "git branch --show-current",
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7946760Z   "totalActiveAfter": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7947128Z   "remainingCommands": []
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7947457Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7948009Z [TRACE 2026-10-24T09:44:38.119Z] [SignalHandler] Removing SIGINT handler | {"activeRunners":0}
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7949048Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Cleaning up abort controller during cleanup | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7949800Z   "wasAborted": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7950110Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7950716Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Abort controller aborted successfully during cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7953052Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Abort controller reference cleared during cleanup
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7954100Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Cleaning up child process reference | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7955489Z   "hasChild": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7956595Z   "childPid": 7744,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7956922Z   "childKilled": true
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7957241Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7958046Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Child process listeners removed successfully
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7958980Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Child process reference cleared
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7960189Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] No virtual generator to clean up
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7960971Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] _cleanup() completed | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7961709Z   "totalActiveAfter": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7962077Z   "sigintListenerCount": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7962407Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7962795Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Cleanup completed
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7963562Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Process finished, result set | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7964183Z   "finished": true,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7964493Z   "resultCode": 0
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7964768Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7965248Z [TRACE 2026-10-24T09:44:38.119Z] [ProcessRunner] Returning result successfully | {
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7965876Z   "exitCode": 0,
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7966170Z   "errexit": false
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7966445Z }
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7966970Z (pass) git init command produces no master branch hint when executed for real [509.72ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7967549Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7967934Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7968045Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7968315Z ##[group]test\recheck-broken-links.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7968797Z (pass) lychee report classification > marks a failure carrying a status code as final [0.31ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7969441Z (pass) lychee report classification > marks ERROR, TIMEOUT, and UNKNOWN markers as never answered [0.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7970140Z (pass) lychee report classification > treats a rejected status code as an answer whatever the marker [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7970871Z (pass) lychee report classification > keeps non-http failures out of the re-check even when unanswered [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7971577Z (pass) lychee request option sharing > reads the same accept list and user agent as the lychee step [0.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7972208Z (pass) lychee request option sharing > extracts the flags when the workflow sets them [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7972746Z (pass) accept list parsing > honours ranges, singles, and stray spaces [0.15ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7973393Z (pass) complete report recovery verdict > requires every failure in a non-empty unanswered-only report to recover [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7974027Z (pass) re-check requests > recovers a URL that answers accepted [0.83ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7974537Z (pass) re-check requests > stops at the first rejected answer and never retries it [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7975110Z (pass) re-check requests > retries a URL that never answers and takes a later success [4.41ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7976092Z (pass) re-check requests > gives up without an answer once the budget expires [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7976567Z (pass) re-check requests > asks a duplicated URL only once [0.20ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7977039Z (pass) re-check requests > sends the request the way lychee was configured to [0.15ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7977638Z (pass) re-check step end to end > recovers only the URLs that answer healthy and never re-asks a 404 [129.51ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7978307Z (pass) re-check step end to end > releases the gate when a cached 503 recovers with a fresh success [120.99ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7978978Z (pass) re-check step end to end > does not release the gate when a 404 remains beside a recovered link [126.08ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7979586Z (pass) re-check step end to end > exits 0 even when the report is missing entirely [62.59ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7980202Z (pass) web archive fallback honouring the re-check > drops recovered URLs from the archive lookup [0.21ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7980908Z (pass) web archive fallback honouring the re-check > skips nothing when the recovered file is missing or empty [0.05ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7981338Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7981717Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7981827Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7982045Z ##[group]test\release-notes.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7982417Z (pass) a single changeset keeps its paragraphs, nested lists and rules [0.40ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7982888Z (pass) every changeset entry is kept and every hash is returned [0.07ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7983387Z (pass) several sections keep their headings; CRLF and duplicates are normalized [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7983941Z (pass) a body without a changes section is left alone [0.03ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7984317Z (pass) one related PR is singular, several are listed [0.12ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:38.7984741Z (pass) npm badges escape the dashes and underscores shields.io splits on [0.10ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.8784728Z Current npm version: 10.8.2
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9724521Z (pass) format-release-notes publishes every entry and links every PR [1121.01ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9727427Z (pass) the release body is exactly the section of the released version [0.27ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9736249Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9736869Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9737144Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9737630Z ##[group]test\release.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9738562Z (pass) publishWithRetries rejects non-zero command results after all attempts [0.29ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9739667Z (pass) publishWithRetries succeeds only after a zero command exit code [0.18ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9740655Z (pass) release workflow uses an OIDC-compatible Node and npm toolchain [0.38ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:39.9741663Z (pass) setupNpm rejects when the npm upgrade command has a non-zero exit code [0.38ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1216446Z (pass) release-note parent fails when its formatter child exits non-zero [1288.79ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1217683Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1218245Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1218700Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1219136Z ##[group]test\run-with-budget-warning.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1220102Z (skip) never terminates a command that finishes inside its budget [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1221485Z (skip) still terminates a command that overruns its budget [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1222191Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1222419Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1222524Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1222783Z ##[group]test\sanitize-npm-userconfig.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1223303Z (pass) npm user config sanitization > removes only deprecated always-auth entries from npmrc content [0.20ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1224041Z (pass) npm user config sanitization > updates the user config file from NPM_CONFIG_USERCONFIG [0.29ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1224754Z (pass) npm user config sanitization > skips cleanly when setup-node did not create a user config file [0.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1225164Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1225364Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1225472Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1225681Z ##[group]test\status-gate.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1226040Z (pass) gate coverage reads needs lists with comments and blank lines [25.67ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1226566Z (pass) every gate compares the run with the pull request ref, not a branch name [0.50ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1227178Z (skip) the gate resolves the run head through HEAD_REF [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1227570Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1227775Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1227877Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1228267Z ##[group]test\transient-links.test.js:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1228754Z (pass) transient link failures > classifies cached 503 and rejected 429 as retryable, preserving 404 [0.11ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1229441Z (pass) transient link failures > backs off between transient answers and recovers only on success [0.39ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1230127Z (pass) transient link failures > uses authenticated contents GET for GitHub blob and tree throttling [0.64ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1230851Z (pass) transient link failures > does not recover on an API denial and keeps credentials off unrelated hosts [0.30ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1231825Z (pass) transient link failures > never retries a definitive 404 or uses an API answer to hide it [0.14ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1232507Z (pass) transient link failures > bounds persistent 503 errors by the shared wall-clock budget [0.19ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1233119Z (pass) transient link failures > pins every Bun setup to the supported major line [0.24ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1233456Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1233790Z ##[endgroup]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1233894Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1233961Z 3 tests skipped:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1234408Z (skip) never terminates a command that finishes inside its budget [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1235153Z (skip) still terminates a command that overruns its budget [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1235847Z (skip) the gate resolves the run head through HEAD_REF [skipped: bash on PATH may be WSL rather than Git Bash]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1236247Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1236251Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1236317Z 2 tests failed:
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1236613Z (fail) ShellCheck lints every tracked shell script and gates the run [33.49ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1237091Z (fail) the release job checks every artifact before skipping a release [2.06ms]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1237383Z 
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1237455Z  316 pass
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1237779Z  3 skip
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1237974Z  2 fail
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:41.1238156Z Ran 321 tests across 36 files. [127.87s]
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:42.2503305Z Bun test suite finished in 129s of its 360s budget (exit 1).
+Bun Test (windows-2025)	Run tests	2026-10-24T09:44:42.2795386Z ##[error]Process completed with exit code 1.
+Pipeline Status	Fail the run when a required job was cancelled or failed	﻿2026-10-24T09:44:51.5289420Z ##[group]Run bash scripts/check-pipeline-status.sh
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5290570Z ^[[36;1mbash scripts/check-pipeline-status.sh^[[0m
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5593269Z shell: /usr/bin/bash -e {0}
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5594259Z env:
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5595090Z   GIT_CONFIG_COUNT: 1
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5595979Z   GIT_CONFIG_KEY_0: init.defaultBranch
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5596963Z   GIT_CONFIG_VALUE_0: main
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5600855Z   NEEDS_JSON: {
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "detect-changes": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "success",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	      "js-changed": "true",
+Pipeline Status	Fail the run when a required job was cancelled or failed	      "docs-changed": "true",
+Pipeline Status	Fail the run when a required job was cancelled or failed	      "any-code-changed": "true"
+Pipeline Status	Fail the run when a required job was cancelled or failed	    }
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "version-check": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "success",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "changeset-check": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "success",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "lint": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "success",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "test": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "failure",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "release-preflight": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "success",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "release": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "skipped",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "instant-release": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "skipped",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  },
+Pipeline Status	Fail the run when a required job was cancelled or failed	  "changeset-pr": {
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "result": "skipped",
+Pipeline Status	Fail the run when a required job was cancelled or failed	    "outputs": {}
+Pipeline Status	Fail the run when a required job was cancelled or failed	  }
+Pipeline Status	Fail the run when a required job was cancelled or failed	}
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5604421Z   RUN_SHA: 2d642db1e291fa965ddc4e1774e42002b496bb6d
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5605339Z   BRANCH_NAME: issue-59-de5fbec5d0d0
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5606180Z   HEAD_REF: refs/pull/60/head
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.5607073Z ##[endgroup]
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.6364084Z Failed jobs:    test
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.6365100Z Cancelled jobs: <none>
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.6383096Z ##[error]Failing jobs: test
+Pipeline Status	Fail the run when a required job was cancelled or failed	2026-10-24T09:44:51.6396101Z ##[error]Process completed with exit code 1.

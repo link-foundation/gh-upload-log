@@ -1,0 +1,15 @@
+$ bun test --timeout 30000
+bun test v1.4.3 (c6da4a4d3)
+
+test/issue-59-ci-scripts.test.js:
+Comparing: git diff --name-only base HEAD^2
+Range unavailable (unknown revision)
+Comparing: git diff --name-only base HEAD
+Comparing: git diff --name-only HEAD^1 HEAD
+
+test/release.test.js:
+Current npm version: 10.8.2
+
+ 322 pass
+ 0 fail
+Ran 322 tests across 36 files. [111.36s]

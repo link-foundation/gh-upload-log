@@ -22,6 +22,10 @@ export default [
         __filename: 'readonly',
         // Node.js 18+ globals
         fetch: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
         // Runtime-specific globals
         Bun: 'readonly',
         Deno: 'readonly',
@@ -43,6 +47,12 @@ export default [
       'prefer-const': 'error',
       'prefer-arrow-callback': 'error',
       'no-duplicate-imports': 'error',
+      // Kept in sync with scripts/check-file-size.mjs (principle 2), so the
+      // editor flags an oversized file before CI does.
+      'max-lines': [
+        'error',
+        { max: 1000, skipBlankLines: false, skipComments: false },
+      ],
 
       // ES6+ features
       'arrow-body-style': ['error', 'as-needed'],
@@ -71,6 +81,7 @@ export default [
       'dist/**',
       '*.min.js',
       '.eslintcache',
+      'dev/log/**',
     ],
   },
 ];

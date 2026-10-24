@@ -4,3 +4,5 @@ dist
 *.min.js
 package-lock.json
 .eslintcache
+# Raw CI logs and API responses collected as evidence for case studies
+dev/log

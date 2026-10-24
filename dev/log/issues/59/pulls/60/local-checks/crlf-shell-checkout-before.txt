@@ -1,0 +1,10 @@
+i/lf    w/crlf  attr/                 	.husky/pre-commit
+i/lf    w/crlf  attr/                 	experiments/issue-59-budget-seconds-early-kill.sh
+i/lf    w/crlf  attr/                 	experiments/issue-59-bunfig-test-timeout.sh
+i/lf    w/crlf  attr/                 	experiments/issue-59-secretlint-npx-local-dep.sh
+i/lf    w/crlf  attr/                 	scripts/check-pipeline-status.sh
+i/lf    w/crlf  attr/                 	scripts/read-job-cancel-in-progress.sh
+i/lf    w/crlf  attr/                 	scripts/run-with-budget-warning.sh
+i/lf    w/crlf  attr/                 	scripts/simulate-fresh-merge.sh
+first line of scripts/read-job-cancel-in-progress.sh: 0000000   #   !   /   u   s   r   /   b   i   n   /   e   n   v       b
+sh -n: OK (LF checkout)

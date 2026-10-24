@@ -1,0 +1,5 @@
+npm install gh-upload-file@0.9.1 failed (attempt 1/1)
+REJECTED: npm install gh-upload-file@0.9.1 failed:
+npm error code E404
+npm error 404 Not Found - GET https://registry.npmjs.org/gh-upload-file - Not found
+npm error 404
