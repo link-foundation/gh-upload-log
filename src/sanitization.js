@@ -20,7 +20,7 @@ export function uploadSourcePath(options) {
 }
 
 export async function withSanitizedUpload(options, upload) {
-  if (options[verified]?.filePath === options.filePath) {
+  if (options[verified] && options[verified].filePath === options.filePath) {
     return upload(options);
   }
   if (!options.filePath) {

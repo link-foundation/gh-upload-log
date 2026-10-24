@@ -86,7 +86,7 @@ only for a missing changeset, at log lines 244–246. This run predates fixes.
 Large command logs are preserved locally in `ci-logs/` and
 `experiments/output/`; concise durable evidence is recorded below and in the PR.
 
-Local verification on Linux with Bun 1.4.3 and Node 26.12.1 passed all 196 tests,
+Local verification on Linux with Bun 1.4.3 and Node 26.12.1 passed all 197 tests,
 formatting, lint and the 1,000-line JavaScript file limit. The finite streaming
 probe used Node's `--max-old-space-size=640` and checked the SHA-256 of every
 output byte against an independently generated expected stream:

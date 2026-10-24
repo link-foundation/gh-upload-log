@@ -540,7 +540,7 @@ test('uploadLog - retries with a unique repository name after a collision', asyn
   );
 });
 
-test('uploadLog - stores large files in the shared visibility repository by default', async () => {
+test('uploadLog - stores repository uploads in the shared visibility repository by default', async () => {
   const sharedFile = path.join('test', 'fixtures', 'shared-default-large.log');
   writeRepositoryTestFile(sharedFile);
 

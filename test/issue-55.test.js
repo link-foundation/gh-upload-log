@@ -83,6 +83,18 @@ function captureCommands({ failGist = false } = {}) {
   return { commands, payloads, stagedPaths, factory: () => bind() };
 }
 
+test('missing input cannot enter the verified-upload callback', async () => {
+  let called = false;
+  await assert.rejects(
+    withSanitizedUpload({}, () => {
+      called = true;
+      return {};
+    }),
+    /filePath is required/
+  );
+  assert.equal(called, false);
+});
+
 for (const isPublic of [false, true]) {
   test(`every gist entry point sanitizes (${isPublic ? 'public' : 'private'})`, async () => {
     await withFile(original, async (filePath) => {
