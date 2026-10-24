@@ -24,36 +24,53 @@ export const ANNOTATION_TITLE = 'Dependency graph disabled';
 
 /**
  * Return true when the dependency graph is enabled. The SBOM endpoint answers
- * 404 exactly when the graph is off; any other failure is not evidence either
- * way, so it throws instead of guessing.
+ * 404 exactly when the graph is off. Rate limits (403/429), 5xx and network
+ * errors are not evidence either way: they are retried, and if they persist
+ * the state is reported as unknown instead of guessed (template issue #249).
  */
 export async function isDependencyGraphEnabled({
   repository,
   token,
   fetchFn = fetch,
   logger = { log() {} },
+  attempts = 3,
+  sleep = (ms) => new Promise((resolve) => globalThis.setTimeout(resolve, ms)),
 }) {
   const url = `https://api.github.com/repos/${repository}/dependency-graph/sbom`;
-  logger.log(`GET ${url}`);
-  const response = await fetchFn(url, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    signal: globalThis.AbortSignal.timeout(30_000),
-  });
-  logger.log(`HTTP ${response.status}`);
-  await response.body?.cancel();
-  if (response.status === 404) {
-    return false;
+  let lastFailure = '';
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    if (attempt > 1) {
+      await sleep(2000 * (attempt - 1));
+    }
+    logger.log(`GET ${url} (attempt ${attempt}/${attempts})`);
+    let response;
+    try {
+      response = await fetchFn(url, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        signal: globalThis.AbortSignal.timeout(30_000),
+      });
+    } catch (error) {
+      lastFailure = error.message;
+      logger.log(`request failed: ${lastFailure}`);
+      continue;
+    }
+    logger.log(`HTTP ${response.status}`);
+    await response.body?.cancel();
+    if (response.status === 404) {
+      return false;
+    }
+    if (response.ok) {
+      return true;
+    }
+    lastFailure = `HTTP ${response.status}`;
   }
-  if (!response.ok) {
-    throw new Error(
-      `Dependency graph check for ${repository} failed (HTTP ${response.status})`
-    );
-  }
-  return true;
+  throw new Error(
+    `Dependency graph state for ${repository} is unknown after ${attempts} attempts (${lastFailure}); re-run the job`
+  );
 }
 
 export async function runDependencyGraphCheck({
@@ -64,6 +81,7 @@ export async function runDependencyGraphCheck({
   logger = console,
   verbose = false,
   setOutput = () => {},
+  sleep,
 }) {
   if (!['enforce', 'report'].includes(mode)) {
     logger.error(`::error::Unknown dependency graph check mode: ${mode}`);
@@ -80,6 +98,7 @@ export async function runDependencyGraphCheck({
       token,
       fetchFn,
       logger: verbose ? logger : undefined,
+      sleep,
     });
   } catch (error) {
     logger.log(`::error title=${ANNOTATION_TITLE}::${error.message}`);

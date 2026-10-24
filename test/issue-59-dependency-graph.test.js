@@ -4,16 +4,23 @@ import { runDependencyGraphCheck } from '../scripts/check-dependency-graph.mjs';
 
 const repository = 'link-foundation/gh-upload-log';
 
-function api(status) {
+// Each call answers with the next status; an Error entry is thrown instead.
+function api(...statuses) {
   const requests = [];
   return {
     requests,
     fetchFn: async (url, options) => {
       requests.push({ url, options });
+      const status = statuses[Math.min(requests.length, statuses.length) - 1];
+      if (status instanceof Error) {
+        throw status;
+      }
       return new globalThis.Response('{}', { status });
     },
   };
 }
+
+const noSleep = async () => {};
 
 function capture() {
   const lines = [];
@@ -84,20 +91,40 @@ test('an enabled dependency graph lets Dependency Review run', async () => {
   );
 });
 
-test('API failures are errors in every mode, never a silent skip', async () => {
+test('persistent API failures are errors in every mode, never a guess', async () => {
   for (const mode of ['enforce', 'report']) {
     const out = capture();
+    const { fetchFn, requests } = api(403, 500, new Error('ECONNRESET'));
     const code = await runDependencyGraphCheck({
       repository,
       mode,
-      fetchFn: api(500).fetchFn,
+      fetchFn,
+      sleep: noSleep,
       logger: out.logger,
       setOutput: out.setOutput,
     });
     assert.equal(code, 1);
+    assert.equal(requests.length, 3);
     assert.equal(out.outputs.enabled, undefined);
-    assert.match(out.lines.join('\n'), /::error .*HTTP 500/);
+    assert.match(out.lines.join('\n'), /::error .*unknown after 3 attempts/);
+    assert.doesNotMatch(out.lines.join('\n'), /settings\/security_analysis/);
   }
+});
+
+test('rate limits and 5xx are retried before the graph state is decided', async () => {
+  const out = capture();
+  const { fetchFn, requests } = api(429, 502, 404);
+  const code = await runDependencyGraphCheck({
+    repository,
+    mode: 'report',
+    fetchFn,
+    sleep: noSleep,
+    logger: out.logger,
+    setOutput: out.setOutput,
+  });
+  assert.equal(code, 0);
+  assert.equal(requests.length, 3);
+  assert.equal(out.outputs.enabled, 'false');
 });
 
 test('verbose mode is off by default and logs requests when enabled', async () => {
