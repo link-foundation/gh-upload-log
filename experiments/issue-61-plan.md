@@ -14,7 +14,11 @@ Objective: implement and verify every issue requirement in PR 62 on
 - [x] Add integration test with local Git origin, simulated publication/install lag and rerun at original SHA.
 - [x] Add patch changeset (automatic version trigger); update recovery docs and evidence.
 - [x] Run focused tests, full tests, lint/format/docs/workflow checks sequentially within memory headroom; retain logs.
-- [ ] Review diff for lost behavior and unmet requirements; commit atomic changes after local checks, push only prepared branch.
-- [ ] Update PR title/body with reproduction, tests, assumptions and Fixes #61; ensure latest main is included.
-- [ ] Verify current-head CI; preserve and analyze any failed logs by timestamp/SHA; fix and repeat as needed.
-- [ ] Refresh all feedback, mark PR 62 ready, confirm clean tree, finish native goal only after acceptance is verified.
+- [x] Review diff for lost behavior and unmet requirements; commit atomic changes after local checks, push only prepared branch.
+- [x] Update PR title/body with reproduction, tests, assumptions and Fixes #61; ensure latest main is included.
+- [x] Verify current-head CI; preserve and analyze any failed logs by timestamp/SHA; fix and repeat as needed.
+- [x] Refresh all feedback, mark PR 62 ready, confirm clean tree.
+
+Implementation CI and requirement evidence are recorded in
+`docs/case-studies/issue-61/README.md`. The native goal remains active through
+the final current-head CI and clean-tree verification after recording evidence.

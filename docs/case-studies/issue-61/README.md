@@ -90,5 +90,26 @@ and does not merge PR 62 or publish its next version during verification.
   installation, all three bin help commands and library import pass for both
   published names.
 
-The work plan and final CI evidence are updated alongside the PR after the
-complete suite and current-head checks finish.
+## CI verification
+
+All four workflows passed for implementation commit
+`4003e97a9e6842a71aaf9bc38bce972c57fbaeef`, committed at 09:46:17 UTC on
+2026-10-25. These runs began at 09:46:28 UTC, after that commit:
+
+- [Checks and release](https://github.com/link-foundation/gh-upload-log/actions/runs/40182033601):
+  Linux and macOS each passed 336 tests. Windows passed 333 tests with three
+  existing Bash-specific skips and zero failures. Both new release lifecycle
+  tests passed on every OS. Changeset validation, the versioning dry run,
+  preflight, lint and the final status gate passed.
+- [Workflows](https://github.com/link-foundation/gh-upload-log/actions/runs/40182033582):
+  actionlint, ShellCheck, zizmor and status-gate coverage passed.
+- [Security](https://github.com/link-foundation/gh-upload-log/actions/runs/40182033551):
+  both CodeQL analyses, dependency review and both lockfile audits passed.
+- [Broken Link Checker](https://github.com/link-foundation/gh-upload-log/actions/runs/40182033539):
+  link checks and its status gate passed.
+
+The [test log excerpts](evidence/ci-verification.txt) preserve test results and
+both integration scenarios on each OS. Full downloaded logs remain in
+`ci-logs/checks-release-40182033601.log`. The branch includes current main;
+the complete PR diff was reviewed and all issue/PR feedback endpoints remained
+empty. PR 62 is ready for review and remains unmerged.
