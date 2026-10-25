@@ -1,6 +1,6 @@
 {
   "name": "gh-upload-file",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Upload text and binary files to GitHub as Gists or chunked repository archives",
   "type": "module",
   "main": "src/index.js",
