@@ -367,7 +367,11 @@ test('the release job checks every artifact before skipping a release', () => {
   const workflow = fs
     .readFileSync(path.join(root, '.github/workflows/release.yml'), 'utf8')
     .replaceAll('\r\n', '\n');
-  assert.ok(workflow.includes('run: bun scripts/check-release-needed.mjs'));
+  assert.ok(
+    workflow.includes(
+      'run: bun "$RELEASE_TOOLS/scripts/check-release-needed.mjs"'
+    )
+  );
   assert.ok(
     workflow.includes(
       "(steps.check_release.outputs.should_release == 'true' &&\n          steps.check_release.outputs.skip_bump == 'true')"

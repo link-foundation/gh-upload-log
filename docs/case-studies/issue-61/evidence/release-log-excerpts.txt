@@ -1,0 +1,43 @@
+release-40084678223-attempt-2.log
+12090: Release	Publish to npm	2026-10-25T09:12:02.1269525Z ✅ Verified gh-upload-log@0.13.0 on npm after 83s
+12091: Release	Publish to npm	2026-10-25T09:12:12.2579882Z ✅ Verified gh-upload-file@0.13.0 on npm after 93s
+12092: Release	Smoke-test the published package	﻿2026-10-25T09:12:12.2675937Z ##[group]Run bash scripts/run-with-budget-warning.sh 600 "npm package smoke test" node scripts/smoke-test-package.mjs --package-version "$PACKAGE_VERSION"
+12103: Release	Smoke-test the published package	2026-10-25T09:12:12.2891245Z Running npm package smoke test with a 600s budget (warning at 420s).
+12104: Release	Smoke-test the published package	2026-10-25T09:12:13.3144202Z npm install gh-upload-file@0.13.0 failed (attempt 1/6)
+12105: Release	Smoke-test the published package	2026-10-25T09:12:23.4431796Z npm install gh-upload-file@0.13.0 failed (attempt 2/6)
+12106: Release	Smoke-test the published package	2026-10-25T09:12:33.5719572Z npm install gh-upload-file@0.13.0 failed (attempt 3/6)
+12107: Release	Smoke-test the published package	2026-10-25T09:12:43.6986194Z npm install gh-upload-file@0.13.0 failed (attempt 4/6)
+12108: Release	Smoke-test the published package	2026-10-25T09:12:53.8376380Z npm install gh-upload-file@0.13.0 failed (attempt 5/6)
+12109: Release	Smoke-test the published package	2026-10-25T09:13:03.9580572Z npm install gh-upload-file@0.13.0 failed (attempt 6/6)
+12110: Release	Smoke-test the published package	2026-10-25T09:13:03.9621042Z ##[error]npm install gh-upload-file@0.13.0 failed:
+12111: Release	Smoke-test the published package	2026-10-25T09:13:03.9626592Z npm error code ETARGET
+12112: Release	Smoke-test the published package	2026-10-25T09:13:03.9626860Z npm error notarget No matching version found for gh-upload-file@0.13.0.
+12113: Release	Smoke-test the published package	2026-10-25T09:13:03.9627272Z npm error notarget In most cases you or one of your dependencies are requesting a package version that doesn't exist.
+12114: Release	Smoke-test the published package	2026-10-25T09:13:03.9627753Z npm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-10-25T09_13_03_386Z-debug-0.log
+12115: Release	Smoke-test the published package	2026-10-25T09:13:03.9628128Z npm package smoke test finished in 51s of its 600s budget (exit 1).
+12116: Release	Smoke-test the published package	2026-10-25T09:13:03.9639300Z ##[error]Process completed with exit code 1.
+
+release-40084678223-attempt-3.log
+1235: Release	Check for changesets	2026-10-25T09:14:55.8384443Z Found 2 changeset file(s)
+1392: Release	Merge multiple changesets	2026-10-25T09:14:55.9094113Z Found 2 changeset file(s)
+3012: Release	Version packages and commit to main	2026-10-25T09:14:56.2900946Z Remote main has advanced (local: 3c55c2d2095c61234257d28634d11481c875dce3, remote: 6a3074575afb69c37512ec6cb1d46f49ed6628db)
+3338: Release	Version packages and commit to main	2026-10-25T09:14:56.2967804Z Remote version: 0.13.0
+3339: Release	Version packages and commit to main	2026-10-25T09:14:56.2967911Z Rebasing on remote main to incorporate changes...
+3340: Release	Version packages and commit to main	2026-10-25T09:14:56.3216009Z [TRACE 2026-10-25T09:14:56.321Z] [Utils] asBuffer: Converting unknown type to buffer
+3341: Release	Version packages and commit to main	2026-10-25T09:14:56.3217222Z [TRACE 2026-10-25T09:14:56.321Z] [ProcessRunner] stderr data received | {"pid":2277,"bufferLength":49,"capture":true,"mirror":true,"preview":"error: cannot rebase: You have unstaged changes.\n"}
+3342: Release	Version packages and commit to main	2026-10-25T09:14:56.3217580Z [TRACE 2026-10-25T09:14:56.321Z] [StreamMonitor] Parent streams already monitored, skipping
+3343: Release	Version packages and commit to main	2026-10-25T09:14:56.3222366Z error: cannot rebase: You have unstaged changes.
+3344: Release	Version packages and commit to main	2026-10-25T09:14:56.3222623Z [TRACE 2026-10-25T09:14:56.321Z] [AnsiUtils] processOutput() called | {
+3345: Release	Version packages and commit to main	2026-10-25T09:14:56.3222719Z   "dataType": "object",
+3346: Release	Version packages and commit to main	2026-10-25T09:14:56.3222803Z   "dataLength": 49,
+3347: Release	Version packages and commit to main	2026-10-25T09:14:56.3222886Z   "options": {}
+3348: Release	Version packages and commit to main	2026-10-25T09:14:56.3222964Z }
+3349: Release	Version packages and commit to main	2026-10-25T09:14:56.3223388Z [TRACE 2026-10-25T09:14:56.321Z] [StreamEmitter] Emitting event | {"event":"stderr","hasListeners":false,"listenerCount":0}
+3350: Release	Version packages and commit to main	2026-10-25T09:14:56.3223805Z [TRACE 2026-10-25T09:14:56.321Z] [StreamEmitter] Emitting event | {"event":"data","hasListeners":false,"listenerCount":0}
+3351: Release	Version packages and commit to main	2026-10-25T09:14:56.3223990Z [TRACE 2026-10-25T09:14:56.321Z] [Utils] asBuffer: Converting unknown type to buffer
+3352: Release	Version packages and commit to main	2026-10-25T09:14:56.3224368Z [TRACE 2026-10-25T09:14:56.321Z] [ProcessRunner] stderr data received | {"pid":2277,"bufferLength":36,"capture":true,"mirror":true,"preview":"error: Please commit or stash them.\n"}
+3353: Release	Version packages and commit to main	2026-10-25T09:14:56.3224554Z [TRACE 2026-10-25T09:14:56.321Z] [StreamMonitor] Parent streams already monitored, skipping
+3354: Release	Version packages and commit to main	2026-10-25T09:14:56.3224642Z error: Please commit or stash them.
+3448: Release	Version packages and commit to main	2026-10-25T09:14:56.3234220Z Error: Failed to rebase on origin/main: error: cannot rebase: You have unstaged changes.
+3449: Release	Version packages and commit to main	2026-10-25T09:14:56.3234305Z error: Please commit or stash them.
+3450: Release	Version packages and commit to main	2026-10-25T09:14:56.3251803Z ##[error]Process completed with exit code 1.

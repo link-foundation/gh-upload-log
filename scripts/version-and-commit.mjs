@@ -147,10 +147,12 @@ export async function versionAndCommit({
     const remoteVersion = JSON.parse(remotePackage.stdout).version;
     logger.log(`Remote version: ${remoteVersion}`);
 
-    if (changesetCount() === 0) {
-      logger.log('No changesets to process and remote has advanced.');
-      logger.log(
-        'Assuming version bump was already completed in a previous attempt.'
+    if (remoteVersion !== readVersion()) {
+      // Reconcile while the checkout is still clean, before any changeset
+      // merger can modify it. Read package files from the recovered commit.
+      await exec(
+        run`git checkout -B main origin/main`,
+        'check out the committed version'
       );
       setOutput('version_committed', 'false');
       setOutput('already_released', 'true');
@@ -180,6 +182,9 @@ export async function versionAndCommit({
       );
     }
   } else {
+    if (changesetCount() > 1) {
+      await exec(run`node scripts/merge-changesets.mjs`, 'merge changesets');
+    }
     logger.log('Running changeset version...');
     // Run changeset version to bump versions and update CHANGELOG
     await exec(run`npm run changeset:version`, 'run changeset version');
