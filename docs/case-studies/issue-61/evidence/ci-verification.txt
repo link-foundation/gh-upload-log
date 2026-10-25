@@ -1,0 +1,16 @@
+2589:Bun Test (ubuntu-24.04)	Run tests	2026-10-25T09:48:50.6553692Z (pass) issue #61: changeset publication, install lag and original-SHA recovery [4283.05ms]
+2590:Bun Test (ubuntu-24.04)	Run tests	2026-10-25T09:48:52.6857262Z (pass) issue #61: instant publication, install lag and original-SHA recovery [2110.40ms]
+3352:Bun Test (ubuntu-24.04)	Run tests	2026-10-25T09:49:17.0162581Z  336 pass
+3353:Bun Test (ubuntu-24.04)	Run tests	2026-10-25T09:49:17.0162880Z  0 fail
+3354:Bun Test (ubuntu-24.04)	Run tests	2026-10-25T09:49:17.0163219Z Ran 336 tests across 39 files. [59.83s]
+4610:Bun Test (macos-15)	Run tests	2026-10-25T09:49:31.2792080Z (pass) issue #61: changeset publication, install lag and original-SHA recovery [6501.61ms]
+4611:Bun Test (macos-15)	Run tests	2026-10-25T09:49:35.9511200Z (pass) issue #61: instant publication, install lag and original-SHA recovery [5237.15ms]
+4756:Bun Test (macos-15)	Run tests	2026-10-25T09:49:43.9042760Z  336 pass
+4757:Bun Test (macos-15)	Run tests	2026-10-25T09:49:43.9043010Z  0 fail
+4758:Bun Test (macos-15)	Run tests	2026-10-25T09:49:43.9043220Z Ran 336 tests across 39 files. [90.66s]
+5544:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:22.0331700Z (pass) issue #61: changeset publication, install lag and original-SHA recovery [28090.31ms]
+5545:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:42.8664478Z (pass) issue #61: instant publication, install lag and original-SHA recovery [21266.05ms]
+6180:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:46.2322352Z  333 pass
+6181:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:46.2322569Z  3 skip
+6182:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:46.2322782Z  0 fail
+6183:Bun Test (windows-2025)	Run tests	2026-10-25T09:50:46.2323000Z Ran 336 tests across 39 files. [157.08s]

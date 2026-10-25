@@ -679,10 +679,9 @@ node experiments/issue-37-package-smoke.mjs
 ```
 
 Both automatic and manual releases check npm package existence before versioning.
-The first `gh-upload-file` publication and trusted publisher setup require an
-authorized npm account. Follow the [exact recovery procedure](./docs/npm-publishing.md),
-which preserves synchronized `gh-upload-log` releases. Publication remains
-blocked until those owner steps are completed.
+Both package names are published through OIDC as of 0.13.0. The
+[release recovery procedure](./docs/npm-publishing.md) explains bounded registry
+visibility retries and resuming an interrupted release without another version bump.
 
 ## Contributing
 

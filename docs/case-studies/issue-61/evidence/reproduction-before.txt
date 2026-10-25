@@ -1,0 +1,61 @@
+bun test v1.4.3 (c6da4a4d3)
+
+test/smoke-test-package.test.js:
+(pass) smoke test runs every bin and imports the library [9.06ms]
+(pass) smoke test retries an install the CDN does not serve yet [2.48ms]
+(pass) smoke test fails when the install never succeeds [1.52ms]
+(pass) smoke test fails on a broken bin or a wrong version [4.65ms]
+(pass) listBins covers string and object bins [0.53ms]
+(pass) both release jobs smoke-test the package before the GitHub release [2.16ms]
+81 |       if (attempt < installAttempts) {
+82 |         await sleepFn(installDelayMs);
+83 |       }
+84 |     }
+85 |     if (install.code !== 0) {
+86 |       throw new Error(
+                     ^
+error: npm install gh-upload-log@1.2.3 failed:
+npm error code E404
+      at smokeTestPackage (/tmp/gh-issue-solver-1792920236273/scripts/smoke-test-package.mjs:86:17)
+      at async <anonymous> (/tmp/gh-issue-solver-1792920236273/test/smoke-test-package.test.js:150:9)
+(fail) install visibility has the same 25-minute budget as publication [9.45ms]
+755 |    * Assert that two values are equal (using strict equality ===)
+756 |    */
+757 |   equal(actual, expected, message) {
+758 |     if (actual !== expected) {
+759 |       const defaultMessage = `Expected ${JSON.stringify(actual)} to equal ${JSON.stringify(expected)}`;
+760 |       throw new Error(message || defaultMessage);
+                      ^
+error: E401
+      at equal (/tmp/gh-issue-solver-1792920236273/node_modules/test-anywhere/src/index.js:760:17)
+      at <anonymous> (/tmp/gh-issue-solver-1792920236273/test/smoke-test-package.test.js:177:12)
+(fail) permanent install failures stop immediately with the original error [3.90ms]
+755 |    * Assert that two values are equal (using strict equality ===)
+756 |    */
+757 |   equal(actual, expected, message) {
+758 |     if (actual !== expected) {
+759 |       const defaultMessage = `Expected ${JSON.stringify(actual)} to equal ${JSON.stringify(expected)}`;
+760 |       throw new Error(message || defaultMessage);
+                      ^
+error: Expected 10 to equal 2
+      at equal (/tmp/gh-issue-solver-1792920236273/node_modules/test-anywhere/src/index.js:760:17)
+      at <anonymous> (/tmp/gh-issue-solver-1792920236273/test/smoke-test-package.test.js:200:10)
+(fail) install retries stop at their wall-clock deadline and retain ETARGET [1.54ms]
+
+test/issue-61-workflow.test.js:
+20 |       actual: value,
+21 |       expected: !0,
+22 |       message,
+23 |       operator: "==",
+24 |       stackStartFn: fn
+25 |     throw err.generatedMessage = generatedMessage, err;
+                                                           ^
+AssertionError: release: missing checkout reconciliation
+      at innerOk (internal:assert/utils:25:55)
+      at ok (node:assert:96:10)
+      at <anonymous> (/tmp/gh-issue-solver-1792920236273/test/issue-61-workflow.test.js:11:12)
+(fail) both release jobs reconcile before installs or changeset consumption [20.81ms]
+
+ 6 pass
+ 4 fail
+Ran 10 tests across 2 files. [145.00ms]

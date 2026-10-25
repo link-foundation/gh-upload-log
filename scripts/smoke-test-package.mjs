@@ -17,18 +17,34 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const INSTALL_ATTEMPTS = 6;
+export const INSTALL_BUDGET_MS = 25 * 60 * 1000;
+const INSTALL_ATTEMPTS = 151;
 const INSTALL_DELAY_MS = 10_000;
 
-function runCommand(command, args, { cwd, verbose = false }) {
+export function isTransientInstallFailure(output) {
+  if (
+    /\b(E401|E403|ENEEDAUTH|EBADENGINE|EINTEGRITY|ELIFECYCLE)\b/i.test(output)
+  ) {
+    return false;
+  }
+  return /\b(ETARGET|E404|E408|E429|E5\d\d|EAI_AGAIN|ECONNRESET|ECONNREFUSED|ENOTFOUND|ETIMEDOUT)\b|npm (?:error|ERR!) (?:404|408|429|5\d\d)\b/i.test(
+    output
+  );
+}
+
+function runCommand(
+  command,
+  args,
+  { cwd, verbose = false, timeout = 300_000 }
+) {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
     // npm is npm.cmd on Windows, which only a shell can start.
     shell: process.platform === 'win32' && command === 'npm',
-    timeout: 300_000,
+    timeout,
   });
-  const output = `${result.stdout || ''}${result.stderr || ''}`;
+  const output = `${result.stdout || ''}${result.stderr || ''}${result.error ? `\n${result.error.code}: ${result.error.message}` : ''}`;
   if (verbose) {
     console.log(`$ ${command} ${args.join(' ')}\n${output}`);
   }
@@ -54,6 +70,8 @@ export async function smokeTestPackage({
     new Promise((resolve) => globalThis.setTimeout(resolve, ms)),
   installAttempts = INSTALL_ATTEMPTS,
   installDelayMs = INSTALL_DELAY_MS,
+  installBudgetMs = INSTALL_BUDGET_MS,
+  now = Date.now,
   logger = console,
   verbose = false,
 }) {
@@ -63,28 +81,46 @@ export async function smokeTestPackage({
       path.join(workspace, 'package.json'),
       `${JSON.stringify({ name: 'smoke-test', private: true, type: 'module' })}\n`
     );
-    // The registry answers the version document before every CDN edge
-    // serves the tarball, so a fresh version may still 404 on install.
+    // Exact-version documents can precede the packument/CDN used by install.
+    // Bound commands AND sleeps by elapsed time; npm's own retries must not
+    // multiply this budget. Runtime validation below is never retried.
+    const deadline = now() + installBudgetMs;
     let install;
     for (let attempt = 1; attempt <= installAttempts; attempt++) {
+      const remaining = deadline - now();
+      if (remaining <= 0) {
+        break;
+      }
       install = run(
         'npm',
-        ['install', '--no-audit', '--no-fund', `${name}@${version}`],
-        { cwd: workspace, verbose }
+        [
+          'install',
+          '--no-audit',
+          '--no-fund',
+          '--no-package-lock',
+          '--prefer-online',
+          '--fetch-retries=0',
+          '--cache=.npm-cache',
+          `${name}@${version}`,
+        ],
+        { cwd: workspace, verbose, timeout: Math.min(300_000, remaining) }
       );
       if (install.code === 0) {
         break;
       }
       logger.log(
-        `npm install ${name}@${version} failed (attempt ${attempt}/${installAttempts})`
+        `npm install ${name}@${version} failed (attempt ${attempt}/${installAttempts}, ${Math.max(0, Math.ceil((deadline - now()) / 1000))}s left):\n${install.output.trim()}`
       );
-      if (attempt < installAttempts) {
-        await sleepFn(installDelayMs);
+      if (!isTransientInstallFailure(install.output)) {
+        break;
+      }
+      if (attempt < installAttempts && now() < deadline) {
+        await sleepFn(Math.min(installDelayMs, deadline - now()));
       }
     }
-    if (install.code !== 0) {
+    if (install?.code !== 0) {
       throw new Error(
-        `npm install ${name}@${version} failed:\n${install.output.trim()}`
+        `npm install ${name}@${version} failed:\n${install?.output.trim() || 'Registry visibility budget exhausted before installation'}`
       );
     }
 
@@ -144,8 +180,14 @@ if (
   const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
   const verbose = process.env.SMOKE_TEST_VERBOSE === '1';
   try {
+    const deadline = Date.now() + INSTALL_BUDGET_MS;
     for (const name of [pkg.name, ...(pkg.publishAliases || [])]) {
-      await smokeTestPackage({ name, version, verbose });
+      await smokeTestPackage({
+        name,
+        version,
+        verbose,
+        installBudgetMs: Math.max(0, deadline - Date.now()),
+      });
     }
   } catch (error) {
     console.error(`::error title=npm smoke test failed::${error.message}`);

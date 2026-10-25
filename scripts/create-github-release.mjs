@@ -40,10 +40,15 @@ const config = makeConfig({
         type: 'string',
         default: getenv('GH_COMMAND', 'gh'),
         describe: 'GitHub CLI executable',
+      })
+      .option('target-commit', {
+        type: 'string',
+        default: getenv('TARGET_COMMIT', ''),
+        describe: 'Exact version commit for a missing release tag',
       }),
 });
 
-const { releaseVersion: version, repository, ghCommand } = config;
+const { releaseVersion: version, repository, ghCommand, targetCommit } = config;
 
 if (!version || !repository) {
   console.error('Error: Missing required arguments');
@@ -74,6 +79,7 @@ try {
     tag_name: tag,
     name: version,
     body: releaseNotes,
+    ...(targetCommit ? { target_commitish: targetCommit } : {}),
   });
   const payloadDirectory = await mkdtemp(
     path.join(os.tmpdir(), 'gh-upload-log-release-')

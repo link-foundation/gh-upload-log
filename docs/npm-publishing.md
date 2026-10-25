@@ -5,14 +5,61 @@ version, runtime code and three CLI commands. The compatibility name continues
 to receive releases; it is not deprecated. Existing consumers do not need to
 change their installation command.
 
-## Current blocker
+## Current status
 
-On 2026-10-24, `gh-upload-file` returns HTTP 404 and `gh-upload-log` still has
-`latest: 0.10.1`. Release run
-[39507532219](https://github.com/link-foundation/gh-upload-log/actions/runs/39507532219)
-failed with npm E404 for `gh-upload-file@0.12.1`. This session's `npm whoami`
-returns ENEEDAUTH, and the repository has no Actions secrets. GitHub repository
-permissions do not authorize npm account operations.
+Both names were published as **0.13.0** through OIDC on 2026-10-25 and passed
+consumer smoke tests. The [0.13.0 GitHub release](https://github.com/link-foundation/gh-upload-log/releases/tag/v0.13.0)
+is complete. No further bootstrap is required for these packages.
+
+## Recovering a partial release
+
+A publication can become visible through npm's exact-version endpoint before
+its installation metadata or tarball reaches every CDN edge. Consumer tests
+allow a shared **25-minute** installation visibility budget for all package
+names, matching the publisher's visibility window. Each attempt uses an
+isolated npm cache with `--prefer-online`, disables npm's nested fetch retries,
+and records the underlying install error. Only registry misses, rate limits,
+server failures and network errors are retried. Authentication, integrity,
+engine and lifecycle failures stop immediately, and CLI/import failures are
+never retried. `SMOKE_TEST_VERBOSE=1` prints commands and output.
+
+Both release jobs preserve their release tools outside the artifact checkout,
+then reconcile the clean checkout before installing dependencies,
+counting changesets or versioning. On a rerun, the original `GITHUB_SHA` identifies
+the first subsequent version commit on main. Recovery checks out that exact
+commit and resumes publication, smoke tests and the missing GitHub release
+without another bump. Newer changesets and later versions on main remain for
+their own runs. If main advanced without changing the version, preparation
+incorporates those changes before processing changesets. Existing versions
+are verified and skipped rather than republished. GitHub release creation
+explicitly targets the selected version commit, including when the tag is missing.
+The preserved tools retain the current retry and release logic when recovering
+source from before these fixes. Their locked dependencies are installed separately.
+Set `RELEASE_RECOVERY_VERBOSE=1` to trace preparation's Git commands.
+
+For release runs using this recovery workflow, rerun the failed release job;
+a new push to main also recovers missing artifacts for its current version.
+GitHub retains the workflow definition of a historical run, so runs from before
+the recovery workflow was introduced still use their original steps. Use the current workflow's `recover` mode with their original source SHA:
+
+```sh
+gh workflow run release.yml --ref main -f release_mode=recover -f recovery_sha=ORIGINAL_FULL_WORKFLOW_SHA
+```
+
+Recovery requires a committed version after that source SHA and fails without
+bumping if none exists. It uses the same tests, preflight, OIDC publisher and
+consumer smoke tests as an automatic release.
+The completed 0.13.0 release needs no recovery action.
+
+The integration regression runs locally without npm or GitHub write access:
+
+```sh
+bun test test/issue-61-release-recovery.test.js
+# Optional full trace of the finite local-Git scenario:
+RELEASE_RECOVERY_VERBOSE=1 node experiments/issue-61-release-recovery.mjs changeset
+```
+
+## Preflight and future package setup
 
 The `Release Preflight` job checks every package name before **either**
 automated or manual release versioning, so a missing npm setup cannot consume a
@@ -45,8 +92,8 @@ secret** so publishing returns to short-lived OIDC credentials.
 
 ## Owner procedure
 
-Use an authorized npm account with 2FA. Bootstrap the current failed release from
-an inspected checkout of `main` before merging this PR. This keeps immutable npm
+For a future missing package name, use an authorized npm account with 2FA.
+Bootstrap the intended release from an inspected checkout of `main`. This keeps immutable npm
 versions consistent with their release source; do not publish different source
 trees under the same version for the two names. These commands publish code and
 modify npm account settings.
@@ -81,18 +128,11 @@ Do not replace a matching trust configuration. If it is expired or incorrect,
 inspect it and replace it using npm's package settings. An unvalidated new
 configuration expires after two days, so complete the first CI publish promptly.
 
-Run `bun scripts/check-npm-publishing.mjs` from this PR to verify package existence.
-An npm owner can then rerun the failed main release; its publisher resumes missing
-versions and verifies each exact version before creating a GitHub release. Verify
-both names from that release before merging this PR. Once these prerequisites
-are resolved, the reviewed PR's minor changeset prepares the next synchronized
-release with sanitization. Neither a dry-run publish nor a successful preflight
-proves OIDC authorization or end-user delivery.
-
-Verify both exact versions, both latest tags, a global installation, all three
-commands, and the GitHub release. Repeat those checks for the subsequent version
-containing this PR. Until actual publication succeeds, issue #56 remains
-unfinished and this PR must remain unmerged.
+Run `bun scripts/check-npm-publishing.mjs` to verify package existence, then
+resume the release workflow. Verify both exact versions, both latest tags,
+global installation, all three commands and the GitHub release. Neither a
+dry-run publish nor a successful preflight proves OIDC authorization or
+end-user delivery.
 
 Sources: [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/),
 [npm trust prerequisites and commands](https://docs.npmjs.com/cli/v11/commands/npm-trust/),
