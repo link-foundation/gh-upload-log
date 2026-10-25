@@ -1,5 +1,17 @@
 # gh-upload-log
 
+## 0.13.0
+
+### Minor Changes
+
+- Fix CI/CD false positives, false negatives and warnings: release scripts now fail on any failed git, npm or gh command instead of reporting success, and no longer evaluate code downloaded from unpkg. GitHub release notes are published as Changesets wrote them (nested lists, later entries and text after `---` are no longer dropped, every entry's pull request is linked), the npm badges no longer render as "badge not found", and a release reads exactly its own CHANGELOG.md section. The workflow adopts the pipeline template's practices (change detection, a pipeline-status gate, release preflight annotations, pinned runners and actions, per-job timeouts and concurrency, secret scanning, Markdown link checking, documentation and file-size checks, actionlint, ShellCheck, zizmor, CodeQL and dependency audits), and the lockfiles no longer contain known high or moderate advisories.
+
+  The release step now fails when GitHub refuses to create the release (under Bun, command-stream 0.7.1 reported exit code 0 for a failing command fed through stdin), a version-commit push that lost a race with another merge is rebased and retried while a push refused by a repository rule fails at once with the rule's output, npm publication is verified for up to 25 minutes and an E409 "already published" answer counts as landed, and a release that died after the version commit or the publish is finished by the next push to main instead of being forgotten.
+
+  Authentication and registry errors (E404, E401, E403, ENEEDAUTH) from `npm publish` are no longer retried, every published npm name is installed from the registry and smoke-tested (each bin's `--help` and the library import) before the GitHub release is created, and shell scripts and the git hook keep LF line endings on Windows checkouts, where CRLF made Bash fail with `set: pipefail\r: invalid option name`.
+
+  Sanitize every upload with sensitive-data-sanitizer in streaming credentials-only mode, preserving public account details and binary bytes while reporting rule counts. Block uploads on sanitization errors. Check npm package bootstrap before versioning releases, retain synchronized gh-upload-log publication, and document required npm owner recovery steps.
+
 ## 0.12.1
 
 ### Patch Changes
