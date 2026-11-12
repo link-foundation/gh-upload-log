@@ -23,10 +23,20 @@ inputBytes, outputBytes}`. Dry mode runs the same scan and uses sanitized hashes
 
 Scanning streams into a private temporary copy. Nothing is uploaded until the
 whole file verifies; failures report a safe error code and delete that copy.
-Memory depends on the largest logical record; records above 64 MiB or detector
-limits block with `ERR_LIMIT`. Large logs with 15 MiB lines are supported. Keep
-credential configuration readable and valid; a malformed `hosts.yml` blocks
-publication with `ERR_AUTH`. Detection follows the library's supported patterns;
+The scan is a single verified pass; redaction counts rescan only the lines it
+changed, so already-masked logs are not scanned twice. A record may be as large
+as the file (memory is roughly 4–5× the longest record). Run the CLI with Bun:
+under Node, sanitizer 0.20.0+ fails on 8 MiB+ runs of letters
+([sensitive-data-sanitizer#170](https://github.com/link-foundation/sensitive-data-sanitizer/issues/170)).
+Keep credential configuration readable and valid; a malformed `hosts.yml` blocks
+publication with `ERR_AUTH`.
+
+Each failure has its own `error.code` and a `reason`, `retryable` and `exitCode`;
+`error.cause.code` keeps the sanitizer's code. `ERR_DETECTOR_LIMIT` (a findings,
+detector or registry limit reached by the content) and other deterministic
+failures exit 65 and say retrying the same file cannot succeed;
+`ERR_INPUT_CHANGED` (the file grew during the scan) and transient I/O errors
+such as `ENOSPC` exit 75. Both values are exported as `SANITIZATION_EXIT_CODES`. Detection follows the library's supported patterns;
 compressed/encrypted file internals are not recursively scanned.
 
 ## Overview
