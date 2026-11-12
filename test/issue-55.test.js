@@ -215,7 +215,8 @@ test('sanitization failure blocks every network operation and explains why', asy
         ['src/cli.js', filePath, '--public', '--dry'],
         { encoding: 'utf8', timeout: 30000 }
       );
-      assert.equal(cli.status, 1);
+      // Issue #63: deterministic sanitization failures exit 65 (EX_DATAERR).
+      assert.equal(cli.status, 65);
       assert.match(cli.stderr, /Sanitization failed.*ERR_AUTH/);
       assert.match(cli.stderr, /nothing was uploaded/);
       assert.ok(!`${cli.stdout}${cli.stderr}`.includes(credential));
@@ -317,11 +318,15 @@ test('streams a 17 MiB log with a 15 MiB line and checks every output byte', () 
   const scenario = fileURLToPath(
     new URL('../experiments/issue-55-streaming.mjs', import.meta.url)
   );
-  const result = spawnSync(
-    'node',
-    ['--max-old-space-size=640', scenario, '--quick'],
-    { encoding: 'utf8', timeout: 60000 }
-  );
+  // Run under the CLI's runtime (Bun). Under Node, sanitizer 0.20.0+ fails on
+  // a long run of capital letters: link-foundation/sensitive-data-sanitizer#170.
+  // Bun ignores V8 heap flags, so the scenario's reported RSS is bounded here.
+  const result = spawnSync(process.execPath, [scenario, '--quick'], {
+    encoding: 'utf8',
+    timeout: 60000,
+  });
   assert.equal(result.error, undefined, result.error?.message);
   assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  const report = JSON.parse(result.stdout.trim().split('\n').pop());
+  assert.ok(report.rssMiB < 640, `RSS ${report.rssMiB} MiB`);
 }, 75000);

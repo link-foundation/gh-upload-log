@@ -471,6 +471,13 @@ async function main() {
     } else {
       console.error('❌ Error:', error.message);
     }
+    if (error.sanitizationFailure) {
+      console.error(
+        error.retryable
+          ? `Sanitization error code ${error.code} may clear on retry (exit ${error.exitCode}).`
+          : `Sanitization error code ${error.code} is deterministic: retrying the same file cannot succeed (exit ${error.exitCode}).`
+      );
+    }
 
     if (config.verbose) {
       console.error('');
@@ -483,7 +490,7 @@ async function main() {
       }
     }
 
-    process.exit(1);
+    process.exit(error.sanitizationFailure ? error.exitCode : 1);
   }
 }
 
