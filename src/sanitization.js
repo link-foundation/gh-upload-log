@@ -96,9 +96,9 @@ export async function sanitizationError(error, inputPath, scannedBytes) {
   ].filter(Boolean);
   return Object.assign(
     new Error(
-      `Sanitization failed (${code}) (${details.join('; ')}); ${
-        retryable ? 'retryable' : 'not retryable'
-      }; nothing was uploaded`,
+      `Sanitization failed (${code})${
+        details.length ? ` (${details.join('; ')})` : ''
+      }; ${retryable ? 'retryable' : 'not retryable'}; nothing was uploaded`,
       { cause: error }
     ),
     {

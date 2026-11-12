@@ -118,6 +118,15 @@ test('distinct failures keep distinct codes and retry advice', async () => {
     }
     const unknown = await sanitizationError(new Error('x'), filePath, 5);
     assert.equal(unknown.code, 'ERR_SANITIZER');
+    const missing = await sanitizationError(
+      new Error('x'),
+      path.join(dir, 'missing.log'),
+      5
+    );
+    assert.equal(
+      missing.message,
+      'Sanitization failed (ERR_SANITIZER); not retryable; nothing was uploaded'
+    );
   });
 });
 
