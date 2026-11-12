@@ -8,7 +8,11 @@
  * - Repositories (for larger text files and gzip archives of binary files)
  */
 
-import { withSanitizedUpload, uploadSourcePath } from './sanitization.js';
+import {
+  withSanitizedUpload,
+  uploadSourcePath,
+  SANITIZATION_EXIT_CODES,
+} from './sanitization.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -51,6 +55,7 @@ import {
 import { resolveRepositoryTarget } from './repository-target.js';
 import { detectFileType, getFileUploadInfo } from './file-upload.js';
 export { detectFileType } from './file-upload.js';
+export { SANITIZATION_EXIT_CODES } from './sanitization.js';
 
 export {
   buildLogRepositoryPath,
@@ -574,4 +579,5 @@ export default {
   LOG_CONTENT_HASH_LENGTH,
   DEFAULT_PRIVATE_LOGS_REPOSITORY,
   DEFAULT_PUBLIC_LOGS_REPOSITORY,
+  SANITIZATION_EXIT_CODES,
 };

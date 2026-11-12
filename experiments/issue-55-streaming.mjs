@@ -1,5 +1,6 @@
 // Finite reproduction of issue #55's real log sizes and 15 MiB records.
-// Run with: node --max-old-space-size=640 experiments/issue-55-streaming.mjs
+// Run with: bun experiments/issue-55-streaming.mjs (Node fails on long capital
+// runs since sanitizer 0.20.0: link-foundation/sensitive-data-sanitizer#170)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

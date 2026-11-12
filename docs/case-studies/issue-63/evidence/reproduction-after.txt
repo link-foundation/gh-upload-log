@@ -1,0 +1,5 @@
+# this branch, sanitizer 0.22.1, bun 1.4.4
+base64-lines-4000: ok (2076 ms) redactions=1 rss=164MiB
+base64-lines-4200: ok (1550 ms) redactions=1 rss=178MiB
+line-over-64mib: ok (28983 ms) redactions=0 rss=246MiB
+masks-200000: ok (31879 ms) redactions=0 rss=240MiB
