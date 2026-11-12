@@ -73,6 +73,9 @@ Each segment then goes through `sanitizeStream`. The output is written in
 order to the private temporary file. Each cut costs about 2 ms
 (`experiments/issue-65-call-overhead.mjs`), and cuts are at least 64 KiB apart.
 
+The scan that chooses cuts reads about 33 MiB/s: 50 MiB in 1.5 s
+(`experiments/issue-65-scan-cost.mjs`).
+
 Files without a trigger line produce no cuts. They still get exactly one
 `sanitizeFileToFile` call, as before. The last segment keeps the original size
 bound, so a file that grows during the scan still fails with
