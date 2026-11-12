@@ -140,7 +140,7 @@ test('CLI exits 65 and says a deterministic refusal cannot succeed', async () =>
 test('counts match a whole-text scan while rescanning only changed lines', async () => {
   await withDir(async (dir) => {
     const { privateKey } = crypto.generateKeyPairSync('rsa', {
-      modulusLength: 1024,
+      modulusLength: 2048,
     });
     const pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
     const token = `ghp_${'a1B2'.repeat(9)}`;
