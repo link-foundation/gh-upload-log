@@ -4,9 +4,9 @@ import path from 'node:path';
 import {
   knownSecretsFromEnv,
   knownSecretsFromGitHubConfig,
-  sanitizeFileToFile,
 } from '@link-foundation/sensitive-data-sanitizer';
 import { resolveLogFilePath } from './common.js';
+import { sanitizeFileInSegments } from './sanitization-segments.js';
 import {
   longestRecordBytes,
   summarizeRedactions,
@@ -147,7 +147,8 @@ export async function withSanitizedUpload(options, upload) {
       // run the engine again over the callback output (about 3x slower on
       // mask-heavy logs). A logical record may be as large as the file: it is
       // held whole in memory, so huge records cost memory, not a refusal.
-      const sizes = await sanitizeFileToFile(inputPath, filePath, {
+      // Segments bound the library's netrc hold (issue 65).
+      const sizes = await sanitizeFileInSegments(inputPath, filePath, {
         allowBinary: true,
         maxRecordBytes: Math.max(1, scannedBytes),
         maxTotalBytes: Math.max(1, scannedBytes),

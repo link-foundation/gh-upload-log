@@ -1,0 +1,5 @@
+(fail) a default = ["macro"] line no longer makes sanitization quadratic [37079.61ms]
+  ^ this test timed out after 30000ms.
+ 0 pass
+ 1 fail
+Ran 1 test across 1 file. [37.43s]
