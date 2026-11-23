@@ -402,13 +402,20 @@ export function generateLogDirectorySegment(filePath) {
   const directory = path.dirname(filePath);
   const normalized = normalizeFileName(directory)
     .replace(/^\.+$/, '')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-+/, '');
+  let end = normalized.length;
+  while (normalized[end - 1] === '-') {
+    end -= 1;
+  }
 
-  if (!normalized) {
+  if (end === 0) {
     return ROOT_LOG_FOLDER_SEGMENT;
   }
 
-  return shortenGeneratedName(normalized, MAX_LOG_FOLDER_SEGMENT_LENGTH);
+  return shortenGeneratedName(
+    normalized.slice(0, end),
+    MAX_LOG_FOLDER_SEGMENT_LENGTH
+  );
 }
 
 /**
