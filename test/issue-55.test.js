@@ -6,6 +6,7 @@ import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, URL } from 'node:url';
+import { createLocalRepositoryStream } from '../experiments/issue-45-local-git.mjs';
 import { withSanitizedUpload } from '../src/sanitization.js';
 import {
   uploadLog,
@@ -137,7 +138,7 @@ for (const isPublic of [false, true]) {
   }, 30000);
 }
 
-for (const mode of ['shared', 'dedicated', 'existing', 'fallback']) {
+for (const mode of ['shared', 'dedicated', 'existing']) {
   test(`sanitizes repository ${mode} before hashing, splitting or compression`, async () => {
     // Invalid UTF-8 and NUL select gzip, while all noncredential bytes survive.
     const bytes = Buffer.concat([
@@ -145,11 +146,8 @@ for (const mode of ['shared', 'dedicated', 'existing', 'fallback']) {
       Buffer.from(original),
     ]);
     await withFile(bytes, async (filePath) => {
-      const capture = captureCommands({ failGist: mode === 'fallback' });
-      if (mode === 'fallback') {
-        fs.writeFileSync(filePath, original);
-      }
-      const result = await (mode === 'fallback' ? uploadLog : uploadAsRepo)({
+      const capture = captureCommands();
+      const result = await uploadAsRepo({
         filePath,
         isPublic: true,
         chunkSize: 48,
@@ -169,11 +167,11 @@ for (const mode of ['shared', 'dedicated', 'existing', 'fallback']) {
         const stored = Buffer.concat(
           parts.map((name) => fs.readFileSync(path.join(output, name)))
         );
-        const safe = mode === 'fallback' ? stored : gunzipSync(stored);
-        const expectedBytes =
-          mode === 'fallback'
-            ? Buffer.from(expected)
-            : Buffer.concat([bytes.subarray(0, 4), Buffer.from(expected)]);
+        const safe = gunzipSync(stored);
+        const expectedBytes = Buffer.concat([
+          bytes.subarray(0, 4),
+          Buffer.from(expected),
+        ]);
         assert.deepEqual(safe, expectedBytes);
         const expectedPath = `${filePath}.safe`;
         fs.writeFileSync(expectedPath, expectedBytes);
@@ -190,6 +188,57 @@ for (const mode of ['shared', 'dedicated', 'existing', 'fallback']) {
     });
   }, 30000);
 }
+
+test('sanitizes Gist fallback before publishing repo text parts', async () => {
+  await withFile(original, async (filePath, dir) => {
+    const gist = captureCommands({ failGist: true });
+    const local = createLocalRepositoryStream(dir);
+    const route =
+      (configuration = {}) =>
+      (strings, ...values) => {
+        if (!Array.isArray(strings?.raw)) {
+          return route(strings);
+        }
+        return strings[0].startsWith('gh gist create ')
+          ? gist.factory()(strings, ...values)
+          : local.stream(configuration)(strings, ...values);
+      };
+    const result = await uploadLog({
+      filePath,
+      chunkSize: 48,
+      logger,
+      commandStreamFactory: route,
+    });
+    try {
+      assert.equal(gist.payloads[0].toString(), expected);
+      const read = (name) =>
+        local.runGit([
+          '--git-dir',
+          local.remote,
+          'show',
+          `main:${result.repositoryPath}/${name}`,
+        ]);
+      const { parts } = JSON.parse(read('.session.log.txt.index.json'));
+      const stored = Array.from({ length: parts.count }, (_, i) =>
+        read(
+          `${parts.prefix}${String(parts.start + i).padStart(parts.digits, '0')}${parts.suffix}`
+        )
+      ).join('');
+      assert.equal(stored, expected);
+      const expectedPath = path.join(dir, 'expected.log');
+      fs.writeFileSync(expectedPath, expected);
+      const hash = await generateFileContentHash(expectedPath);
+      assert.equal(result.contentHash, hash);
+      assert.equal(
+        result.repositoryPath,
+        buildLogRepositoryPath(filePath, hash)
+      );
+      assert.equal(result.sanitization.redactions, 1);
+    } finally {
+      fs.rmSync(result.workDir, { recursive: true, force: true });
+    }
+  });
+}, 30000);
 
 test('sanitization failure blocks every network operation and explains why', async () => {
   await withFile(original, async (filePath, dir) => {
