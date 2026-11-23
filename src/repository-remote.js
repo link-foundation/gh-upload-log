@@ -86,14 +86,19 @@ export function buildGitHubRepositoryUrl(githubUser, repositoryName) {
   return `https://github.com/${githubUser}/${repositoryName}`;
 }
 
-function buildGitHubRepositoryTreeUrl(
+export function buildGitHubRepositoryViewUrl(
   githubUser,
   repositoryName,
   branchName,
-  repositoryPath
+  repositoryPath,
+  fileName
 ) {
   const encodedBranch = branchName.split('/').map(encodeURIComponent).join('/');
-  return `${buildGitHubRepositoryUrl(githubUser, repositoryName)}/tree/${encodedBranch}/${repositoryPath}`;
+  const root = buildGitHubRepositoryUrl(githubUser, repositoryName);
+  const path = `${encodedBranch}/${repositoryPath}`;
+  return fileName
+    ? `${root}/blob/${path}/${encodeURIComponent(fileName)}`
+    : `${root}/tree/${path}`;
 }
 
 export async function getGitHubUsername($quiet) {
@@ -248,7 +253,7 @@ export function buildSharedRepositoryResult({
   return {
     type: 'repo',
     ...info,
-    url: buildGitHubRepositoryTreeUrl(
+    url: buildGitHubRepositoryViewUrl(
       githubUser,
       repositoryName,
       defaultBranch,

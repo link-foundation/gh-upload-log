@@ -123,9 +123,7 @@ try {
     // Exercise default auto selection for a text file above its Gist limit.
     gistFileLimit: 4096,
     useSharedRepository: mode !== 'dedicated',
-    ...(mode === 'target'
-      ? { repository: 'example-org/current-repo', branch }
-      : {}),
+    ...(mode === 'target' ? { repository: 'example-org/tree', branch } : {}),
     chunkSize,
     logger: { log() {}, warn() {}, error() {} },
     commandStreamFactory: () => bind(),
@@ -156,7 +154,10 @@ try {
     assert.equal(result.fileCount + 1, local.pushes.length);
     assert.equal(confirmed, mode === 'dedicated' ? 1 : 2);
     assert.equal(result.sanitization.redactions, 1);
-    assert.ok(result.indexUrl.endsWith(indexName));
+    assert.equal(
+      result.indexUrl,
+      `https://github.com/${result.repositoryFullName}/blob/${branch}/${result.repositoryPath}/${indexName}`
+    );
     const read = (name) =>
       local.runGit([
         '--git-dir',

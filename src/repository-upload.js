@@ -34,6 +34,7 @@ import {
   isMissingRemoteRefError,
   shouldUseSharedRepositoryMode,
   buildGitHubRepositoryUrl,
+  buildGitHubRepositoryViewUrl,
 } from './repository-remote.js';
 export {
   getSharedRepositoryName,
@@ -225,7 +226,13 @@ export async function uploadPlannedTextRepo(options, plan) {
       info,
     });
     const indexUrl = indexName
-      ? `${repo.url.replace(`/tree/`, `/blob/`)}/${encodeURIComponent(indexName)}`
+      ? buildGitHubRepositoryViewUrl(
+          githubUser,
+          repositoryName,
+          defaultBranch,
+          repositoryPath,
+          indexName
+        )
       : undefined;
     return { ...repo, indexUrl, sanitization };
   }
