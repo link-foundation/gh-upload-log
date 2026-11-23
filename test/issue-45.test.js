@@ -1,5 +1,6 @@
 import { test } from 'test-anywhere';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -48,6 +49,14 @@ function repositoryStream({ commands, push, existing = [] }) {
       }
       if (command.startsWith('git push ')) {
         return Promise.resolve(push(command, options));
+      }
+      if (command === 'git hash-object -w --stdin') {
+        const bytes = options.stdin;
+        const stdout = createHash('sha1')
+          .update(`blob ${bytes.length}\0`)
+          .update(bytes)
+          .digest('hex');
+        return Promise.resolve({ code: 0, stdout });
       }
       if (command.startsWith('git diff --cached --quiet')) {
         return Promise.resolve({ code: 1, stdout: '' });
@@ -144,25 +153,21 @@ test('issue #45 - transient retries stop after three attempts', async () => {
 
 test('issue #45 - commits and pushes each chunk before staging the next', async () => {
   await withLog('one\ntwo\ntri\nend\n', async (filePath) => {
-    let attempts = 0;
-    const { commands, result } = await upload(filePath, {
-      chunkSize: 8,
-      push: () => ({
-        code: ++attempts === 2 ? 1 : 0,
-        stderr: 'error: RPC failed; HTTP 408',
-      }),
-    });
+    const { commands, result } = await upload(filePath, { chunkSize: 8 });
     assert.equal(result.fileCount, 2);
-    assert.equal(attempts, 3);
     assert.equal(
-      commands.filter((item) => item.startsWith('git commit ')).length,
-      2
+      commands.filter((item) => item.startsWith('git push ')).length,
+      3
+    );
+    assert.equal(
+      commands.filter((item) => item.startsWith('git commit-tree ')).length,
+      3
     );
     const firstPush = commands.findIndex((item) =>
       item.startsWith('git push ')
     );
     const secondStage = commands.findIndex(
-      (item) => item.startsWith('git add ') && item.includes('part-01')
+      (item) => item.startsWith('git update-index ') && item.includes('part-01')
     );
     assert.ok(firstPush < secondStage);
     assert.ok(!commands.includes('git add .'));

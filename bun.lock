@@ -5,7 +5,7 @@
     "": {
       "name": "gh-upload-file",
       "dependencies": {
-        "@link-foundation/sensitive-data-sanitizer": "^0.22.1",
+        "@link-foundation/sensitive-data-sanitizer": "^0.22.5",
         "command-stream": "^0.7.1",
         "lino-arguments": "^0.3.0",
         "log-lazy": "^1.0.4",
@@ -98,7 +98,7 @@
 
     "@inquirer/external-editor": ["@inquirer/external-editor@1.0.3", "", { "dependencies": { "chardet": "^2.1.1", "iconv-lite": "^0.7.0" }, "peerDependencies": { "@types/node": ">=18" }, "optionalPeers": ["@types/node"] }, "sha512-RWbSrDiYmO4LbejWY7ttpxczuwQyZLBUyygsA9Nsv95hpzUWwnNTVQmAq3xuh7vNwCp07UTmE5i11XAEExx4RA=="],
 
-    "@link-foundation/sensitive-data-sanitizer": ["@link-foundation/sensitive-data-sanitizer@0.22.1", "", { "dependencies": { "@faker-js/faker": "^10.6.0", "@secretlint/core": "13.1.0", "@secretlint/profiler": "13.1.0", "@secretlint/secretlint-rule-preset-recommend": "13.1.0", "libphonenumber-js": "1.13.15", "links-notation": "0.31.0", "re2-wasm": "1.0.2", "re2js": "^2.9.1", "yaml": "^2.9.1" }, "peerDependencies": { "@nlpjs/ner": "^4.27.0" }, "optionalPeers": ["@nlpjs/ner"], "bin": { "sensitive-data-sanitizer": "bin/sensitive-data-sanitizer.js", "sensitive-data-sanitizer-legacy": "bin/legacy-example-package-name.js" } }, "sha512-6AD5kmpiYv+Fl9Cz03UVPVw/kQCM3FJTXPLp2zwU+5x4ZvfFR16zeDXr+PSc85ICCtUoxhpt+v/wCLN+iEXrJg=="],
+    "@link-foundation/sensitive-data-sanitizer": ["@link-foundation/sensitive-data-sanitizer@0.22.5", "", { "dependencies": { "@faker-js/faker": "^10.6.0", "@secretlint/core": "13.1.0", "@secretlint/profiler": "13.1.0", "@secretlint/secretlint-rule-preset-recommend": "13.1.0", "libphonenumber-js": "1.13.15", "links-notation": "0.31.0", "re2-wasm": "1.0.2", "re2js": "^2.9.1", "yaml": "^2.9.1" }, "peerDependencies": { "@nlpjs/ner": "^4.27.0" }, "optionalPeers": ["@nlpjs/ner"], "bin": { "sensitive-data-sanitizer": "bin/sensitive-data-sanitizer.js", "sensitive-data-sanitizer-legacy": "bin/legacy-example-package-name.js" } }, "sha512-LADznm+jEsKVK2wFdAH0OLMySDYntHBgWJ3nukFErjIX1/T3Izip8PBmLN6BLfI6RQmKNYTno8+hst5fwfZgHQ=="],
 
     "@manypkg/find-root": ["@manypkg/find-root@1.1.0", "", { "dependencies": { "@babel/runtime": "^7.5.5", "@types/node": "^12.7.1", "find-up": "^4.1.0", "fs-extra": "^8.1.0" } }, "sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA=="],
 

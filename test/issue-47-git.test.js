@@ -30,7 +30,7 @@ test('issue #47 - real Git fallback writes only selected branch, preserves files
     result = await uploadLog(options);
     assert.equal(result.isPublic, false);
     assert.equal(result.fileCount, 2);
-    assert.equal(local.pushes.length, 2);
+    assert.equal(local.pushes.length, 3);
     assert.equal(
       local.runGit(['--git-dir', local.remote, 'rev-parse', 'main']).trim(),
       mainBefore
@@ -96,7 +96,7 @@ test('issue #47 - real Git fallback writes only selected branch, preserves files
     );
     const again = await uploadLog(options);
     assert.equal(again.deduplicated, true);
-    assert.equal(local.pushes.length, 2);
+    assert.equal(local.pushes.length, 3);
     assert.ok(
       !local.commands.some(
         (command) =>

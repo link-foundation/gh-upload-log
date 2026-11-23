@@ -54,6 +54,13 @@ export function uploadSourcePath(options) {
   return options[verified]?.source || resolveLogFilePath(options.filePath);
 }
 
+export function hasSanitizedUpload(options) {
+  return (
+    options[verified]?.filePath === options.filePath &&
+    Boolean(options[verified])
+  );
+}
+
 function safeCode(error) {
   // Upstream errors contain safe codes rather than matched credentials.
   return /^(?:ERR_[A-Z_]+|E[A-Z0-9]+)$/.test(error?.code)
@@ -115,7 +122,7 @@ export async function sanitizationError(error, inputPath, scannedBytes) {
 }
 
 export async function withSanitizedUpload(options, upload) {
-  if (options[verified] && options[verified].filePath === options.filePath) {
+  if (hasSanitizedUpload(options)) {
     return upload(options);
   }
   if (!options.filePath) {

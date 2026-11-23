@@ -21,13 +21,13 @@ including zero findings. Rule counts can overlap when several detectors identify
 the same span. Library results expose `sanitization: {redactions, rules,
 inputBytes, outputBytes}`. Dry mode runs the same scan and uses sanitized hashes.
 
-Scanning streams into a private temporary copy. Nothing is uploaded until the
-whole file verifies; failures report a safe error code and delete that copy.
-The scan is a single verified pass; redaction counts rescan only the lines it
-changed, so already-masked logs are not scanned twice. A record may be as large
-as the file (memory is roughly 4–5× the longest record). Run the CLI with Bun:
-under Node, sanitizer 0.20.0+ fails on 8 MiB+ runs of letters
-([sensitive-data-sanitizer#170](https://github.com/link-foundation/sensitive-data-sanitizer/issues/170)).
+Large text repository uploads verify the input and plan its parts without
+writing a sanitized copy. During publication, a second sanitizer pass reproduces
+the verified bytes and compares each part with its planned SHA-256 before
+staging it. Gists, binary inputs, and small single-file repository uploads use a
+private temporary copy. The sanitizer can still hold an entire logical record
+in memory, such as one long JSON line or a multiline credential.
+Redaction counts rescan only input lines that changed during verification.
 Keep credential configuration readable and valid; a malformed `hosts.yml` blocks
 publication with `ERR_AUTH`.
 
@@ -291,19 +291,25 @@ gh-upload ./session.log --only-repository --public --chunk-size 50MB
 # Or set GH_UPLOAD_CHUNK_SIZE=50MB in your environment or .lenv
 ```
 
-Shared-repository uploads commit and push one chunk at a time. Transient HTTP
+Shared, explicit, and dedicated text repository uploads commit and push one
+chunk at a time. The temporary Git repository holds the current payload as a
+Git blob and releases it after the push. Transient HTTP
 408/429/5xx, RPC failures, connection drops, and concurrent push rejections get
-up to two retries, after 1 and 2 seconds. Each retry fetches and rebases onto the
-latest remote branch. Authentication, permission, and file-size failures stop
-immediately. Use `--verbose` to see chunk progress and retry details.
+up to two retries, after 1 and 2 seconds. Each retry fetches the latest branch
+and applies the pending change to that branch. Authentication, permission, and
+file-size failures stop immediately. Use `--verbose` to see chunk progress and
+retry details.
 
 An interrupted upload keeps the chunks already pushed. Uploading the same log
-again skips chunks that match the remote. A hidden `.pending` file marks the
-upload in progress and a `.complete` file replaces it
-with the last chunk, so incomplete folders are never treated as complete uploads.
-Complete legacy chunked uploads without a pending marker are recognized by their
-total byte size. Pending uploads are resumed even when changing the chunk size
-has left a mixture of old and new parts.
+again skips chunks that match the remote. A hidden `.pending` file marks a
+multipart text upload in progress. After confirming every part, the uploader
+replaces it with a hidden `.<filename>.index.json` in a separate commit. The CLI
+prints its link and the library returns it as `indexUrl`. The index gives
+the part name prefix and suffix, starting number, zero-padding width, part
+count, concatenated size, and SHA-256. The numeric order reconstructs the
+sanitized log. Completed older uploads remain reusable, including folders
+recognized by their total byte size. When an incomplete upload is retried with
+a different chunk size, the final commit also removes obsolete parts.
 
 Chunks end at line boundaries where possible and preserve the original bytes.
 A line longer than the configured limit is split between UTF-8 characters to keep
@@ -311,8 +317,8 @@ each chunk within the limit. CRLF and a missing final newline are preserved.
 The number of chunks shown before upload is a minimum estimate; line boundaries
 can produce additional chunks. Smaller chunks do not change the gist threshold.
 
-The legacy dedicated-repository mode supports the chunk size and readable
-splitting options, but still creates its repository with a single initial push.
+Multipart dedicated text uploads reserve a repository for the content hash so
+a retry uses the same target, including when the usual name was already taken.
 
 ### Existing repositories and GitHub App installation tokens
 
@@ -430,6 +436,7 @@ Upload any file. The two exports refer to the same function, with identical opti
   repositoryFullName?: string, // OWNER/REPO for shared/explicit targets
   branch?: string | null,      // Shared/explicit target branch; null if unknown in dry mode
   repositoryPath?: string,     // Shared repository folder for repository-mode uploads
+  indexUrl?: string,           // Ordered index for streamed multipart text uploads
   deduplicated?: boolean,      // True when an existing shared-repo upload was reused
   dryMode?: boolean            // Set to true in dry mode
 }

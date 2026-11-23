@@ -26,6 +26,7 @@ export async function pushWithRetry($workDir, options) {
     pushRetries = 2,
     pushRetryDelayMs = 1000,
     sleepFn = sleep,
+    refreshCommit,
   } = options;
   const remoteBranch = options.repository
     ? `refs/heads/${defaultBranch}`
@@ -67,13 +68,21 @@ export async function pushWithRetry($workDir, options) {
             fetched,
             'refresh shared repository before retry'
           );
-          const rebased = hasRemoteBase
-            ? await $workDir`git rebase -q FETCH_HEAD`
-            : await $workDir`git rebase -q --root --onto FETCH_HEAD`;
-          ensureCommandSucceeded(
-            rebased,
-            'rebase shared repository upload before retry'
-          );
+          if (refreshCommit) {
+            // Rebuild a metadata-only index on the current tip without
+            // checking out or fetching blobs from previously published parts.
+            if (!(await refreshCommit())) {
+              return;
+            }
+          } else {
+            const rebased = hasRemoteBase
+              ? await $workDir`git rebase -q FETCH_HEAD`
+              : await $workDir`git rebase -q --root --onto FETCH_HEAD`;
+            ensureCommandSucceeded(
+              rebased,
+              'rebase shared repository upload before retry'
+            );
+          }
           hasRemoteBase = true;
         }
       }
@@ -90,7 +99,7 @@ export async function pushWithRetry($workDir, options) {
       log.debug(() => `Push failure: ${failure.trim()}`);
       log.warn(
         () =>
-          `Push attempt ${attempt + 1}/${pushRetries + 1} failed; retrying in ${delay}ms after fetching and rebasing...`
+          `Push attempt ${attempt + 1}/${pushRetries + 1} failed; retrying in ${delay}ms after fetching the latest branch...`
       );
       await sleepFn(delay);
     }

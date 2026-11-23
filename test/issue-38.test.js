@@ -174,6 +174,11 @@ test('issue #38 - the example from the issue maps to home-box/<hash>/file.log.tx
   );
 });
 
+test('directory names trim edge dashes and keep interior dashes', () => {
+  assert.equal(generateLogDirectorySegment('/---a--b---/app.log'), 'a--b');
+  assert.equal(generateLogDirectorySegment('/---/app.log'), 'root');
+});
+
 test('issue #38 - chunked uploads are recognized as the stored log file', () => {
   assert.equal(isStoredLogFileName('app.log.txt', 'app.log.txt'), true);
   assert.equal(

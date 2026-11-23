@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { withSanitizedUpload, uploadSourcePath } from './sanitization.js';
+import { uploadSourcePath, withSanitizedUpload } from './sanitization.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -8,8 +8,6 @@ import {
   createDefaultLogger,
   createENOSPCError,
   createWorkDirPath,
-  DEFAULT_PRIVATE_LOGS_REPOSITORY,
-  DEFAULT_PUBLIC_LOGS_REPOSITORY,
   ensureCommandSucceeded,
   extractGitHubRepoUrl,
   generateCollisionRepoName,
@@ -25,7 +23,31 @@ import {
 } from './common.js';
 import { pushWithRetry } from './git-push.js';
 import {
+  buildSharedRepositoryResult,
+  createWorkDirRunner,
+  ensureSharedRepositoryExists,
+  getGitHubUsername,
+  getRepositoryFolderContents,
+  getRepositoryMetadata,
+  getSharedRepositoryName,
+  initializeGitRepository,
+  isMissingRemoteRefError,
+  shouldUseSharedRepositoryMode,
+  buildGitHubRepositoryUrl,
+  buildGitHubRepositoryViewUrl,
+} from './repository-remote.js';
+export {
+  getSharedRepositoryName,
+  shouldUseSharedRepositoryMode,
+} from './repository-remote.js';
+import { publishTextParts, textPartLayout } from './repository-text-push.js';
+import {
+  isStreamingTextCandidate,
+  planTextUpload,
+} from './text-upload-plan.js';
+import {
   getFileUploadInfo,
+  getUploadInfoForType,
   isStoredFileName,
   stageUploadFiles,
 } from './file-upload.js';
@@ -33,93 +55,6 @@ import {
   resolveRepositoryTarget,
   validateRepositoryBranch,
 } from './repository-target.js';
-
-const REPOSITORY_METADATA_QUERY =
-  '{"defaultBranch": .default_branch, "visibility": .visibility}';
-const REPOSITORY_FOLDER_CONTENTS_QUERY =
-  'map({name: .name, size: .size, download_url: .download_url})';
-
-/**
- * Create a command runner bound to a working directory
- *
- * Uses the `cwd` option instead of a `cd <dir> && ...` prefix: command-stream's
- * `cd` builtin changes the working directory of the host process itself
- * (documented in link-foundation/command-stream#50), which breaks any relative
- * path resolved afterwards. Output is mirrored only in verbose mode so that
- * git/gh chatter never pollutes the CLI output.
- *
- * @param {Function} $ - command-stream template tag
- * @param {string} workDir - Absolute working directory for the commands
- * @param {boolean} verbose - Mirror command output when true
- * @returns {Function} command-stream template tag bound to workDir
- */
-function createWorkDirRunner($, workDir, verbose = false) {
-  return $({ cwd: workDir, mirror: Boolean(verbose), capture: true });
-}
-
-/**
- * Initialize a git repository quietly on the requested default branch
- *
- * `git init` prints an "hint: Using 'master' as the name for the initial
- * branch" advice block when `init.defaultBranch` is not configured globally.
- * Passing the config explicitly (plus `-q`) keeps the output clean and makes
- * the initial branch deterministic.
- *
- * @param {Function} $workDir - command-stream tag bound to the work directory
- * @param {string} branchName - Desired initial branch name
- * @returns {Promise<void>}
- */
-async function initializeGitRepository($workDir, branchName) {
-  ensureCommandSucceeded(
-    await $workDir`git -c init.defaultBranch=${branchName} init -q`,
-    'initialize temporary git repository'
-  );
-  // Older git versions ignore init.defaultBranch, so force the branch name.
-  ensureCommandSucceeded(
-    await $workDir`git branch -M ${branchName}`,
-    `rename temporary git branch to ${branchName}`
-  );
-}
-
-function isGitHubNotFoundError(errorText = '') {
-  const normalized = errorText.toLowerCase();
-  return normalized.includes('not found') || normalized.includes('http 404');
-}
-
-function isMissingRemoteRefError(errorText = '') {
-  const normalized = errorText.toLowerCase();
-  return (
-    normalized.includes("couldn't find remote ref") ||
-    normalized.includes('could not find remote branch')
-  );
-}
-
-export function shouldUseSharedRepositoryMode(
-  _filePath,
-  useSharedRepository = true
-) {
-  return useSharedRepository;
-}
-
-export function getSharedRepositoryName(isPublic = false) {
-  return isPublic
-    ? DEFAULT_PUBLIC_LOGS_REPOSITORY
-    : DEFAULT_PRIVATE_LOGS_REPOSITORY;
-}
-
-function buildGitHubRepositoryUrl(githubUser, repositoryName) {
-  return `https://github.com/${githubUser}/${repositoryName}`;
-}
-
-function buildGitHubRepositoryTreeUrl(
-  githubUser,
-  repositoryName,
-  branchName,
-  repositoryPath
-) {
-  const encodedBranch = branchName.split('/').map(encodeURIComponent).join('/');
-  return `${buildGitHubRepositoryUrl(githubUser, repositoryName)}/tree/${encodedBranch}/${repositoryPath}`;
-}
 
 /**
  * Check that a raw URL really serves the uploaded file
@@ -157,131 +92,6 @@ function listUploadedFiles(directoryPath) {
     .sort();
 }
 
-async function getGitHubUsername($quiet) {
-  const whoamiResult = ensureCommandSucceeded(
-    await $quiet`gh api user --jq .login`,
-    'fetch authenticated GitHub username'
-  );
-
-  return whoamiResult.stdout.trim();
-}
-
-async function getRepositoryMetadata($quiet, githubUser, repositoryName) {
-  const result =
-    await $quiet`gh api repos/${githubUser}/${repositoryName} --jq ${REPOSITORY_METADATA_QUERY}`;
-
-  if (getCommandExitCode(result) !== 0) {
-    if (isGitHubNotFoundError(result.stderr || result.stdout)) {
-      return null;
-    }
-    ensureCommandSucceeded(
-      result,
-      `read metadata for GitHub repo ${repositoryName}`
-    );
-  }
-
-  return JSON.parse(result.stdout.trim());
-}
-
-async function getRepositoryFolderContents(
-  $quiet,
-  githubUser,
-  repositoryName,
-  repositoryPath,
-  branch
-) {
-  const result = branch
-    ? await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --method GET -f ref=${branch} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`
-    : await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
-
-  if (getCommandExitCode(result) !== 0) {
-    if (isGitHubNotFoundError(result.stderr || result.stdout)) {
-      return null;
-    }
-    ensureCommandSucceeded(
-      result,
-      `read contents of ${repositoryName}/${repositoryPath}`
-    );
-  }
-
-  const contents = result.stdout.trim();
-  return contents ? JSON.parse(contents) : [];
-}
-
-async function ensureSharedRepositoryExists(
-  $quiet,
-  githubUser,
-  repositoryName,
-  isPublic,
-  log
-) {
-  const expectedVisibility = isPublic ? 'public' : 'private';
-  const existingMetadata = await getRepositoryMetadata(
-    $quiet,
-    githubUser,
-    repositoryName
-  );
-
-  if (existingMetadata) {
-    if (existingMetadata.visibility !== expectedVisibility) {
-      throw new Error(
-        `Shared repository ${repositoryName} exists with visibility ${existingMetadata.visibility}, expected ${expectedVisibility}`
-      );
-    }
-
-    return {
-      defaultBranch: existingMetadata.defaultBranch || 'main',
-      visibility: existingMetadata.visibility,
-      url: buildGitHubRepositoryUrl(githubUser, repositoryName),
-    };
-  }
-
-  const visibilityFlag = isPublic ? '--public' : '--private';
-  log.debug(
-    () =>
-      `→ Creating shared ${expectedVisibility} GitHub repo: ${repositoryName}`
-  );
-  const createResult =
-    await $quiet`gh repo create ${repositoryName} ${visibilityFlag}`;
-
-  if (
-    getCommandExitCode(createResult) !== 0 &&
-    isRepositoryNameConflict(createResult.stderr)
-  ) {
-    const racedMetadata = await getRepositoryMetadata(
-      $quiet,
-      githubUser,
-      repositoryName
-    );
-    if (racedMetadata) {
-      if (racedMetadata.visibility !== expectedVisibility) {
-        throw new Error(
-          `Shared repository ${repositoryName} exists with visibility ${racedMetadata.visibility}, expected ${expectedVisibility}`
-        );
-      }
-
-      return {
-        defaultBranch: racedMetadata.defaultBranch || 'main',
-        visibility: racedMetadata.visibility,
-        url: buildGitHubRepositoryUrl(githubUser, repositoryName),
-      };
-    }
-  }
-
-  ensureCommandSucceeded(
-    createResult,
-    `create ${expectedVisibility} GitHub repo ${repositoryName}`
-  );
-
-  return {
-    defaultBranch: 'main',
-    visibility: expectedVisibility,
-    url:
-      extractGitHubRepoUrl(createResult.stdout) ||
-      buildGitHubRepositoryUrl(githubUser, repositoryName),
-  };
-}
-
 function stageRepositoryFiles(filePath, outputDir, log, chunkSize, info) {
   log.debug(() =>
     info.archiveFormat
@@ -291,43 +101,250 @@ function stageRepositoryFiles(filePath, outputDir, log, chunkSize, info) {
   return stageUploadFiles(filePath, outputDir, chunkSize, info);
 }
 
-function buildSharedRepositoryResult({
+async function ensureDedicatedTextRepository(
+  $quiet,
   githubUser,
-  repositoryName,
-  defaultBranch,
-  repositoryPath,
-  contents,
+  baseName,
   contentHash,
-  fileName,
-  isPublic,
-  workDir,
-  deduplicated = false,
-  info,
-}) {
-  const fileCount = contents.length;
-  const rawUrl = fileCount === 1 ? contents[0]?.download_url || null : null;
+  isPublic
+) {
+  const description = `gh-upload-log content ${contentHash}`;
+  const visibility = isPublic ? 'public' : 'private';
+  const visibilityFlag = `--${visibility}`;
+  // Keep the usual base name. The content-specific fallback lets interrupted
+  // uploads find the same dedicated repository after a name collision.
+  for (const repositoryName of [
+    baseName,
+    `${baseName.slice(0, 83)}-${contentHash}`,
+  ]) {
+    const metadata = await getRepositoryMetadata(
+      $quiet,
+      githubUser,
+      repositoryName,
+      { includeDescription: true }
+    );
+    if (metadata) {
+      if (
+        metadata.visibility === visibility &&
+        metadata.description === description
+      ) {
+        return repositoryName;
+      }
+      continue;
+    }
+    const result =
+      await $quiet`gh repo create ${repositoryName} ${visibilityFlag} --description ${description}`;
+    if (getCommandExitCode(result) === 0) {
+      return repositoryName;
+    }
+    if (isRepositoryNameConflict(result.stderr)) {
+      const raced = await getRepositoryMetadata(
+        $quiet,
+        githubUser,
+        repositoryName,
+        { includeDescription: true }
+      );
+      if (
+        raced?.visibility === visibility &&
+        raced.description === description
+      ) {
+        return repositoryName;
+      }
+      continue;
+    }
+    ensureCommandSucceeded(
+      result,
+      `create dedicated GitHub repo ${repositoryName}`
+    );
+  }
+  throw new Error(`Could not reserve a dedicated repository for ${baseName}`);
+}
 
-  return {
-    type: 'repo',
-    ...info,
-    url: buildGitHubRepositoryTreeUrl(
+export async function uploadPlannedTextRepo(options, plan) {
+  const { source, contentHash, sanitization, parts } = plan;
+  const { isPublic = false, verbose = false } = options;
+  const log = createDefaultLogger(options);
+  const info = getUploadInfoForType(source, 'text');
+  const { fileName } = info;
+  const repositoryPath = buildLogRepositoryPath(source, contentHash);
+  const target = resolveRepositoryTarget(options);
+  const baseName = generateRepoName(source);
+  const shared =
+    target ||
+    shouldUseSharedRepositoryMode(source, options.useSharedRepository);
+  const $ = await getCommandStream(options);
+  const $quiet = $({ mirror: verbose, capture: true });
+  const githubUser = target?.owner || (await getGitHubUsername($quiet));
+  const repositoryName = shared
+    ? target?.repositoryName || getSharedRepositoryName(isPublic)
+    : await ensureDedicatedTextRepository(
+        $quiet,
+        githubUser,
+        baseName,
+        contentHash,
+        isPublic
+      );
+  const metadata = target
+    ? await getRepositoryMetadata($quiet, githubUser, repositoryName)
+    : shared
+      ? await ensureSharedRepositoryExists(
+          $quiet,
+          githubUser,
+          repositoryName,
+          isPublic,
+          log
+        )
+      : { defaultBranch: 'main', visibility: isPublic ? 'public' : 'private' };
+  if (!metadata) {
+    throw new Error(
+      `Existing GitHub repository ${githubUser}/${repositoryName} was not found or is inaccessible`
+    );
+  }
+  const defaultBranch = validateRepositoryBranch(
+    target?.branch || metadata.defaultBranch || 'main'
+  );
+  const contents = () =>
+    getRepositoryFolderContents(
+      $quiet,
+      githubUser,
+      repositoryName,
+      repositoryPath,
+      defaultBranch
+    );
+  function result(entries, workDir, deduplicated, indexName) {
+    const repo = buildSharedRepositoryResult({
       githubUser,
       repositoryName,
       defaultBranch,
-      repositoryPath
-    ),
-    rawUrl,
-    repositoryName,
-    repositoryFullName: `${githubUser}/${repositoryName}`,
-    branch: defaultBranch,
-    repositoryPath,
-    contentHash,
-    fileName,
-    fileCount,
-    isPublic,
-    workDir,
-    deduplicated,
-  };
+      repositoryPath,
+      contents: entries,
+      contentHash,
+      fileName,
+      isPublic: metadata.visibility === 'public',
+      workDir,
+      deduplicated,
+      info,
+    });
+    const indexUrl = indexName
+      ? buildGitHubRepositoryViewUrl(
+          githubUser,
+          repositoryName,
+          defaultBranch,
+          repositoryPath,
+          indexName
+        )
+      : undefined;
+    return { ...repo, indexUrl, sanitization };
+  }
+
+  const layout = textPartLayout(fileName, parts.length);
+  const existing = (await contents()) || [];
+  const files = existing.filter((entry) => isStoredFileName(entry.name, info));
+  const indexName = existing.some((entry) => entry.name === layout.indexName)
+    ? layout.indexName
+    : null;
+  if (
+    files.length &&
+    !existing.some((entry) => entry.name === layout.pendingName) &&
+    (files.some((entry) => entry.name === fileName) ||
+      // The Contents API truncates at 1,000 entries. Use the Git tree below
+      // when the listing may be incomplete.
+      (existing.length < 1000 &&
+        (indexName ||
+          existing.some((entry) => entry.name === `.${fileName}.complete`) ||
+          (files.every((entry) => Number.isSafeInteger(entry.size)) &&
+            files.reduce((total, entry) => total + entry.size, 0) ===
+              sanitization.outputBytes))))
+  ) {
+    return result(files, null, true, indexName);
+  }
+
+  const workDir = fs.mkdtempSync(`${createWorkDirPath(baseName)}-`);
+  const run = createWorkDirRunner($, workDir, verbose);
+  const input = (stdin) =>
+    $({ cwd: workDir, mirror: false, capture: true, stdin });
+  try {
+    ensureCommandSucceeded(
+      await run`git -c init.defaultBranch=${defaultBranch} init -q --object-format=sha1`,
+      'initialize streaming repository upload'
+    );
+    ensureCommandSucceeded(
+      await run`git symbolic-ref HEAD ${`refs/heads/${defaultBranch}`}`,
+      'set streaming upload branch'
+    );
+    const config = [
+      ['gc.auto', '0'],
+      ['maintenance.auto', 'false'],
+      ['pack.window', '0'],
+      ['pack.threads', '1'],
+      ...(target
+        ? [
+            ['credential.https://github.com.helper', ''],
+            ['credential.https://github.com.helper', '!gh auth git-credential'],
+            ['user.name', 'gh-upload-log'],
+            ['user.email', 'gh-upload-log@users.noreply.github.com'],
+          ]
+        : []),
+    ];
+    for (const [key, value] of config) {
+      ensureCommandSucceeded(
+        await run`git config --local --add ${key} ${value}`,
+        `configure streaming repository upload ${key}`
+      );
+    }
+    ensureCommandSucceeded(
+      await run`git remote add origin https://github.com/${githubUser}/${repositoryName}.git`,
+      'add streaming repository remote'
+    );
+    const branch = target ? `refs/heads/${defaultBranch}` : defaultBranch;
+    const fetchResult =
+      await run`git fetch -q --depth 1 --filter=blob:none origin ${branch}`;
+    const newBranch = isMissingRemoteRefError(
+      fetchResult.stderr || fetchResult.stdout
+    );
+    if (newBranch && target) {
+      throw new Error(
+        `Existing branch ${defaultBranch} was not found in ${githubUser}/${repositoryName}`
+      );
+    }
+    if (!newBranch) {
+      ensureCommandSucceeded(
+        fetchResult,
+        `fetch upload branch ${defaultBranch}`
+      );
+    }
+
+    const published = await publishTextParts({
+      options,
+      plan,
+      info,
+      workDir,
+      repositoryPath,
+      repositoryName,
+      defaultBranch,
+      log,
+      run,
+      input,
+      newBranch,
+    });
+    const uploaded = published.names.map((name) => ({ name }));
+    if (uploaded.length === 1) {
+      uploaded[0] =
+        (await contents())?.find((entry) => entry.name === fileName) ||
+        uploaded[0];
+    }
+    if (published.deduplicated) {
+      fs.rmSync(workDir, { recursive: true, force: true });
+      return result(uploaded, null, true, published.indexName);
+    }
+    return result(uploaded, workDir, false, published.indexName);
+  } catch (error) {
+    fs.rmSync(workDir, { recursive: true, force: true });
+    if (isENOSPC(error)) {
+      throw createENOSPCError('streaming repository upload', error);
+    }
+    throw error;
+  }
 }
 
 async function uploadAsDedicatedRepo(options = {}) {
@@ -801,7 +818,11 @@ async function uploadAsSharedRepo(options = {}) {
  * @param {string} options.branch - Existing branch in the target repository (default: its default branch)
  * @returns {Promise<Object>} Repository information including URL
  */
-export function uploadAsRepo(options = {}) {
+export async function uploadAsRepo(options = {}) {
+  if (isStreamingTextCandidate(options)) {
+    resolveRepositoryTarget(options);
+    return uploadPlannedTextRepo(options, await planTextUpload(options));
+  }
   return withSanitizedUpload(options, uploadSanitizedRepo);
 }
 
