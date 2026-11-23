@@ -6,6 +6,7 @@ import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { randomBytes } from 'node:crypto';
 import * as api from '../src/index.js';
+import { createLocalRepositoryStream } from '../experiments/issue-45-local-git.mjs';
 import {
   getFileUploadInfo,
   isStoredFileName,
@@ -304,10 +305,32 @@ test('issue #37 - hidden text and binary names remain visible upload files', asy
         const { result } = await uploadBinary(filePath);
         assert.equal(result.fileType, fileType);
         assert.ok(result.fileName.startsWith('file-'));
-        const { result: chunked } = await uploadBinary(filePath, {
-          chunkSize: 4,
-        });
-        assert.ok(chunked.fileCount > 1);
+        if (fileType === 'text') {
+          const local = createLocalRepositoryStream(path.dirname(filePath));
+          const chunked = await api.uploadLog({
+            filePath,
+            onlyRepository: true,
+            chunkSize: 4,
+            logger,
+            commandStreamFactory: () => local.stream,
+          });
+          try {
+            assert.ok(chunked.fileCount > 1);
+            const files = local.pushes
+              .flat()
+              .map((name) => path.posix.basename(name))
+              .filter((name) => !name.startsWith('.'));
+            assert.equal(files.length, chunked.fileCount);
+            assert.ok(files.every((name) => name.startsWith('file-')));
+          } finally {
+            fs.rmSync(chunked.workDir, { recursive: true, force: true });
+          }
+        } else {
+          const { result: chunked } = await uploadBinary(filePath, {
+            chunkSize: 4,
+          });
+          assert.ok(chunked.fileCount > 1);
+        }
       },
       name
     );

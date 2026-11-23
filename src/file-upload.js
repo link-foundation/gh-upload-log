@@ -49,7 +49,10 @@ export function detectFileType(filePath) {
 
 /** Names and metadata refer to the source, even when staging an archive. */
 export function getFileUploadInfo(filePath, sourcePath = filePath) {
-  const fileType = detectFileType(filePath);
+  return getUploadInfoForType(sourcePath, detectFileType(filePath));
+}
+
+export function getUploadInfoForType(sourcePath, fileType) {
   const originalFileName = path.basename(sourcePath);
   let fileName =
     fileType === 'binary'

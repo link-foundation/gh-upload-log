@@ -6,7 +6,7 @@ import { spawnGitSync } from './real-git-test-utils.mjs';
 
 export function createLocalRepositoryStream(
   directory,
-  { onPush = () => null, empty = false } = {}
+  { onPush = () => null, empty = false, partialClone = true } = {}
 ) {
   const remote = path.join(directory, 'remote.git');
   const writer = path.join(directory, 'writer');
@@ -26,6 +26,10 @@ export function createLocalRepositoryStream(
     return result.stdout;
   };
   runGit(['init', '-q', '--bare', '-b', 'main', remote]);
+  if (partialClone) {
+    runGit(['config', 'uploadpack.allowFilter', 'true'], remote);
+    runGit(['config', 'uploadpack.allowAnySHA1InWant', 'true'], remote);
+  }
   runGit(['clone', '-q', remote, writer]);
   if (!empty) {
     fs.writeFileSync(path.join(writer, 'seed.txt'), 'seed\n');
@@ -139,6 +143,7 @@ export function createLocalRepositoryStream(
       const result = spawnGitSync(args.slice(1), {
         cwd: options.cwd,
         env,
+        input: options.stdin,
       });
       return {
         code: result.status,

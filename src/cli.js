@@ -369,6 +369,9 @@ async function main() {
     if (result.url && !result.dryMode) {
       console.log(`🔗 ${result.url}`);
     }
+    if (result.indexUrl) {
+      console.log(`📋 ${result.indexUrl}`);
+    }
 
     // Display raw file URL if available (single file only)
     if (result.rawUrl && !result.dryMode) {

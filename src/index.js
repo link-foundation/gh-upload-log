@@ -51,7 +51,12 @@ import {
   getSharedRepositoryName,
   shouldUseSharedRepositoryMode,
   uploadAsRepo,
+  uploadPlannedTextRepo,
 } from './repository-upload.js';
+import {
+  isStreamingTextCandidate,
+  planTextUpload,
+} from './text-upload-plan.js';
 import { resolveRepositoryTarget } from './repository-target.js';
 import { detectFileType, getFileUploadInfo } from './file-upload.js';
 export { detectFileType } from './file-upload.js';
@@ -348,8 +353,51 @@ async function uploadSanitizedGist(options) {
  * @param {Object} options.logger - Logging target (default: console)
  * @returns {Promise<Object>} Upload result with URL and metadata
  */
-export function uploadLog(options = {}) {
+export async function uploadLog(options = {}) {
+  const gistLimit = resolveGistFileLimit(options.gistFileLimit);
+  if (
+    isStreamingTextCandidate(options, options.onlyRepository ? 0 : gistLimit)
+  ) {
+    resolveRepositoryTarget(options);
+    const plan = await planTextUpload(options);
+    if (options.onlyRepository || plan.sanitization.outputBytes > gistLimit) {
+      return withRawUrlCheck(
+        options,
+        await uploadPlannedTextRepo(options, plan)
+      );
+    }
+  }
   return withSanitizedUpload(options, uploadSanitizedLog);
+}
+
+/**
+ * Optionally confirm the raw URL really resolves before it is printed
+ *
+ * Issue #38 reported raw URLs that answered 404; this turns such a report
+ * into a checked fact instead of a guess.
+ */
+async function withRawUrlCheck(options, result) {
+  if (!options.checkRawUrl || !result?.rawUrl) {
+    return result;
+  }
+
+  const log = createDefaultLogger(options);
+  const rawUrlCheck = await checkRawUrlExists(result.rawUrl);
+  log.debug(
+    () =>
+      `Raw URL check: ${rawUrlCheck.ok ? 'reachable' : 'unreachable'}` +
+      `${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}` +
+      `${rawUrlCheck.error ? ` (${rawUrlCheck.error})` : ''}`
+  );
+
+  if (!rawUrlCheck.ok) {
+    log.warn(
+      () =>
+        `Raw URL is not reachable${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}: ${result.rawUrl}`
+    );
+  }
+
+  return { ...result, rawUrlCheck };
 }
 
 async function uploadSanitizedLog(options) {
@@ -363,7 +411,6 @@ async function uploadSanitizedLog(options) {
     description,
     gistFileLimit,
     chunkSize,
-    checkRawUrl = false,
     verbose = false,
     logger = console,
   } = options;
@@ -476,38 +523,12 @@ async function uploadSanitizedLog(options) {
     };
   }
 
-  /**
-   * Optionally confirm the raw URL really resolves before it is printed
-   *
-   * Issue #38 reported raw URLs that answered 404; this turns such a report
-   * into a checked fact instead of a guess.
-   */
-  const withRawUrlCheck = async (result) => {
-    if (!checkRawUrl || !result?.rawUrl) {
-      return result;
-    }
-
-    const rawUrlCheck = await checkRawUrlExists(result.rawUrl);
-    log.debug(
-      () =>
-        `Raw URL check: ${rawUrlCheck.ok ? 'reachable' : 'unreachable'}` +
-        `${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}` +
-        `${rawUrlCheck.error ? ` (${rawUrlCheck.error})` : ''}`
-    );
-
-    if (!rawUrlCheck.ok) {
-      log.warn(
-        () =>
-          `Raw URL is not reachable${rawUrlCheck.status ? ` (HTTP ${rawUrlCheck.status})` : ''}: ${result.rawUrl}`
-      );
-    }
-
-    return { ...result, rawUrlCheck };
-  };
-
   if (uploadType === 'gist') {
     try {
-      return await withRawUrlCheck(await uploadAsGist(resolvedOptions));
+      return await withRawUrlCheck(
+        options,
+        await uploadAsGist(resolvedOptions)
+      );
     } catch (gistError) {
       if (isENOSPC(gistError)) {
         throw createENOSPCError('gist upload', gistError);
@@ -522,12 +543,12 @@ async function uploadSanitizedLog(options) {
           `Gist upload failed: ${gistError.message}. Falling back to repository mode...`
       );
 
-      return withRawUrlCheck(await uploadAsRepo(resolvedOptions));
+      return withRawUrlCheck(options, await uploadAsRepo(resolvedOptions));
     }
   }
 
   try {
-    return await withRawUrlCheck(await uploadAsRepo(resolvedOptions));
+    return await withRawUrlCheck(options, await uploadAsRepo(resolvedOptions));
   } catch (repoError) {
     if (isENOSPC(repoError)) {
       const fileSize = getFileSize(filePath);

@@ -14,20 +14,17 @@ const CONTEXT_BYTES = 4096;
 const COUNT_WINDOW_BYTES = 8 * 1024 * 1024;
 
 /** Stream `{hash, start, end}` for every `\n`-terminated (or final) line. */
-async function* lineBatches(file) {
-  const handle = await fs.promises.open(file, 'r');
+async function* lineBatches(source) {
+  const chunks =
+    typeof source === 'string'
+      ? fs.createReadStream(source, { highWaterMark: READ_BYTES })
+      : source;
   try {
-    const buffer = Buffer.alloc(READ_BYTES);
     let hash = crypto.createHash('sha1');
     let start = 0;
     let offset = 0;
     let open = false;
-    for (;;) {
-      const { bytesRead } = await handle.read(buffer, 0, READ_BYTES, null);
-      if (!bytesRead) {
-        break;
-      }
-      const chunk = buffer.subarray(0, bytesRead);
+    for await (const chunk of chunks) {
       const batch = [];
       let from = 0;
       for (
@@ -45,9 +42,9 @@ async function* lineBatches(file) {
         start = offset + nl + 1;
         from = nl + 1;
       }
-      open = from < bytesRead;
+      open = from < chunk.length || (from === 0 && open);
       hash.update(chunk.subarray(from));
-      offset += bytesRead;
+      offset += chunk.length;
       if (batch.length) {
         yield batch;
       }
@@ -56,7 +53,7 @@ async function* lineBatches(file) {
       yield [{ hash: hash.digest('base64'), start, end: offset }];
     }
   } finally {
-    await handle.close();
+    await chunks.return?.();
   }
 }
 
@@ -74,6 +71,7 @@ function lineQueue(file) {
     shift(count = 1) {
       head += count;
     },
+    close: () => batches.return(),
     async fill(minimum) {
       while (!done && lines.length - head < minimum) {
         const next = await batches.next();
@@ -123,8 +121,7 @@ function readRange(fd, start, end) {
 }
 
 /** Split a large changed range at line or word boundaries for counting. */
-function countWindows(fd, start, end) {
-  const windows = [];
+function* countWindows(fd, start, end) {
   while (end - start > COUNT_WINDOW_BYTES) {
     const tail = readRange(
       fd,
@@ -136,11 +133,10 @@ function countWindows(fd, start, end) {
       cut >= 0
         ? start + COUNT_WINDOW_BYTES / 2 + cut + 1
         : start + COUNT_WINDOW_BYTES;
-    windows.push([start, next]);
+    yield [start, next];
     start = next;
   }
-  windows.push([start, end]);
-  return windows;
+  yield [start, end];
 }
 
 async function countRange(engine, fd, contextStart, start, end, summary) {
@@ -192,6 +188,12 @@ export async function summarizeRedactions(inputPath, outputPath, options) {
       await input.fill(RESYNC_LINES);
       await output.fill(RESYNC_LINES);
       if (!input.length) {
+        // A streaming output also drives the upload plan. Consume any bytes
+        // left after the final input line before returning its summary.
+        while (output.length) {
+          output.shift(output.length);
+          await output.fill(1);
+        }
         break;
       }
       let matched = false;
@@ -226,6 +228,7 @@ export async function summarizeRedactions(inputPath, outputPath, options) {
     }
   } finally {
     fs.closeSync(fd);
+    await Promise.all([input.close(), output.close()]);
   }
   return summary;
 }

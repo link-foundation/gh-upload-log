@@ -45,7 +45,7 @@ const scenarios = {
         commandStreamFactory: () => repository.stream,
       });
       try {
-        assert.equal(repository.attempts, 3);
+        assert.equal(repository.attempts, 4);
         assert.equal(result.fileCount, 2);
         assert.equal(
           repository.runGit([
@@ -66,10 +66,15 @@ const scenarios = {
         );
         assert.equal(parts.join(''), fs.readFileSync(filePath, 'utf8'));
         assert.ok(
-          repository.pushes.every(
-            (files) =>
-              files.filter((name) => name.endsWith('.log.txt')).length === 1
-          )
+          repository.pushes
+            .slice(0, -1)
+            .every(
+              (files) =>
+                files.filter((name) => name.endsWith('.log.txt')).length === 1
+            )
+        );
+        assert.ok(
+          repository.pushes.at(-1).some((name) => name.endsWith('.index.json'))
         );
       } finally {
         fs.rmSync(result.workDir, { recursive: true, force: true });
@@ -121,15 +126,15 @@ const scenarios = {
               'main',
             ])
             .trim(),
-          '3'
+          '4'
         );
-        assert.equal(repository.attempts, 5);
-        assert.equal(repository.pushes.length, 2);
+        assert.equal(repository.attempts, 6);
+        assert.equal(repository.pushes.length, 3);
         assert.ok(
           repository.pushes[1].some((name) => name.endsWith('part-01.log.txt'))
         );
         assert.ok(
-          repository.pushes[1].some((name) => name.endsWith('.complete'))
+          repository.pushes[2].some((name) => name.endsWith('.index.json'))
         );
       } finally {
         fs.rmSync(result.workDir, { recursive: true, force: true });
