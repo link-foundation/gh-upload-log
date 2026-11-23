@@ -89,7 +89,7 @@ export async function publishTextParts({
     hasParent = true;
     const listing = await command(
       'read previously published parts',
-      run`git ls-tree -r -z HEAD -- ${`${repositoryPath}/`}`
+      run`git --literal-pathspecs ls-tree -r -z HEAD -- ${`${repositoryPath}/`}`
     );
     entries.clear();
     for (const entry of listing.stdout.split('\0').filter(Boolean)) {
@@ -214,12 +214,12 @@ export async function publishTextParts({
         `→ Committing and pushing chunk ${indexNumber}/${parts.length}: ${name}`
     );
     const objectId = await storeBlob(bytes, part.objectId);
-    const changes = new Map([[name, objectId]]);
-    if (pending && !entries.has(layout.indexName)) {
-      changes.set(layout.pendingName, pending);
-    }
     await publish(() => {
       assertLayout();
+      const changes = new Map([[name, objectId]]);
+      if (pending && !entries.has(layout.indexName)) {
+        changes.set(layout.pendingName, pending);
+      }
       return changes;
     });
     await fs.rm(localBlobPath(workDir, objectId), { force: true });

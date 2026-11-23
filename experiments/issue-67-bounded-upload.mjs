@@ -20,7 +20,10 @@ process.env.TMPDIR = scratch;
 process.env.TEMP = scratch;
 process.env.TMP = scratch;
 
-const filePath = path.join(root, 'session.log');
+const sourceDirectory =
+  mode === 'target' ? path.join(root, 'logs #% [é]') : root;
+fs.mkdirSync(sourceDirectory, { recursive: true });
+const filePath = path.join(sourceDirectory, 'session.log');
 const chunkSize = 8191;
 const credential = ['synthetic', 'private', 'credential', 'A1234'].join('-');
 const content = `first line\r\npassword=${credential}\r\n${'🌲é'.repeat(4000)}final 🌍`;
@@ -154,9 +157,13 @@ try {
     assert.equal(result.fileCount + 1, local.pushes.length);
     assert.equal(confirmed, mode === 'dedicated' ? 1 : 2);
     assert.equal(result.sanitization.redactions, 1);
+    const repositoryUrlPath = result.repositoryPath
+      .split('/')
+      .map(encodeURIComponent)
+      .join('/');
     assert.equal(
       result.indexUrl,
-      `https://github.com/${result.repositoryFullName}/blob/${branch}/${result.repositoryPath}/${indexName}`
+      `https://github.com/${result.repositoryFullName}/blob/${branch}/${repositoryUrlPath}/${indexName}`
     );
     const read = (name) =>
       local.runGit([

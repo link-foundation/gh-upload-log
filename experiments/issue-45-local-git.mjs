@@ -66,11 +66,12 @@ export function createLocalRepositoryStream(
           const listing = runGit([
             '--git-dir',
             remote,
+            '--literal-pathspecs',
             'ls-tree',
             '-z',
             '-l',
             'main',
-            `${values[2]}/`,
+            `${decodeURIComponent(values[2])}/`,
           ]);
           const files = listing
             .split('\0')

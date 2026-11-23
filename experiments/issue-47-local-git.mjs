@@ -44,11 +44,12 @@ export function createExistingRepositoryStream(
         const listing = local.runGit([
           '--git-dir',
           local.remote,
+          '--literal-pathspecs',
           'ls-tree',
           '-z',
           '-l',
           requestedBranch,
-          `${values[2]}/`,
+          `${decodeURIComponent(values[2])}/`,
         ]);
         const files = listing
           .split('\0')

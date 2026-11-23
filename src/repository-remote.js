@@ -86,6 +86,10 @@ export function buildGitHubRepositoryUrl(githubUser, repositoryName) {
   return `https://github.com/${githubUser}/${repositoryName}`;
 }
 
+function encodePathSegments(path) {
+  return path.split('/').map(encodeURIComponent).join('/');
+}
+
 export function buildGitHubRepositoryViewUrl(
   githubUser,
   repositoryName,
@@ -93,9 +97,8 @@ export function buildGitHubRepositoryViewUrl(
   repositoryPath,
   fileName
 ) {
-  const encodedBranch = branchName.split('/').map(encodeURIComponent).join('/');
   const root = buildGitHubRepositoryUrl(githubUser, repositoryName);
-  const path = `${encodedBranch}/${repositoryPath}`;
+  const path = encodePathSegments(`${branchName}/${repositoryPath}`);
   return fileName
     ? `${root}/blob/${path}/${encodeURIComponent(fileName)}`
     : `${root}/tree/${path}`;
@@ -142,9 +145,10 @@ export async function getRepositoryFolderContents(
   repositoryPath,
   branch
 ) {
+  const folder = encodePathSegments(repositoryPath);
   const result = branch
-    ? await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --method GET -f ref=${branch} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`
-    : await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${repositoryPath} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
+    ? await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${folder} --method GET -f ref=${branch} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`
+    : await $quiet`gh api repos/${githubUser}/${repositoryName}/contents/${folder} --jq ${REPOSITORY_FOLDER_CONTENTS_QUERY}`;
 
   if (getCommandExitCode(result) !== 0) {
     if (isGitHubNotFoundError(result.stderr || result.stdout)) {
